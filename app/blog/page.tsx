@@ -22,7 +22,7 @@ async function getBlogPosts() {
         created_at,
         profiles (
           username,
-          full_name
+          artist_name
         )
       `)
       .eq('published', true)
@@ -113,7 +113,7 @@ export default async function BlogPage() {
                     </p>
                   )}
                   <div className="flex items-center text-sm text-gray-500">
-                    <span>{post.profiles?.full_name || post.profiles?.username}</span>
+                    <span>{post.profiles?.artist_name || post.profiles?.username}</span>
                     <span className="mx-2">•</span>
                     <span>
                       {new Date(post.created_at).toLocaleDateString('en-ZA')}
