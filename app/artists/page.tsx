@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import { UsersIcon, SearchIcon, ChevronDownIcon } from "lucide-react"
+import { UsersIcon, SearchIcon, ChevronDownIcon, XIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import ArtistCard from "@/components/ArtistCard"
@@ -22,7 +22,7 @@ export default function ArtistsPage() {
 
   useEffect(() => {
     fetchArtists()
-  }, [currentPage]) // Updated dependency array
+  }, [searchTerm]) // Updated dependency array
 
   async function fetchArtists() {
     setLoading(true)
@@ -30,6 +30,8 @@ export default function ArtistsPage() {
 
     if (searchTerm) {
       query = query.ilike("username", `%${searchTerm}%`)
+    } else {
+      setSearchTerm("") // Reset search term when fetching all artists
     }
 
     const { data, error, count } = await query.range(
@@ -56,6 +58,12 @@ export default function ArtistsPage() {
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage)
     window.scrollTo(0, 0)
+  }
+
+  const handleClearSearch = () => {
+    setSearchTerm("")
+    setCurrentPage(1)
+    fetchArtists()
   }
 
   console.log("artsits", artists)
@@ -132,19 +140,26 @@ export default function ArtistsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          <div className="flex items-center max-w-md mx-auto bg-gray-800 rounded-lg overflow-hidden">
-            <Input
-              type="text"
-              placeholder="Search artists..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-grow pl-10 bg-transparent text-white border-none focus:ring-0"
-            />
-            <Button onClick={handleSearch} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2">
-              <SearchIcon className="w-5 h-5" />
-            </Button>
+          <div className="flex flex-col items-center max-w-md mx-auto">
+            <div className="flex items-center w-full bg-gray-800 rounded-lg overflow-hidden">
+              <Input
+                type="text"
+                placeholder="Search artists..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="flex-grow p-8 bg-transparent text-2xl text-white border-none focus:ring-0"
+              />
+              <Button onClick={handleSearch} className="bg-red-600 hover:bg-red-700 text-white px-4 py-8">
+                <SearchIcon className="w-5 h-5" />
+              </Button>
+            </div>
+            {searchTerm && (
+              <Button onClick={handleClearSearch} variant="ghost" className="mt-2 text-gray-400 hover:text-white">
+                <XIcon className="w-4 h-4 mr-2" />
+                Clear Search
+              </Button>
+            )}
           </div>
-          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         </motion.div>
 
         {loading ? (
@@ -210,7 +225,7 @@ export default function ArtistsPage() {
         >
           <div className="inline-block p-8 bg-zinc-950 rounded-2xl">
             <UsersIcon className="h-12 w-12 text-red-600 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-white mb-4">NgumRhepi? Yiba yiNxalenye!</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">Ngumrhapi? Yiba yiNxalenye!</h2>
             <p className="text-gray-400 mb-6 max-w-lg mx-auto">
               Are you a Xhosa Hip Hop artist? Join our platform to showcase your music and connect with fans.
             </p>

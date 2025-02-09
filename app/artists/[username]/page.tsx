@@ -9,6 +9,7 @@ import { FaSpotify, FaYoutube, FaInstagram, FaTwitter, FaFacebook, FaTiktok, FaW
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
 import { Mail, Phone, Calendar, MapPin, Music, Award, ShoppingBag, Users } from "lucide-react"
+import { UsersIcon, SearchIcon, ChevronDownIcon } from "lucide-react"
 
 const DEFAULT_IMAGE = "/placeholder.svg"
 
@@ -284,8 +285,25 @@ export default function ArtistPage() {
         </section>
       )}
 
+     <motion.div
+          className="mt-20 text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+        >
+          <div className="inline-block p-8 bg-zinc-950 rounded-2xl">
+            <UsersIcon className="h-12 w-12 text-red-600 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-white mb-4">NgumRhepi? Yiba yiNxalenye!</h2>
+            <p className="text-gray-400 mb-6 max-w-lg mx-auto">
+              Are you a Xhosa Hip Hop artist? Join our platform to showcase your music and connect with fans.
+            </p>
+            <Button asChild size="lg" className="bg-red-600 hover:bg-red-700">
+              <Link href="/register">Qala Apha</Link>
+            </Button>
+          </div>
+    </motion.div>
       {/* Call to Action */}
-      <section className="bg-red-600 py-12">
+      {/* <section className="bg-red-600 py-12">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-6">Support {artist.artist_name}</h2>
           <div className="flex flex-wrap justify-center gap-4">
@@ -298,13 +316,13 @@ export default function ArtistPage() {
               Listen on Spotify
             </Button>
             <Button size="lg" variant="outline" className="text-white border-white hover:bg-white/10">
-              {/* Added Lucide-react icon here */}
+              
               <Users className="mr-2" />
               Follow on Socials
             </Button>
           </div>
         </div>
-      </section>
+      </section> */}
     </div>
   )
 }
