@@ -86,17 +86,16 @@ export default function ArtistPage({ params }: { params: { username: string } })
         <div className="relative z-10 text-center mt-20">
           <Image
             src={artist.profile_image_url || DEFAULT_IMAGE}
-            alt={artist.artist_name}
+            alt="Artist image"
             width={150}
             height={150}
             className="rounded-full mx-auto mb-4"
           />
           <h1 className="text-4xl font-bold mb-2">{artist.artist_name}</h1>
-          <p className="text-xl text-gray-300">{artist.tagline}</p>
-          <p className="text-lg text-gray-400 mt-2">
+           <p className="text-lg text-gray-400 mt-2">
             <Music className="inline-block mr-2" />
-            {artist.genre} • <MapPin className="inline-block mr-2" />
-            {artist.location}
+            Hip Hop • <MapPin className="inline-block mr-2" />
+            {artist.suburb}
           </p>
         </div>
       </motion.div>
@@ -108,7 +107,7 @@ export default function ArtistPage({ params }: { params: { username: string } })
           About the Artist
         </h2>
         <p className="text-gray-300 mb-6">{artist.artist_bio}</p>
-        {artist.achievements && (
+        {/* {artist.achievements && (
           <div>
             <h3 className="text-xl font-semibold mb-2">Achievements</h3>
             <ul className="list-disc list-inside text-gray-300">
@@ -117,7 +116,7 @@ export default function ArtistPage({ params }: { params: { username: string } })
               ))}
             </ul>
           </div>
-        )}
+        )} */}
       </section>
 
       {/* Gallery */}
@@ -179,7 +178,7 @@ export default function ArtistPage({ params }: { params: { username: string } })
           <SocialLink href={artist.facebook_url} icon={<FaFacebook />} label="Facebook" />
           <SocialLink href={artist.tiktok_url} icon={<FaTiktok />} label="TikTok" />
         </div>
-        {artist.website && (
+        {/* {artist.website && (
           <Link
             href={artist.website}
             target="_blank"
@@ -188,7 +187,7 @@ export default function ArtistPage({ params }: { params: { username: string } })
           >
             Visit Website
           </Link>
-        )}
+        )} */}
       </section>
 
       {/* Contact & Booking */}
@@ -243,7 +242,8 @@ export default function ArtistPage({ params }: { params: { username: string } })
               Upcoming Events
             </h3>
             <ul className="space-y-2">
-              {artist.upcoming_events.map((event, index) => (
+                <li>No upcoming events</li>
+              {/* {artist.upcoming_events.map((event, index) => (
                 <li key={index} className="bg-zinc-900 p-4 rounded-lg">
                   <p className="font-semibold">{event.name}</p>
                   <p className="text-sm text-gray-400">
@@ -252,14 +252,14 @@ export default function ArtistPage({ params }: { params: { username: string } })
                     {event.location}
                   </p>
                 </li>
-              ))}
+              ))} */}
             </ul>
           </div>
         )}
       </section>
 
       {/* Merch & Store (Optional) */}
-      {artist.merch && (
+      {/* {artist.merch && (
         <section className="max-w-4xl mx-auto px-4 py-12">
           <h2 className="text-2xl font-bold mb-4 flex items-center">
             <ShoppingBag className="mr-2" />
@@ -282,7 +282,7 @@ export default function ArtistPage({ params }: { params: { username: string } })
             ))}
           </div>
         </section>
-      )}
+      )} */}
 
       {/* Call to Action */}
       <section className="bg-red-600 py-12">

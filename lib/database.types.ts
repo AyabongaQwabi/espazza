@@ -55,8 +55,21 @@ export interface Database {
           artist_bio: string | null
           profile_image_url: string | null
           gallery_images: string [],
+          youtube_links: string [],
+          demo_songs: string [],
           created_at: string
-          updated_at: string
+          updated_at: string,
+          town_id :string | null
+          suburb: string | null,
+          youtube_url: string | null,
+          spotify_url: string | null,
+          instagram_url: string | null,
+          twitter_url: string | null,
+          facebook_url: string | null,
+          tiktok_url: string | null,
+          cellphone: string | null,
+          email: string | null,
+          upcoming_events:  string [],
         }
         Insert: {
           id: string
@@ -65,8 +78,22 @@ export interface Database {
           artist_bio?: string | null
           profile_image_url?: string | null
           gallery_images: string [],
-          created_at?: string
-          updated_at?: string
+          youtube_links: string [],
+          demo_songs: string [],
+          created_at?: string,
+          updated_at?: string,
+          town_id: string | null,
+          suburb: string | null,
+          youtube_url: string | null,
+          spotify_url: string | null,
+          instagram_url: string | null,
+          twitter_url: string | null,
+          facebook_url: string | null,
+          tiktok_url: string | null,
+          cellphone: string | null,
+          email: string | null,
+          upcoming_events:  string [],
+
         }
         Update: {
           id?: string
