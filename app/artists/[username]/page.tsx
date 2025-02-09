@@ -78,7 +78,7 @@ export default function ArtistPage({ params }: { params: { username: string } })
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: `url(${artist.banner_image || artist.profile_image_url || DEFAULT_IMAGE})`,
+            backgroundImage: `url(${artist.gallery_images[0]|| artist.profile_image_url || DEFAULT_IMAGE})`,
             filter: "blur(5px)",
           }}
         />
