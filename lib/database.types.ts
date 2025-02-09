@@ -51,20 +51,20 @@ export interface Database {
         Row: {
           id: string
           username: string
-          full_name: string | null
-          bio: string | null
-          avatar_url: string | null
-          website: string | null
+          artist_name: string | null
+          artist_bio: string | null
+          profile_image_url: string | null
+          gallery_images: string [],
           created_at: string
           updated_at: string
         }
         Insert: {
           id: string
           username: string
-          full_name?: string | null
-          bio?: string | null
-          avatar_url?: string | null
-          website?: string | null
+          artist_name?: string | null
+          artist_bio?: string | null
+          profile_image_url?: string | null
+          gallery_images: string [],
           created_at?: string
           updated_at?: string
         }
