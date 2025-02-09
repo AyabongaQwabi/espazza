@@ -10,7 +10,7 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import type { Database } from "@/lib/database.types"
 import { Mail, Phone, Calendar, MapPin, Music, Award, ShoppingBag, Users } from "lucide-react"
 
-const DEFAULT_IMAGE = "/placeholder.svg"
+const DEFAULT_IMAGE = "/Ndlu.jpg"
 
 async function fetchArtist(username: string) {
   const supabase = createClientComponentClient<Database>()
