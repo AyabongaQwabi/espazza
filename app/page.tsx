@@ -17,13 +17,12 @@ function Navigation({ className = "" }: { className?: string }) {
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-gray-900">
       {/* Header */}
-      <header className="fixed w-full z-50 bg-black/90 backdrop-blur-sm">
+      <header className="fixed w-full z-50 bg-gray-900 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <MusicIcon className="h-6 w-6 text-red-600" />
-            <span className="text-2xl font-bold">X<span className="text-red-600">HAP</span></span>
+          <img src="/logo.png" className="w-10 h-10 object-fit"/>
           </div>
           
           <Navigation className="hidden md:block text-sm" />
@@ -66,18 +65,15 @@ export default function Home() {
           backgroundPosition: 'center',
         }}
       >
-        <div className="absolute inset-0 bg-black/70" />
+        <div className="absolute inset-0 bg-gray-900/90" />
         <div className="relative z-10 text-center px-4 pt-16">
           <div className="flex items-center justify-center mb-6">
-            <MusicIcon className="h-12 w-12 text-red-600 mr-2" />
-            <h1 className="text-4xl md:text-6xl font-bold text-white">
-              X<span className="text-red-600">HAP</span>
-            </h1>
+            <img src="/logo.png" className="w-72 h-64 object-fit"/>
           </div>
-          <p className="text-xl md:text-2xl text-gray-300 mb-4">
-            Iplatform yabarhapi baseKhaya
+          <p className="text-xl md:text-6xl text-gray-300 mb-4 font-bold">
+            iPlatform yomRepha besiXhosa
           </p>
-          <p className="text-lg text-gray-400 mb-8 max-w-2xl mx-auto">
+          <p className="text-2xl text-gray-400 mb-8 max-w-2xl mx-auto">
             The ultimate platform for Xhosa Hip Hop artists to connect, share, and elevate the culture
           </p>
           <div className="space-x-4">
@@ -92,7 +88,7 @@ export default function Home() {
       </div>
 
       {/* Features Section */}
-      <div className="py-20 px-4 bg-zinc-900">
+      {/* <div className="py-20 px-4 bg-gray-950">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-4">
             Phakamisa iXhap
@@ -119,10 +115,10 @@ export default function Home() {
             />
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Featured Artists */}
-      <div className="py-20 px-4 bg-black">
+      <div className="py-20 px-4 bg-gray-900">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-white text-center mb-4">
             Abaculi Abaphambili
@@ -130,27 +126,27 @@ export default function Home() {
           <p className="text-gray-400 text-center mb-12">Featured Artists</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <ArtistCard
-              name="Sipho M"
-              image="https://images.unsplash.com/photo-1534308143481-c55f00be8bd7?auto=format&fit=crop&q=80"
+              name="Dee Koala"
+              image="/deekoala.jpg"
             />
             <ArtistCard
-              name="Thembi K"
-              image="https://images.unsplash.com/photo-1567784177951-6fa58317e16b?auto=format&fit=crop&q=80"
+              name="K Keed"
+              image="/kkeed.jpg"
             />
             <ArtistCard
-              name="Lundi X"
-              image="https://images.unsplash.com/photo-1531384441138-2736e62e0919?auto=format&fit=crop&q=80"
+              name="Flash Ikumkani"
+              image="/flash.jpg"
             />
             <ArtistCard
-              name="Buhle Z"
-              image="https://images.unsplash.com/photo-1517230878791-4d28214057c2?auto=format&fit=crop&q=80"
+              name="Driemanskap"
+              image="/driemanskap.jpg"
             />
           </div>
         </div>
       </div>
 
       {/* Events Section */}
-      <div className="py-20 px-4 bg-zinc-900">
+      <div className="py-20 px-4 bg-gray-950">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-white text-center mb-4">
             Iziganeko Ezizayo
@@ -174,7 +170,7 @@ export default function Home() {
       </div>
 
       {/* Testimonials */}
-      <div className="py-20 px-4 bg-black">
+      {/* <div className="py-20 px-4 bg-gray-900">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-white text-center mb-4">
             Amazwi Abaculi Bethu
@@ -193,7 +189,7 @@ export default function Home() {
             />
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
@@ -205,7 +201,7 @@ function FeatureCard({ title, subtitle, description, image }: {
   image: string; 
 }) {
   return (
-    <div className="rounded-lg overflow-hidden bg-zinc-800 hover:bg-zinc-700 transition-colors">
+    <div className="rounded-lg overflow-hidden bg-zinc-800 hover:bg-bg-zinc-800 transition-colors">
       <div 
         className="h-48 w-full"
         style={{

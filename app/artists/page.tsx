@@ -18,16 +18,16 @@ export default async function ArtistsPage() {
   const artists = await getArtists();
 
   return (
-    <div className="min-h-screen bg-black pt-16">
+    <div className="min-h-screen bg-gray-900 pt-16">
       {/* Hero Section */}
       <div className="relative h-[40vh] flex items-center justify-center">
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: 'url("https://images.unsplash.com/photo-1571974599782-87624638275e?auto=format&fit=crop&q=80")',
+            backgroundImage: 'url("/lxndi.jpg")',
           }}
         >
-          <div className="absolute inset-0 bg-black/70" />
+          <div className="absolute inset-0 bg-gray-900/90" />
         </div>
         <div className="relative z-10 text-center px-4">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
@@ -45,7 +45,7 @@ export default async function ArtistsPage() {
           {artists.map((artist) => (
             <div 
               key={artist.id}
-              className="bg-zinc-900 rounded-lg overflow-hidden hover:bg-zinc-800 transition-colors"
+              className="bg-zinc-950 rounded-lg overflow-hidden hover:bg-zinc-800 transition-colors"
             >
               <div 
                 className="h-64 w-full bg-cover bg-center"
@@ -74,7 +74,7 @@ export default async function ArtistsPage() {
 
         {/* Join as Artist CTA */}
         <div className="mt-20 text-center">
-          <div className="inline-block p-8 bg-zinc-900 rounded-2xl">
+          <div className="inline-block p-8 bg-zinc-950 rounded-2xl">
             <UsersIcon className="h-12 w-12 text-red-600 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-white mb-4">
               Ngumrhapi? Yiba yiNxalenye!

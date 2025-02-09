@@ -169,7 +169,7 @@ export default function BasicInfoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black p-8">
+    <div className="min-h-screen bg-gray-900 p-8">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-white mb-8">
           Step 1: Basic Information
@@ -177,7 +177,7 @@ export default function BasicInfoPage() {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Personal Information */}
-          <div className="bg-zinc-900 rounded-lg p-6 space-y-4">
+          <div className="bg-zinc-950 rounded-lg p-6 space-y-4">
             <h2 className="text-xl font-semibold text-white mb-4">
               Personal Information
             </h2>
@@ -240,7 +240,7 @@ export default function BasicInfoPage() {
           </div>
 
           {/* Address Information */}
-          <div className="bg-zinc-900 rounded-lg p-6 space-y-4">
+          <div className="bg-zinc-950 rounded-lg p-6 space-y-4">
             <h2 className="text-xl font-semibold text-white mb-4">
               Address Information
             </h2>
@@ -350,7 +350,7 @@ export default function BasicInfoPage() {
           </div>
 
           {/* Professional Information */}
-          <div className="bg-zinc-900 rounded-lg p-6 space-y-4">
+          <div className="bg-zinc-950 rounded-lg p-6 space-y-4">
             <h2 className="text-xl font-semibold text-white mb-4">
               Professional Information
             </h2>
@@ -453,7 +453,7 @@ export default function BasicInfoPage() {
           </div>
 
           {/* Memberships */}
-          <div className="bg-zinc-900 rounded-lg p-6 space-y-4">
+          <div className="bg-zinc-950 rounded-lg p-6 space-y-4">
             <h2 className="text-xl font-semibold text-white mb-4">
               Organization Memberships
             </h2>

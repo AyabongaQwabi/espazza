@@ -26,16 +26,14 @@ export function SiteHeader() {
 
   return (
     <motion.header
-      className="fixed w-full z-50 bg-black/90 backdrop-blur-sm"
+      className="fixed w-full z-50 bg-gray-900/90 backdrop-blur-sm"
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
     >
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center space-x-2 hover-lift">
-          <BounceIcon icon={MusicIcon} className="h-6 w-6 text-red-600" />
-          <span className="text-2xl font-bold">X<span className="text-red-600">HAP</span></span>
-        </Link>
+        <img src="/logo.png" className="w-10 h-10 object-fit"/></Link>
         
         <Navigation className="hidden md:block text-sm text-white" />
         

@@ -52,7 +52,7 @@ export default function DashboardBlog() {
         {posts.map((post: any) => (
           <div 
             key={post.id}
-            className="bg-zinc-900 rounded-lg p-6"
+            className="bg-zinc-950 rounded-lg p-6"
           >
             <h2 className="text-xl font-semibold text-white mb-2">
               {post.title}

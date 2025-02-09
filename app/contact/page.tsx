@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-black pt-16">
+    <div className="min-h-screen bg-gray-900 pt-16">
       {/* Hero Section */}
       <div className="relative h-[40vh] flex items-center justify-center">
         <div 
@@ -14,7 +14,7 @@ export default function ContactPage() {
             backgroundImage: 'url("https://images.unsplash.com/photo-1534536281715-e28d76689b4d?auto=format&fit=crop&q=80")',
           }}
         >
-          <div className="absolute inset-0 bg-black/70" />
+          <div className="absolute inset-0 bg-gray-900/70" />
         </div>
         <div className="relative z-10 text-center px-4">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
@@ -65,7 +65,7 @@ export default function ContactPage() {
           </div>
 
           {/* Contact Form */}
-          <div className="bg-zinc-900 p-8 rounded-lg">
+          <div className="bg-zinc-950 p-8 rounded-lg">
             <h2 className="text-2xl font-bold text-white mb-6">
               Thumela Umyalezo
             </h2>

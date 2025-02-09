@@ -29,6 +29,15 @@ export default function MediaUploadPage() {
   const [youtubeLinks, setYoutubeLinks] = useState<string[]>(['']);
   const [artistBio, setArtistBio] = useState('');
 
+  const ProgressBar = ({ progress }: { progress: number }) => (
+    <div className="w-full bg-zinc-800 rounded-full h-2 mt-2">
+      <div
+        className="bg-red-600 h-2 rounded-full transition-all duration-300"
+        style={{ width: `${progress}%` }}
+      />
+    </div>
+  );
+
   const handleSongUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
@@ -94,11 +103,11 @@ export default function MediaUploadPage() {
   };
 
   // Helper function to upload files to Supabase storage
-  const uploadFile = async (file: File, bucket: string) => {
+  const uploadFile = async (file: File, bucket: string, index?: number) => {
     const fileExt = file.name.split('.').pop();
     const fileName = `${Math.random()}.${fileExt}`;
     
-    const uploadKey = `${bucket}-${fileName}`;
+    const uploadKey = index !== undefined ? `${bucket}-${index}` : bucket;
     setUploadProgress(prev => ({ ...prev, [uploadKey]: 0 }));
 
     const { data, error } = await supabase.storage
@@ -125,6 +134,7 @@ export default function MediaUploadPage() {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setUploadProgress({}); // Reset progress
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -135,13 +145,13 @@ export default function MediaUploadPage() {
         profileImageUrl = await uploadFile(profileImage, 'profile-images');
       }
 
-      const galleryUrls = await Promise.all(
-        galleryImages.map(file => uploadFile(file, 'gallery-images'))
-      );
+        const galleryUrls = await Promise.all(
+        galleryImages.map((file, index) => uploadFile(file, 'gallery-images', index))
+        );
 
-      const songUploads = await Promise.all(
-        songs.map(async (song) => {
-          const url = await uploadFile(song.file, 'demo-songs');
+        const songUploads = await Promise.all(
+        songs.map(async (song, index) => {
+          const url = await uploadFile(song.file, 'demo-songs', index);
           return {
             url,
             title: song.title,
@@ -162,8 +172,9 @@ export default function MediaUploadPage() {
           registration_complete: true
         })
         .eq('id', user.id);
-
+        console.log("update error", updateError)
       if (updateError) throw updateError;
+     
 
       router.push('/dashboard');
     } catch (err: any) {
@@ -174,7 +185,7 @@ export default function MediaUploadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black p-8">
+    <div className="min-h-screen bg-gray-900 p-8">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-white mb-8">
           Step 2: Media Upload
@@ -182,14 +193,14 @@ export default function MediaUploadPage() {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Profile Image Upload */}
-          <div className="bg-zinc-900 rounded-lg p-6 space-y-4">
+          <div className="bg-zinc-950 rounded-lg p-6 space-y-4">
             <h2 className="text-xl font-semibold text-white mb-4">
               Profile Image
             </h2>
             
             <div className="space-y-4">
               <Label>Profile Picture</Label>
-              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4">
                 <Input
                   type="file"
                   accept="image/*"
@@ -197,19 +208,22 @@ export default function MediaUploadPage() {
                 />
                 {profileImagePreview && (
                   <div className="relative w-20 h-20">
-                    <img
-                      src={profileImagePreview}
-                      alt="Profile preview"
-                      className="w-full h-full object-cover rounded-lg"
-                    />
+                  <img
+                    src={profileImagePreview}
+                    alt="Profile preview"
+                    className="w-full h-full object-cover rounded-lg"
+                  />
                   </div>
                 )}
-              </div>
+                </div>
+                {uploadProgress['profile-images'] > 0 && (
+                <ProgressBar progress={uploadProgress['profile-images']} />
+                )}
             </div>
           </div>
 
           {/* Gallery Images */}
-          <div className="bg-zinc-900 rounded-lg p-6 space-y-4">
+          <div className="bg-zinc-950 rounded-lg p-6 space-y-4">
             <h2 className="text-xl font-semibold text-white mb-4">
               Gallery Images
             </h2>
@@ -239,14 +253,17 @@ export default function MediaUploadPage() {
                     >
                       X
                     </Button>
-                  </div>
+                    {uploadProgress[`gallery-images-${index}`] > 0 && (
+                      <ProgressBar progress={uploadProgress[`gallery-images-${index}`]} />
+                    )}
+                    </div>
                 ))}
               </div>
             </div>
           </div>
 
           {/* Artist Bio */}
-          <div className="bg-zinc-900 rounded-lg p-6 space-y-4">
+          <div className="bg-zinc-950 rounded-lg p-6 space-y-4">
             <h2 className="text-xl font-semibold text-white mb-4">
               Artist Bio
             </h2>
@@ -263,7 +280,7 @@ export default function MediaUploadPage() {
           </div>
 
           {/* Demo Songs */}
-          <div className="bg-zinc-900 rounded-lg p-6 space-y-4">
+          <div className="bg-zinc-950 rounded-lg p-6 space-y-4">
             <h2 className="text-xl font-semibold text-white mb-4">
               Demo Songs
             </h2>
@@ -291,9 +308,12 @@ export default function MediaUploadPage() {
                         }}
                       >
                         Remove
-                      </Button>
-                    </div>
-                    <div className="grid gap-3">
+                        </Button>
+                      </div>
+                      {uploadProgress[`demo-songs-${index}`] > 0 && (
+                        <ProgressBar progress={uploadProgress[`demo-songs-${index}`]} />
+                      )}
+                      <div className="grid gap-3">
                       <div>
                         <Label>Song Title</Label>
                         <Input
@@ -328,7 +348,7 @@ export default function MediaUploadPage() {
           </div>
 
           {/* YouTube Links */}
-          <div className="bg-zinc-900 rounded-lg p-6 space-y-4">
+          <div className="bg-zinc-950 rounded-lg p-6 space-y-4">
             <h2 className="text-xl font-semibold text-white mb-4">
               YouTube Links
             </h2>

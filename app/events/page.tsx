@@ -4,16 +4,16 @@ import Link from 'next/link';
 
 export default function EventsPage() {
   return (
-    <div className="min-h-screen bg-black pt-16">
+    <div className="min-h-screen bg-gray-900 pt-16">
       {/* Hero Section */}
       <div className="relative h-[40vh] flex items-center justify-center">
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: 'url("https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&q=80")',
+            backgroundImage: 'url("/keed-perf.jpg")',
           }}
         >
-          <div className="absolute inset-0 bg-black/70" />
+          <div className="absolute inset-0 bg-gray-900/90" />
         </div>
         <div className="relative z-10 text-center px-4">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
@@ -53,7 +53,7 @@ export default function EventsPage() {
           ].map((event, index) => (
             <div 
               key={index}
-              className="bg-zinc-900 rounded-lg overflow-hidden flex flex-col md:flex-row"
+              className="bg-zinc-950 rounded-lg overflow-hidden flex flex-col md:flex-row"
             >
               <div 
                 className="h-48 md:h-auto md:w-64 flex-shrink-0 bg-cover bg-center"
@@ -76,7 +76,7 @@ export default function EventsPage() {
 
         {/* Host Event CTA */}
         <div className="mt-20 text-center">
-          <div className="inline-block p-8 bg-zinc-900 rounded-2xl">
+          <div className="inline-block p-8 bg-zinc-950 rounded-2xl">
             <CalendarIcon className="h-12 w-12 text-red-600 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-white mb-4">
               Unesiganeko?

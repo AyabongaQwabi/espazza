@@ -40,7 +40,7 @@ export default async function BlogPost({ params }: { params: { slug: string } })
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
         <div className="text-center">
           <MusicIcon className="h-12 w-12 text-red-600 mx-auto mb-6" />
           <h1 className="text-4xl font-bold text-white mb-4">
@@ -60,7 +60,7 @@ export default async function BlogPost({ params }: { params: { slug: string } })
   }
 
   return (
-    <div className="min-h-screen bg-black pt-24">
+    <div className="min-h-screen bg-gray-900 pt-24">
       <article className="max-w-4xl mx-auto px-4">
         {post.featured_image && (
           <div 

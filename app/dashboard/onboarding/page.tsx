@@ -37,7 +37,7 @@ export default function OnboardingRedirect() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
       <p className="text-gray-400">Loading...</p>
     </div>
   );

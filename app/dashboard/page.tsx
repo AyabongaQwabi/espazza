@@ -76,14 +76,14 @@ export default function DashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-zinc-900 rounded-lg p-6">
+        <div className="bg-zinc-950 rounded-lg p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-white">Total Posts</h3>
             <BookOpenIcon className="h-5 w-5 text-red-600" />
           </div>
           <p className="text-3xl font-bold text-white">{posts.length}</p>
         </div>
-        <div className="bg-zinc-900 rounded-lg p-6">
+        <div className="bg-zinc-950 rounded-lg p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-white">Published</h3>
             <MusicIcon className="h-5 w-5 text-green-500" />
@@ -92,7 +92,7 @@ export default function DashboardPage() {
             {posts.filter(post => post.published).length}
           </p>
         </div>
-        <div className="bg-zinc-900 rounded-lg p-6">
+        <div className="bg-zinc-950 rounded-lg p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-white">Drafts</h3>
             <UsersIcon className="h-5 w-5 text-yellow-500" />
@@ -104,13 +104,13 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Posts */}
-      <div className="bg-zinc-900 rounded-lg p-6">
+      <div className="bg-zinc-950 rounded-lg p-6">
         <h2 className="text-xl font-semibold text-white mb-6">Recent Posts</h2>
         <div className="space-y-4">
           {posts.map((post) => (
             <div
               key={post.id}
-              className="bg-zinc-800 rounded-lg p-4 hover:bg-zinc-700 transition-colors"
+              className="bg-zinc-800 rounded-lg p-4 hover:bg-bg-zinc-800 transition-colors"
             >
               <Link href={`/dashboard/blog/edit/${post.id}`}>
                 <h3 className="text-lg font-medium text-white mb-2">{post.title}</h3>

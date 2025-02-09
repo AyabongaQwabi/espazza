@@ -45,7 +45,7 @@ export default async function BlogPage() {
 
   if (posts.length === 0) {
     return (
-      <div className="min-h-screen bg-black pt-24">
+      <div className="min-h-screen bg-gray-900 pt-24">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
@@ -78,7 +78,7 @@ export default async function BlogPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black pt-24">
+    <div className="min-h-screen bg-gray-900 pt-24">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
@@ -96,7 +96,7 @@ export default async function BlogPage() {
               href={`/blog/${post.slug}`}
               className="group"
             >
-              <article className="bg-zinc-900 rounded-lg overflow-hidden hover:bg-zinc-800 transition-colors">
+              <article className="bg-zinc-950 rounded-lg overflow-hidden hover:bg-zinc-800 transition-colors">
                 {post.featured_image && (
                   <div 
                     className="h-48 w-full bg-cover bg-center"

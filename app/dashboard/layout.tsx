@@ -25,7 +25,7 @@ export default function DashboardLayout({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <p className="text-gray-400">Loading...</p>
       </div>
     );
@@ -46,13 +46,12 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="min-h-screen bg-black flex">
+    <div className="min-h-screen bg-gray-900 flex">
       {/* Sidebar */}
-      <div className="w-64 bg-zinc-900 border-r border-zinc-800">
+      <div className="w-64 bg-zinc-950 border-r border-zinc-800">
         <div className="p-6">
           <div className="flex items-center space-x-2">
-            <MusicIcon className="h-6 w-6 text-red-600" />
-            <span className="text-2xl font-bold text-white">X<span className="text-red-600">HAP</span></span>
+            <img src="/logo.png" className="w-10 h-10 object-fit"/>
           </div>
         </div>
         <nav className="px-4 py-6">

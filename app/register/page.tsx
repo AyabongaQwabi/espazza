@@ -82,7 +82,7 @@ export default function Register() {
         throw new Error('Failed to create user profile. Please try again.');
       }
 
-      router.push('/dashboard/onboarding');
+      router.push('/dashboard/onboarding/basic-info');
     } catch (err: any) {
       console.error('Registration error:', err);
       setError(err.message);
@@ -91,7 +91,7 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">

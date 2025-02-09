@@ -2,16 +2,16 @@ import { MusicIcon, HeartIcon, UsersIcon, BanknoteIcon } from 'lucide-react';
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-black pt-16">
+    <div className="min-h-screen bg-gray-900 pt-16">
       {/* Hero Section */}
       <div className="relative h-[60vh] flex items-center justify-center">
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: 'url("https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80")',
+            backgroundImage: 'url("/ndlu.jpg")',
           }}
         >
-          <div className="absolute inset-0 bg-black/70" />
+          <div className="absolute inset-0 bg-gray-900/90" />
         </div>
         <div className="relative z-10 text-center px-4">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
@@ -24,11 +24,11 @@ export default function AboutPage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-20">
+      <div className="max-w-6xl mx-auto px-4 py-20 shadow-4xl">
         {/* Mission Statement */}
         <div className="text-center mb-20">
           <div className="flex justify-center mb-6">
-            <MusicIcon className="h-12 w-12 text-red-600" />
+          <img src="/logo.png" className="w-40 h-40 object-fit"/>
           </div>
           <h2 className="text-3xl font-bold text-white mb-6">
             Injongo Yethu (Our Mission)
@@ -83,7 +83,7 @@ export default function AboutPage() {
         </div>
 
         {/* Community Impact */}
-        <div className="bg-zinc-900 rounded-2xl p-8 md:p-12">
+        <div className="bg-zinc-950 rounded-2xl p-8 md:p-12">
           <div className="flex justify-center mb-8">
             <HeartIcon className="h-12 w-12 text-red-600" />
           </div>
