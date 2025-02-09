@@ -1,105 +1,146 @@
-'use client';
+"use client"
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { PasswordField } from '@/components/ui/password-field';
-import Link from 'next/link';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { PasswordField } from "@/components/ui/password-field"
+import Link from "next/link"
+import { supabase, isSupabaseConfigured } from "@/lib/supabase"
+
+const MAX_RETRIES = 3
+const RETRY_DELAY = 1000 // 1 second
 
 export default function Register() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [passwordStrength, setPasswordStrength] = useState(0);
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [passwordStrength, setPasswordStrength] = useState(0)
+
+  useEffect(() => {
+    if (!isSupabaseConfigured()) {
+      setError("Database connection not configured. Please check your Supabase setup.")
+    }
+  }, [])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+    e.preventDefault()
+    setLoading(true)
+    setError("")
 
     if (!isSupabaseConfigured()) {
-      setError('Database connection not configured. Please connect to Supabase first.');
-      setLoading(false);
-      return;
+      setError("Database connection not configured. Please connect to Supabase first.")
+      setLoading(false)
+      return
     }
 
-    if (passwordStrength < 60) {
-      setError('Please choose a stronger password');
-      setLoading(false);
-      return;
+    if (passwordStrength < 3) {
+      setError("Please choose a stronger password")
+      setLoading(false)
+      return
     }
 
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-    const username = formData.get('username') as string;
+    const formData = new FormData(e.currentTarget)
+    const email = formData.get("email") as string
+    const password = formData.get("password") as string
+    const username = formData.get("username") as string
 
     try {
+      // Validate username format
       if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
-        setError('Username can only contain letters, numbers, underscores, and hyphens');
-        setLoading(false);
-        return;
+        setError("Username can only contain letters, numbers, underscores, and hyphens")
+        setLoading(false)
+        return
       }
 
-      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
+      // Sign up user
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            username
-          }
-        }
-      });
+            username,
+          },
+        },
+      })
 
       if (signUpError) {
-        if (signUpError.message.includes('already registered')) {
-          setError('This email is already registered. Please login instead.');
-          setLoading(false);
-          return;
+        if (signUpError.message.includes("already registered")) {
+          setError("This email is already registered. Please login instead.")
+          setLoading(false)
+          return
         }
-        throw signUpError;
+        throw signUpError
       }
 
-      if (!user) {
-        throw new Error('Failed to create user account');
+      if (!signUpData.user) {
+        throw new Error("Failed to create user account")
       }
 
+      // Wait for the session to be established
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      // Sign in the user to get a fresh session
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (signInError) {
+        console.log("signin error", signInError, signInData)
+        throw new Error("Failed to establish session. Please try logging in.")
+      }
+
+      if (!signInData.session) {
+        throw new Error("No session established after sign in")
+      }
+
+      // Create profile using the authenticated session
       const { error: profileError } = await supabase
-        .from('profiles')
+        .from("profiles")
         .insert([
           {
-            id: user.id,
+            id: signUpData.user.id,
             username,
-            email: user.email,
-          }
-        ]);
+            email: signUpData.user.email,
+          },
+        ])
+        .select()
+        .single()
 
       if (profileError) {
-        console.error('Profile creation failed:', profileError);
-        await supabase.auth.signOut();
-        throw new Error('Failed to create user profile. Please try again.');
+        console.error("Profile creation failed:", profileError)
+        // Clean up by deleting the auth user if profile creation fails
+        await supabase.auth.signOut()
+        throw new Error(`Failed to create user profile: ${profileError.message}`)
       }
 
-      router.push('/dashboard/onboarding/basic-info');
+      // Redirect to dashboard after successful registration
+      router.push("/dashboard")
     } catch (err: any) {
-      console.error('Registration error:', err);
-      setError(err.message);
-      setLoading(false);
+      console.error("Registration error:", err)
+
+      // Provide more specific error messages based on the error type
+      if (err.message?.includes("row-level security")) {
+        setError("Unable to create profile. Please try again or contact support if the problem persists.")
+      } else if (err.message?.includes("network")) {
+        setError("Network error. Please check your internet connection and try again.")
+      } else if (err.message?.includes("session")) {
+        setError("Authentication failed. Please try again or contact support.")
+      } else {
+        setError(err.message || "An unexpected error occurred during registration")
+      }
+
+      setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-black flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">
-            Qala Apha (Get Started)
-          </h1>
-          <p className="text-gray-400">
-            Join the Xhosa Hip Hop community
-          </p>
+          <h1 className="text-3xl font-bold text-white mb-2">Qala Apha (Get Started)</h1>
+          <p className="text-gray-400">Join the Xhosa Hip Hop community</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -142,30 +183,20 @@ export default function Register() {
           {error && (
             <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
               <p className="text-red-500 text-sm">{error}</p>
-              {error.includes('already registered') && (
-                <Button
-                  asChild
-                  variant="link"
-                  className="text-red-500 hover:text-red-400 p-0 h-auto mt-2"
-                >
-                  <Link href="/login">
-                    Click here to login →
-                  </Link>
+              {error.includes("already registered") && (
+                <Button asChild variant="link" className="text-red-500 hover:text-red-400 p-0 h-auto mt-2">
+                  <Link href="/login">Click here to login →</Link>
                 </Button>
               )}
             </div>
           )}
 
-          <Button
-            type="submit"
-            className="w-full bg-red-600 hover:bg-red-700"
-            disabled={loading}
-          >
-            {loading ? 'Registering...' : 'Register'}
+          <Button type="submit" className="w-full bg-red-600 hover:bg-red-700" disabled={loading}>
+            {loading ? "Registering..." : "Register"}
           </Button>
 
           <p className="text-center text-gray-400 text-sm">
-            Already have an account?{' '}
+            Already have an account?{" "}
             <Link href="/login" className="text-red-500 hover:text-red-400">
               Ngena (Login)
             </Link>
@@ -173,5 +204,6 @@ export default function Register() {
         </form>
       </div>
     </div>
-  );
+  )
 }
+
