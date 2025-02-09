@@ -34,7 +34,7 @@ export default function AboutPage() {
             Injongo Yethu (Our Mission)
           </h2>
           <p className="text-gray-300 text-lg max-w-3xl mx-auto">
-            XHAP yiplatform eyilwe yiXhosa Hip Hop Organisation ukuvula amathuba kubarhapi abasebenzisa isiXhosa. 
+            XHAP yiplatform eyilwe yiXhosa Hip Hop Organisation ukuvula amathuba kubaRhepi abasebenzisa isiXhosa. 
             Injongo yethu kukusasaza umculo weXhosa Hip Hop kwihlabathi lonke, sinika abaculi bethu ithuba 
             lokwabelana ngemisebenzi yabo simahla okanye bayithengise.
           </p>

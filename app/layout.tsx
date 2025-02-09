@@ -12,7 +12,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Xhap - Xhosa Hip Hop Platform',
-  description: 'Iplatform yabarhapi baseKhaya - The home of Xhosa Hip Hop',
+  description: 'Iplatform yabaRhepi baseKhaya - The home of Xhosa Hip Hop',
 };
 
 export default function RootLayout({
