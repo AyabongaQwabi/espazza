@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import ArtistCard from "@/components/ArtistCard"
 import Link from "next/link"
 import { motion } from "framer-motion"
+import type { Database } from "@/lib/database.types"
 
 const ARTISTS_PER_PAGE = 3
 
@@ -18,7 +19,7 @@ export default function ArtistsPage() {
   const [loading, setLoading] = useState(true)
   const [totalArtists, setTotalArtists] = useState(0)
 
-  const supabase = createClientComponentClient()
+  const supabase = createClientComponentClient<Database>()
 
   useEffect(() => {
     fetchArtists()
