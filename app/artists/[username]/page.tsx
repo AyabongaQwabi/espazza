@@ -1,112 +1,152 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { FaSpotify, FaYoutube, FaInstagram, FaTwitter, FaFacebook, FaTiktok, FaWhatsapp } from "react-icons/fa"
-import { Button } from "@/components/ui/button"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import type { Database } from "@/lib/database.types"
-import { Mail, Phone, Calendar, MapPin, Music, Award, ShoppingBag, Users } from "lucide-react"
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import {
+  FaSpotify,
+  FaYoutube,
+  FaInstagram,
+  FaTwitter,
+  FaFacebook,
+  FaTiktok,
+  FaWhatsapp,
+} from 'react-icons/fa';
+import { Button } from '@/components/ui/button';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import type { Database } from '@/lib/database.types';
+import {
+  Mail,
+  Phone,
+  Calendar,
+  MapPin,
+  Music,
+  Award,
+  ShoppingBag,
+  Users,
+} from 'lucide-react';
 
-const DEFAULT_IMAGE = "/Ndlu.jpg"
+const DEFAULT_IMAGE = '/Ndlu.jpg';
 
 async function fetchArtist(username: string) {
-  const supabase = createClientComponentClient<Database>()
+  const supabase = createClientComponentClient<Database>();
   try {
-    const { data, error } = await supabase.from("profiles").select("*").eq("username", username).single()
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('username', username)
+      .single();
 
     if (error) {
-      if (error.code === "PGRST116") {
+      if (error.code === 'PGRST116') {
         // No results found
-        return null
+        return null;
       }
-      throw error
+      throw error;
     }
 
-    return data
+    return data;
   } catch (error) {
-    console.error("Error fetching artist:", error)
-    return null
+    console.error('Error fetching artist:', error);
+    return null;
   }
 }
 
-export default function ArtistPage({ params }: { params: { username: string } }) {
-  const [artist, setArtist] = useState<Database["public"]["Tables"]["profiles"]["Row"] | null>(null)
-  const [loading, setLoading] = useState(true)
+export default function ArtistPage({
+  params,
+}: {
+  params: { username: string };
+}) {
+  const [artist, setArtist] = useState<
+    Database['public']['Tables']['profiles']['Row'] | null
+  >(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadArtist() {
-      const artistData = await fetchArtist(params.username)
+      const artistData = await fetchArtist(params.username);
       if (artistData) {
-        setArtist(artistData)
+        setArtist(artistData);
       } else {
-        console.log("Artist not found")
+        console.log('Artist not found');
       }
-      setLoading(false)
+      setLoading(false);
     }
 
-    loadArtist()
-  }, [params.username])
+    loadArtist();
+  }, [params.username]);
 
   if (loading) {
-    return <div className="min-h-screen bg-black text-white flex items-center justify-center">Loading...</div>
+    return (
+      <div className='min-h-screen bg-zinc-950 text-white flex items-center justify-center'>
+        Loading...
+      </div>
+    );
   }
 
   if (!artist) {
     return (
-      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center">
-        <h1 className="text-4xl font-bold mb-4">Artist Not Found</h1>
-        <p className="text-xl mb-8">We couldn't find an artist with that username.</p>
-        <Link href="/artists" className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+      <div className='min-h-screen bg-zinc-950 text-white flex flex-col items-center justify-center'>
+        <h1 className='text-4xl font-bold mb-4'>Artist Not Found</h1>
+        <p className='text-xl mb-8'>
+          We couldn't find an artist with that username.
+        </p>
+        <Link
+          href='/artists'
+          className='bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded'
+        >
           Back to Artists
         </Link>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className='min-h-screen bg-zinc-950 text-white'>
       {/* Hero Section */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
-        className="relative h-[50vh] flex items-center justify-center mt-20"
+        className='relative h-[50vh] flex items-center justify-center mt-20'
       >
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className='absolute inset-0 bg-cover bg-center'
           style={{
-            backgroundImage: `url(${artist.gallery_images[0]|| artist.profile_image_url || DEFAULT_IMAGE})`,
-            filter: "blur(5px)",
+            backgroundImage: `url(${
+              artist.gallery_images[0] ||
+              artist.profile_image_url ||
+              DEFAULT_IMAGE
+            })`,
+            filter: 'blur(5px)',
           }}
         />
-        <div className="absolute inset-0 bg-black bg-opacity-50" />
-        <div className="relative z-10 text-center mt-20">
+        <div className='absolute inset-0 bg-zinc-950 bg-opacity-50' />
+        <div className='relative z-10 text-center mt-20'>
           <Image
             src={artist.profile_image_url || DEFAULT_IMAGE}
-            alt="Artist image"
+            alt='Artist image'
             width={150}
             height={150}
-            className="rounded-full mx-auto mb-4"
+            className='rounded-full mx-auto mb-4'
           />
-          <h1 className="text-4xl font-bold mb-2">{artist.artist_name}</h1>
-           <p className="text-lg text-gray-400 mt-2">
-            <Music className="inline-block mr-2" />
-            Hip Hop • <MapPin className="inline-block mr-2" />
+          <h1 className='text-4xl font-bold mb-2'>{artist.artist_name}</h1>
+          <p className='text-lg text-gray-400 mt-2'>
+            <Music className='inline-block mr-2' />
+            Hip Hop • <MapPin className='inline-block mr-2' />
             {artist.suburb}
           </p>
         </div>
       </motion.div>
 
       {/* About the Artist */}
-      <section className="max-w-4xl mx-auto px-4 py-12">
-        <h2 className="text-2xl font-bold mb-4 flex items-center">
-          <Award className="mr-2" />
+      <section className='max-w-4xl mx-auto px-4 py-12'>
+        <h2 className='text-2xl font-bold mb-4 flex items-center'>
+          <Award className='mr-2' />
           About the Artist
         </h2>
-        <p className="text-gray-300 mb-6">{artist.artist_bio}</p>
+        <p className='text-gray-300 mb-6'>{artist.artist_bio}</p>
         {/* {artist.achievements && (
           <div>
             <h3 className="text-xl font-semibold mb-2">Achievements</h3>
@@ -121,8 +161,8 @@ export default function ArtistPage({ params }: { params: { username: string } })
 
       {/* Gallery */}
       {artist.gallery_images && artist.gallery_images.length > 0 && (
-        <section className="max-w-4xl mx-auto px-4 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <section className='max-w-4xl mx-auto px-4 py-12'>
+          <div className='grid grid-cols-2 md:grid-cols-3 gap-4'>
             {artist.gallery_images.map((image, index) => (
               <Image
                 key={index}
@@ -130,7 +170,7 @@ export default function ArtistPage({ params }: { params: { username: string } })
                 alt={`${artist.artist_name} gallery image ${index + 1}`}
                 width={300}
                 height={300}
-                className="rounded-lg object-cover w-full h-64"
+                className='rounded-lg object-cover w-full h-64'
               />
             ))}
           </div>
@@ -138,28 +178,30 @@ export default function ArtistPage({ params }: { params: { username: string } })
       )}
 
       {/* Music & Media Showcase */}
-      <section className="max-w-4xl mx-auto px-4 py-12">
-        <h2 className="text-2xl font-bold mb-4 flex items-center">
-          <Music className="mr-2" />
+      <section className='max-w-4xl mx-auto px-4 py-12'>
+        <h2 className='text-2xl font-bold mb-4 flex items-center'>
+          <Music className='mr-2' />
           Music & Media
         </h2>
         {/* Featured Songs */}
-        <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-4">Featured Songs</h3>
+        <div className='mb-8'>
+          <h3 className='text-xl font-semibold mb-4'>Featured Songs</h3>
           {/* Add your music player component here */}
         </div>
         {/* Music Videos & Performances */}
         <div>
-          <h3 className="text-xl font-semibold mb-4">Videos</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <h3 className='text-xl font-semibold mb-4'>Videos</h3>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             {artist.youtube_links?.map((link, index) => (
-              <div key={index} className="aspect-w-16 aspect-h-9">
+              <div key={index} className='aspect-w-16 aspect-h-9'>
                 <iframe
-                  src={`https://www.youtube.com/embed/${getYouTubeVideoId(link)}`}
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  src={`https://www.youtube.com/embed/${getYouTubeVideoId(
+                    link
+                  )}`}
+                  frameBorder='0'
+                  allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
                   allowFullScreen
-                  className="w-full h-full"
+                  className='w-full h-full'
                 ></iframe>
               </div>
             ))}
@@ -168,15 +210,39 @@ export default function ArtistPage({ params }: { params: { username: string } })
       </section>
 
       {/* Social & Streaming Links */}
-      <section className="max-w-4xl mx-auto px-4 py-12">
-        <h2 className="text-2xl font-bold mb-4">Follow & Listen</h2>
-        <div className="flex flex-wrap gap-4">
-          <SocialLink href={artist.youtube_url} icon={<FaYoutube />} label="YouTube" />
-          <SocialLink href={artist.spotify_url} icon={<FaSpotify />} label="Spotify" />
-          <SocialLink href={artist.instagram_url} icon={<FaInstagram />} label="Instagram" />
-          <SocialLink href={artist.twitter_url} icon={<FaTwitter />} label="Twitter" />
-          <SocialLink href={artist.facebook_url} icon={<FaFacebook />} label="Facebook" />
-          <SocialLink href={artist.tiktok_url} icon={<FaTiktok />} label="TikTok" />
+      <section className='max-w-4xl mx-auto px-4 py-12'>
+        <h2 className='text-2xl font-bold mb-4'>Follow & Listen</h2>
+        <div className='flex flex-wrap gap-4'>
+          <SocialLink
+            href={artist.youtube_url}
+            icon={<FaYoutube />}
+            label='YouTube'
+          />
+          <SocialLink
+            href={artist.spotify_url}
+            icon={<FaSpotify />}
+            label='Spotify'
+          />
+          <SocialLink
+            href={artist.instagram_url}
+            icon={<FaInstagram />}
+            label='Instagram'
+          />
+          <SocialLink
+            href={artist.twitter_url}
+            icon={<FaTwitter />}
+            label='Twitter'
+          />
+          <SocialLink
+            href={artist.facebook_url}
+            icon={<FaFacebook />}
+            label='Facebook'
+          />
+          <SocialLink
+            href={artist.tiktok_url}
+            icon={<FaTiktok />}
+            label='TikTok'
+          />
         </div>
         {/* {artist.website && (
           <Link
@@ -191,33 +257,38 @@ export default function ArtistPage({ params }: { params: { username: string } })
       </section>
 
       {/* Contact & Booking */}
-      <section className="max-w-4xl mx-auto px-4 py-12">
-        <h2 className="text-2xl font-bold mb-4 flex items-center">
-          <Phone className="mr-2" />
+      <section className='max-w-4xl mx-auto px-4 py-12'>
+        <h2 className='text-2xl font-bold mb-4 flex items-center'>
+          <Phone className='mr-2' />
           Contact & Booking
         </h2>
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className='grid md:grid-cols-2 gap-8'>
           <div>
-            <h3 className="text-xl font-semibold mb-2">Book This Artist</h3>
-            <p className="text-gray-300 mb-4">
-              Interested in booking {artist.artist_name} for an event or collaboration?
+            <h3 className='text-xl font-semibold mb-2'>Book This Artist</h3>
+            <p className='text-gray-300 mb-4'>
+              Interested in booking {artist.artist_name} for an event or
+              collaboration?
             </p>
-            <div className="flex space-x-4">
+            <div className='flex space-x-4'>
               {artist.cellphone && (
                 <Button
-                  onClick={() => window.open(`https://wa.me/${artist.cellphone}`, "_blank")}
-                  className="bg-green-600 hover:bg-green-700"
+                  onClick={() =>
+                    window.open(`https://wa.me/${artist.cellphone}`, '_blank')
+                  }
+                  className='bg-green-600 hover:bg-green-700'
                 >
-                  <FaWhatsapp className="mr-2" />
+                  <FaWhatsapp className='mr-2' />
                   WhatsApp
                 </Button>
               )}
               {artist.email && (
                 <Button
-                  onClick={() => (window.location.href = `mailto:${artist.email}`)}
-                  className="bg-blue-600 hover:bg-blue-700"
+                  onClick={() =>
+                    (window.location.href = `mailto:${artist.email}`)
+                  }
+                  className='bg-blue-600 hover:bg-blue-700'
                 >
-                  <Mail className="mr-2" />
+                  <Mail className='mr-2' />
                   Email
                 </Button>
               )}
@@ -227,24 +298,24 @@ export default function ArtistPage({ params }: { params: { username: string } })
       </section>
 
       {/* Fan Interaction & Engagement */}
-      <section className="max-w-4xl mx-auto px-4 py-12">
-        <h2 className="text-2xl font-bold mb-4 flex items-center">
+      <section className='max-w-4xl mx-auto px-4 py-12'>
+        <h2 className='text-2xl font-bold mb-4 flex items-center'>
           {/* Added Lucide-react icon here */}
-          <Users className="mr-2" />
+          <Users className='mr-2' />
           Fan Zone
         </h2>
-        <Button className="mb-4">Follow Artist</Button>
+        <Button className='mb-4'>Follow Artist</Button>
         {/* Add comments/fan wall component here */}
         {artist.upcoming_events && (
-          <div className="mt-8">
-            <h3 className="text-xl font-semibold mb-4 flex items-center">
-              <Calendar className="mr-2" />
+          <div className='mt-8'>
+            <h3 className='text-xl font-semibold mb-4 flex items-center'>
+              <Calendar className='mr-2' />
               Upcoming Events
             </h3>
-            <ul className="space-y-2">
-                <li>No upcoming events</li>
+            <ul className='space-y-2'>
+              <li>No upcoming events</li>
               {/* {artist.upcoming_events.map((event, index) => (
-                <li key={index} className="bg-zinc-900 p-4 rounded-lg">
+                <li key={index} className="bg-gray-900 p-4 rounded-lg">
                   <p className="font-semibold">{event.name}</p>
                   <p className="text-sm text-gray-400">
                     <Calendar className="inline-block mr-2" />
@@ -267,7 +338,7 @@ export default function ArtistPage({ params }: { params: { username: string } })
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {artist.merch.map((item, index) => (
-              <div key={index} className="bg-zinc-900 p-4 rounded-lg">
+              <div key={index} className="bg-gray-900 p-4 rounded-lg">
                 <Image
                   src={item.image || DEFAULT_IMAGE}
                   alt={item.name}
@@ -285,48 +356,57 @@ export default function ArtistPage({ params }: { params: { username: string } })
       )} */}
 
       {/* Call to Action */}
-      <section className="bg-red-600 py-12">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6">Support {artist.artist_name}</h2>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" className="bg-white text-red-600 hover:bg-gray-100">
-              <Calendar className="mr-2" />
+      <section className='bg-red-600 py-12'>
+        <div className='max-w-4xl mx-auto px-4 text-center'>
+          <h2 className='text-3xl font-bold mb-6'>
+            Support {artist.artist_name}
+          </h2>
+          <div className='flex flex-wrap justify-center gap-4'>
+            <Button
+              size='lg'
+              className='bg-white text-red-600 hover:bg-gray-100'
+            >
+              <Calendar className='mr-2' />
               Book This Artist
             </Button>
-            <Button size="lg" className="bg-[#1DB954] hover:bg-[#1ed760]">
-              <FaSpotify className="mr-2" />
+            <Button size='lg' className='bg-[#1DB954] hover:bg-[#1ed760]'>
+              <FaSpotify className='mr-2' />
               Listen on Spotify
             </Button>
-            <Button size="lg" variant="outline" className="text-white border-white hover:bg-white/10">
+            <Button
+              size='lg'
+              variant='outline'
+              className='text-white border-white hover:bg-white/10'
+            >
               {/* Added Lucide-react icon here */}
-              <Users className="mr-2" />
+              <Users className='mr-2' />
               Follow on Socials
             </Button>
           </div>
         </div>
       </section>
     </div>
-  )
+  );
 }
 
 function SocialLink({ href, icon, label }) {
-  if (!href) return null
+  if (!href) return null;
   return (
     <Link
       href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-full"
+      target='_blank'
+      rel='noopener noreferrer'
+      className='flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-full'
     >
       {icon}
       <span>{label}</span>
     </Link>
-  )
+  );
 }
 
 function getYouTubeVideoId(url) {
-  const regex = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/
-  const match = url.match(regex)
-  return match ? match[1] : null
+  const regex =
+    /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/;
+  const match = url.match(regex);
+  return match ? match[1] : null;
 }
-
