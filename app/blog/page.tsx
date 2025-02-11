@@ -42,10 +42,6 @@ async function getBlogPosts(page = 1) {
 
   console.log('Fetched posts:', posts); // Debug log
   console.log('Total count:', count); // Debug log
-  console.log(
-    'SQL query:',
-    supabase.from('blog_posts').select().eq('published', true).toSQL()
-  ); // Debug log
 
   return { posts, count };
 }

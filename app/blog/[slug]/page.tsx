@@ -32,16 +32,12 @@ async function getBlogPost(slug: string) {
       throw error;
     }
 
+    if (!post) {
+      console.log('No post found with slug:', slug);
+      return null;
+    }
+
     console.log('Fetched post:', post); // Debug log
-    console.log(
-      'SQL query:',
-      supabase
-        .from('blog_posts')
-        .select()
-        .eq('slug', slug)
-        .eq('published', true)
-        .toSQL()
-    ); // Debug log
 
     return post;
   } catch (error) {
@@ -55,9 +51,12 @@ export default async function BlogPost({
 }: {
   params: { slug: string };
 }) {
+  console.log('Rendering BlogPost component with slug:', params.slug); // Debug log
+
   const post = await getBlogPost(params.slug);
 
   if (!post) {
+    console.log('Post not found, rendering not found page'); // Debug log
     return (
       <div className='min-h-screen bg-black flex items-center justify-center px-4'>
         <div className='text-center'>
@@ -75,6 +74,8 @@ export default async function BlogPost({
       </div>
     );
   }
+
+  console.log('Rendering post content'); // Debug log
 
   return (
     <div className='min-h-screen bg-black pt-24'>
