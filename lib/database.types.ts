@@ -1,10 +1,4 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[];
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export interface Database {
   public: {
@@ -145,10 +139,10 @@ export interface Database {
         Update: {
           id?: string;
           username?: string;
-          full_name?: string | null;
-          bio?: string | null;
-          avatar_url?: string | null;
-          website?: string | null;
+          artist_name?: string | null;
+          artist_bio?: string | null;
+          profile_image_url?: string | null;
+          gallery_images?: string[];
           created_at?: string;
           updated_at?: string;
           banner_image?: string | null;
@@ -188,89 +182,6 @@ export interface Database {
           sampra_id?: string | null;
           demo_songs?: string[] | null;
           youtube_links?: string[] | null;
-        };
-      };
-      south_african_towns: {
-        Row: {
-          id: string;
-          name: string;
-          province: string;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          name: string;
-          province: string;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          name?: string;
-          province?: string;
-          created_at?: string;
-        };
-      };
-      record_labels: {
-        Row: {
-          id: string;
-          name: string;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          name: string;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          name?: string;
-          created_at?: string;
-        };
-      };
-      distributors: {
-        Row: {
-          id: string;
-          name: string;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          name: string;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          name?: string;
-          created_at?: string;
-        };
-      };
-      songs: {
-        Row: {
-          id: string;
-          title: string;
-          artist_id: string;
-          audio_url: string;
-          youtube_url: string;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          title: string;
-          artist_id: string;
-          audio_url: string;
-          youtube_url: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          title?: string;
-          artist_id?: string;
-          audio_url?: string;
-          youtube_url?: string;
-          created_at?: string;
-          updated_at?: string;
         };
       };
       events: {
@@ -499,6 +410,4 @@ export interface Database {
     CompositeTypes: {};
   };
 }
-
-export default Database;
 

@@ -13,17 +13,45 @@ async function getBlogPosts(page = 1) {
   const start = (page - 1) * POSTS_PER_PAGE;
   const end = start + POSTS_PER_PAGE - 1;
 
-  const { data: posts, count } = await supabase
+  console.log('Fetching blog posts...'); // Debug log
+
+  const {
+    data: posts,
+    count,
+    error,
+  } = await supabase
     .from('blog_posts')
     .select(
       `
-      *
+      id,
+      title,
+      excerpt,
+      slug,
+      featured_image,
+      created_at,
+      published,
+      profiles (
+        username,
+        full_name
+      )
     `,
       { count: 'exact' }
     )
-
+    .eq('published', true)
     .order('created_at', { ascending: false })
     .range(start, end);
+
+  if (error) {
+    console.error('Error fetching blog posts:', error);
+    throw new Error(`Failed to fetch blog posts: ${error.message}`);
+  }
+
+  console.log('Fetched posts:', posts); // Debug log
+  console.log('Total count:', count); // Debug log
+  console.log(
+    'SQL query:',
+    supabase.from('blog_posts').select().eq('published', true).toSQL()
+  ); // Debug log
 
   return { posts, count };
 }
@@ -34,9 +62,45 @@ export default async function BlogPage({
   searchParams: { page?: string };
 }) {
   const currentPage = Number(searchParams.page) || 1;
-  const { posts, count } = await getBlogPosts(currentPage);
+  let posts, count, error;
+
+  try {
+    ({ posts, count } = await getBlogPosts(currentPage));
+  } catch (e) {
+    console.error('Error in BlogPage:', e);
+    error = e instanceof Error ? e.message : 'An unknown error occurred';
+  }
+
   const totalPages = Math.ceil((count || 0) / POSTS_PER_PAGE);
-  console.log('posts', posts);
+
+  if (error) {
+    return (
+      <div className='min-h-screen bg-black pt-24'>
+        <div className='max-w-7xl mx-auto px-4'>
+          <div className='text-center mb-12'>
+            <h1 className='text-4xl md:text-5xl font-bold text-white mb-4'>
+              Amabali eXhap
+            </h1>
+            <p className='text-gray-400 text-lg'>
+              Stories from the Xhosa Hip Hop Community
+            </p>
+          </div>
+          <div className='text-center py-20'>
+            <MusicIcon className='h-12 w-12 text-red-600 mx-auto mb-6' />
+            <h2 className='text-2xl font-semibold text-white mb-4'>
+              Oops! Something went wrong.
+            </h2>
+            <p className='text-gray-400 mb-8'>
+              We're having trouble loading the blog posts. Please try again
+              later.
+            </p>
+            <p className='text-gray-500'>Error: {error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!posts || posts.length === 0) {
     return (
       <div className='min-h-screen bg-black pt-24'>
