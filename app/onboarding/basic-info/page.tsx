@@ -162,7 +162,7 @@ export default function BasicInfoPage() {
 
       if (updateError) throw updateError;
 
-      router.push('/dashboard/onboarding/media');
+      router.push('/onboarding/media');
     } catch (err: any) {
       setError(err.message);
     } finally {

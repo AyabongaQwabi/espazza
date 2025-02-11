@@ -1,60 +1,45 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { MusicIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-export default function BlogPage() {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
+const POSTS_PER_PAGE = 9;
 
-  useEffect(() => {
-    async function fetchBlogPosts() {
-      const supabase = createClientComponentClient();
-      try {
-        const { data, error } = await supabase
-          .from('blog_posts')
-          .select(
-            `
-            id,
-            title,
-            excerpt,
-            slug,
-            featured_image,
-            created_at,
-            profiles (
-              username,
-              full_name
-            )
-          `
-          )
-          .eq('published', true)
-          .order('created_at', { ascending: false });
+export const revalidate = 60; // Revalidate this page every 60 seconds
 
-        if (error) throw error;
-        setPosts(data || []);
-      } catch (error) {
-        console.error('Error fetching blog posts:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
+async function getBlogPosts(page = 1) {
+  const supabase = createServerComponentClient({ cookies });
+  const start = (page - 1) * POSTS_PER_PAGE;
+  const end = start + POSTS_PER_PAGE - 1;
 
-    fetchBlogPosts();
-  }, []);
+  const { data: posts, count } = await supabase
+    .from('blog_posts')
+    .select(
+      `
+      *
+    `,
+      { count: 'exact' }
+    )
 
-  if (loading) {
+    .order('created_at', { ascending: false })
+    .range(start, end);
+
+  return { posts, count };
+}
+
+export default async function BlogPage({
+  searchParams,
+}: {
+  searchParams: { page?: string };
+}) {
+  const currentPage = Number(searchParams.page) || 1;
+  const { posts, count } = await getBlogPosts(currentPage);
+  const totalPages = Math.ceil((count || 0) / POSTS_PER_PAGE);
+  console.log('posts', posts);
+  if (!posts || posts.length === 0) {
     return (
-      <div className='min-h-screen bg-zinc-900 pt-24 flex items-center justify-center'>
-        <p className='text-white text-xl'>Loading posts...</p>
-      </div>
-    );
-  }
-
-  if (posts.length === 0) {
-    return (
-      <div className='min-h-screen bg-zinc-900 pt-24'>
+      <div className='min-h-screen bg-black pt-24'>
         <div className='max-w-7xl mx-auto px-4'>
           <div className='text-center mb-12'>
             <h1 className='text-4xl md:text-5xl font-bold text-white mb-4'>
@@ -91,7 +76,7 @@ export default function BlogPage() {
   }
 
   return (
-    <div className='min-h-screen bg-zinc-900 pt-24'>
+    <div className='min-h-screen bg-black pt-24'>
       <div className='max-w-7xl mx-auto px-4'>
         <div className='text-center mb-12'>
           <h1 className='text-4xl md:text-5xl font-bold text-white mb-4'>
@@ -105,7 +90,7 @@ export default function BlogPage() {
         <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-8'>
           {posts.map((post) => (
             <Link key={post.id} href={`/blog/${post.slug}`} className='group'>
-              <article className='bg-gray-900 rounded-lg overflow-hidden hover:bg-zinc-800 transition-colors'>
+              <article className='bg-zinc-900 rounded-lg overflow-hidden hover:bg-zinc-800 transition-colors'>
                 {post.featured_image && (
                   <div
                     className='h-48 w-full bg-cover bg-center'
@@ -135,6 +120,21 @@ export default function BlogPage() {
             </Link>
           ))}
         </div>
+
+        {totalPages > 1 && (
+          <div className='flex justify-center mt-12'>
+            {currentPage > 1 && (
+              <Button asChild variant='outline' className='mr-2'>
+                <Link href={`/blog?page=${currentPage - 1}`}>Previous</Link>
+              </Button>
+            )}
+            {currentPage < totalPages && (
+              <Button asChild variant='outline'>
+                <Link href={`/blog?page=${currentPage + 1}`}>Next</Link>
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

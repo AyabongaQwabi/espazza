@@ -53,12 +53,16 @@ export default function MerchPage() {
       query = query.ilike('name', `%${searchTerm}%`);
     }
 
-    if (priceFilter) {
+    if (priceFilter && priceFilter !== 'all') {
       const [min, max] = priceFilter.split('-');
-      query = query.gte('price', min).lte('price', max);
+      if (max) {
+        query = query.gte('price', min).lte('price', max);
+      } else {
+        query = query.gte('price', min);
+      }
     }
 
-    if (categoryFilter) {
+    if (categoryFilter && categoryFilter !== 'all') {
       query = query.eq('category', categoryFilter);
     }
 
@@ -87,15 +91,18 @@ export default function MerchPage() {
   const handlePriceFilter = (value: string) => {
     setPriceFilter(value);
     setCurrentPage(1);
+    fetchProducts();
   };
 
   const handleCategoryFilter = (value: string) => {
     setCategoryFilter(value);
     setCurrentPage(1);
+    fetchProducts();
   };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    fetchProducts();
   };
 
   return (
@@ -117,8 +124,7 @@ export default function MerchPage() {
             <SelectValue placeholder='Filter by price' />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value='all'>All prices</SelectItem>{' '}
-            {/*Corrected SelectItem value*/}
+            <SelectItem value='all'>All prices</SelectItem>
             <SelectItem value='0-100'>R0 - R100</SelectItem>
             <SelectItem value='101-250'>R101 - R250</SelectItem>
             <SelectItem value='251-500'>R251 - R500</SelectItem>
@@ -131,8 +137,7 @@ export default function MerchPage() {
             <SelectValue placeholder='Filter by category' />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value='all'>All categories</SelectItem>{' '}
-            {/*Corrected SelectItem value*/}
+            <SelectItem value='all'>All categories</SelectItem>
             <SelectItem value='clothing'>Clothing</SelectItem>
             <SelectItem value='accessories'>Accessories</SelectItem>
             <SelectItem value='digital'>Digital Downloads</SelectItem>

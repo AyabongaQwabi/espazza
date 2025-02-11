@@ -126,7 +126,7 @@ export default function Register() {
       }
 
       // Redirect to dashboard after successful registration
-      router.push('/dashboard');
+      router.push('/onboarding/basic-info');
     } catch (err: any) {
       console.error('Registration error:', err);
 

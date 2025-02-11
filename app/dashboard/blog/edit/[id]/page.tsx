@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,50 +10,57 @@ import { supabase } from '@/lib/supabase';
 import { Editor } from '@/components/Editor';
 import { toast } from '@/hooks/use-toast';
 
-export default function NewBlogPost() {
+export default function EditBlogPost({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [featuredImage, setFeaturedImage] = useState('');
+  const [published, setPublished] = useState(false);
 
-  async function handleSaveAsDraft() {
-    await handleSubmit(false);
-  }
+  useEffect(() => {
+    async function fetchPost() {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('id', params.id)
+        .single();
 
-  async function handlePublish() {
-    await handleSubmit(true);
-  }
+      if (error) {
+        toast({
+          title: 'Error',
+          description: 'Failed to fetch post. Please try again.',
+          variant: 'destructive',
+        });
+        router.push('/dashboard/blog');
+      } else if (data) {
+        setTitle(data.title);
+        setContent(data.content);
+        setExcerpt(data.excerpt || '');
+        setFeaturedImage(data.featured_image || '');
+        setPublished(data.published);
+        setLoading(false);
+      }
+    }
 
-  async function handleSubmit(publish: boolean) {
+    fetchPost();
+  }, [params.id, router]);
+
+  async function handleSave(publish: boolean) {
     setLoading(true);
 
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error('Please login to create a post');
-
-      const slug = title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('blog_posts')
-        .insert([
-          {
-            title,
-            content,
-            excerpt,
-            featured_image: featuredImage,
-            slug,
-            author_id: user.id,
-            published: publish,
-          },
-        ])
-        .select();
+        .update({
+          title,
+          content,
+          excerpt,
+          featured_image: featuredImage,
+          published: publish,
+        })
+        .eq('id', params.id);
 
       if (error) throw error;
 
@@ -77,20 +84,20 @@ export default function NewBlogPost() {
   }
 
   function handlePreview() {
-    // Store the current post data in localStorage
     localStorage.setItem(
       'previewPost',
       JSON.stringify({ title, content, excerpt, featuredImage })
     );
-    // Open the preview page in a new tab
     window.open('/dashboard/blog/preview', '_blank');
+  }
+
+  if (loading) {
+    return <div className='p-8'>Loading...</div>;
   }
 
   return (
     <div className='p-8 max-w-4xl mx-auto'>
-      <h1 className='text-2xl font-bold text-white mb-8'>
-        Bhala Ibali Elitsha (Write New Story)
-      </h1>
+      <h1 className='text-2xl font-bold text-white mb-8'>Edit Blog Post</h1>
 
       <div className='space-y-6'>
         <div>
@@ -160,18 +167,18 @@ export default function NewBlogPost() {
         </div>
 
         <div className='flex gap-4'>
-          <Button onClick={handleSaveAsDraft} disabled={loading}>
+          <Button onClick={() => handleSave(false)} disabled={loading}>
             Save as Draft
           </Button>
           <Button onClick={handlePreview} disabled={loading}>
             Preview
           </Button>
           <Button
-            onClick={handlePublish}
+            onClick={() => handleSave(true)}
             className='bg-red-600 hover:bg-red-700'
             disabled={loading}
           >
-            Publish
+            {published ? 'Update' : 'Publish'}
           </Button>
           <Button
             variant='outline'
