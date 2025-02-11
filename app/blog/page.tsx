@@ -23,14 +23,8 @@ async function getBlogPosts(page = 1) {
     .from('blog_posts')
     .select(
       `
-      id,
-      title,
-      excerpt,
-      slug,
-      featured_image,
-      created_at,
-      published,
-      profiles (
+      *,
+      profiles:author_id (
         username,
         full_name
       )
