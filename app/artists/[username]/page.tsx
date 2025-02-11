@@ -79,7 +79,7 @@ export default function ArtistPage({
 
   if (loading) {
     return (
-      <div className='min-h-screen bg-zinc-950 text-white flex items-center justify-center'>
+      <div className='min-h-screen bg-zinc-900 text-white flex items-center justify-center'>
         Loading...
       </div>
     );
@@ -87,7 +87,7 @@ export default function ArtistPage({
 
   if (!artist) {
     return (
-      <div className='min-h-screen bg-zinc-950 text-white flex flex-col items-center justify-center'>
+      <div className='min-h-screen bg-zinc-900 text-white flex flex-col items-center justify-center'>
         <h1 className='text-4xl font-bold mb-4'>Artist Not Found</h1>
         <p className='text-xl mb-8'>
           We couldn't find an artist with that username.
@@ -103,7 +103,7 @@ export default function ArtistPage({
   }
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-white'>
+    <div className='min-h-screen bg-zinc-900 text-white'>
       {/* Hero Section */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -122,7 +122,7 @@ export default function ArtistPage({
             filter: 'blur(5px)',
           }}
         />
-        <div className='absolute inset-0 bg-zinc-950 bg-opacity-50' />
+        <div className='absolute inset-0 bg-zinc-900 bg-opacity-50' />
         <div className='relative z-10 text-center mt-20'>
           <Image
             src={artist.profile_image_url || DEFAULT_IMAGE}

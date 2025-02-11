@@ -152,7 +152,7 @@ export default function Register() {
   }
 
   return (
-    <div className='min-h-screen bg-zinc-950 flex items-center justify-center px-4'>
+    <div className='min-h-screen bg-zinc-900 flex items-center justify-center px-4'>
       <div className='max-w-md w-full'>
         <div className='text-center mb-8'>
           <h1 className='text-3xl font-bold text-white mb-2'>

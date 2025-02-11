@@ -287,6 +287,9 @@ export interface Database {
           cover_image: string | null;
           created_at: string;
           updated_at: string;
+          town_id?: string | null;
+          organizer_name?: string | null;
+          venue_id?: string | null;
         };
         Insert: {
           id?: string;
@@ -301,6 +304,9 @@ export interface Database {
           cover_image?: string | null;
           created_at?: string;
           updated_at?: string;
+          town_id?: string | null;
+          organizer_name?: string | null;
+          venue_id?: string | null;
         };
         Update: {
           id?: string;
@@ -315,6 +321,9 @@ export interface Database {
           cover_image?: string | null;
           created_at?: string;
           updated_at?: string;
+          town_id?: string | null;
+          organizer_name?: string | null;
+          venue_id?: string | null;
         };
       };
       products: {
@@ -451,6 +460,38 @@ export interface Database {
           created_at?: string;
         };
       };
+      venues: {
+        Row: {
+          id: string;
+          name: string;
+          address: string | null;
+          town_id: string | null;
+          capacity: number | null;
+          created_at: string;
+          updated_at: string;
+          created_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          address?: string | null;
+          town_id?: string | null;
+          capacity?: number | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          address?: string | null;
+          town_id?: string | null;
+          capacity?: number | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string | null;
+        };
+      };
     };
     Views: {};
     Functions: {};
@@ -458,4 +499,6 @@ export interface Database {
     CompositeTypes: {};
   };
 }
+
+export default Database;
 

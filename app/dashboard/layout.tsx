@@ -57,7 +57,7 @@ export default function DashboardLayout({
 
   if (loading) {
     return (
-      <div className='min-h-screen bg-zinc-950 flex items-center justify-center'>
+      <div className='min-h-screen bg-zinc-900 flex items-center justify-center'>
         <p className='text-gray-400'>Loading...</p>
       </div>
     );
@@ -68,7 +68,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className='min-h-screen bg-zinc-950 flex'>
+    <div className='min-h-screen bg-zinc-900 flex'>
       {/* Sidebar */}
       <div className='w-64 bg-gray-900 border-r border-zinc-800'>
         <div className='p-6'>

@@ -46,7 +46,7 @@ export default function BlogPage() {
 
   if (loading) {
     return (
-      <div className='min-h-screen bg-zinc-950 pt-24 flex items-center justify-center'>
+      <div className='min-h-screen bg-zinc-900 pt-24 flex items-center justify-center'>
         <p className='text-white text-xl'>Loading posts...</p>
       </div>
     );
@@ -54,7 +54,7 @@ export default function BlogPage() {
 
   if (posts.length === 0) {
     return (
-      <div className='min-h-screen bg-zinc-950 pt-24'>
+      <div className='min-h-screen bg-zinc-900 pt-24'>
         <div className='max-w-7xl mx-auto px-4'>
           <div className='text-center mb-12'>
             <h1 className='text-4xl md:text-5xl font-bold text-white mb-4'>
@@ -91,7 +91,7 @@ export default function BlogPage() {
   }
 
   return (
-    <div className='min-h-screen bg-zinc-950 pt-24'>
+    <div className='min-h-screen bg-zinc-900 pt-24'>
       <div className='max-w-7xl mx-auto px-4'>
         <div className='text-center mb-12'>
           <h1 className='text-4xl md:text-5xl font-bold text-white mb-4'>

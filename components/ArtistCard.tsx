@@ -268,7 +268,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
                     width={300}
                     height={150}
                   />
-                  <div className='absolute inset-0 flex items-center justify-center bg-zinc-950 bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg'>
+                  <div className='absolute inset-0 flex items-center justify-center bg-zinc-900 bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg'>
                     <FaYoutube className='text-4xl text-red-500' />
                   </div>
                 </motion.div>
@@ -312,7 +312,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
       </div>
 
       {isModalOpen && (
-        <div className='fixed inset-0 bg-zinc-950 bg-opacity-75 flex items-center justify-center z-50'>
+        <div className='fixed inset-0 bg-zinc-900 bg-opacity-75 flex items-center justify-center z-50'>
           <div className='bg-gray-900 p-4 rounded-lg w-full max-w-3xl'>
             <iframe
               src={`https://www.youtube.com/embed/${selectedVideo}`}

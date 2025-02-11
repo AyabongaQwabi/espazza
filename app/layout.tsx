@@ -1,4 +1,3 @@
-
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
@@ -21,14 +20,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="xh" className="dark">
+    <html lang='xh' className='dark'>
       <body className={inter.className}>
         <SupabaseProvider>
-          <div className="flex flex-col min-h-screen">
+          <div className='flex flex-col min-h-screen bg-gray-800'>
             <SiteHeader />
-            <AnimationWrapper>
-                {children}
-              </AnimationWrapper>
+            <AnimationWrapper>{children}</AnimationWrapper>
             <SiteFooter />
           </div>
           <Toaster />

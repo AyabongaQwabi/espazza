@@ -19,8 +19,10 @@ export default function MediaUploadPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [uploadProgress, setUploadProgress] = useState<{[key: string]: number}>({});
-  
+  const [uploadProgress, setUploadProgress] = useState<{
+    [key: string]: number;
+  }>({});
+
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [profileImagePreview, setProfileImagePreview] = useState<string>('');
   const [galleryImages, setGalleryImages] = useState<File[]>([]);
@@ -30,9 +32,9 @@ export default function MediaUploadPage() {
   const [artistBio, setArtistBio] = useState('');
 
   const ProgressBar = ({ progress }: { progress: number }) => (
-    <div className="w-full bg-zinc-800 rounded-full h-2 mt-2">
+    <div className='w-full bg-zinc-800 rounded-full h-2 mt-2'>
       <div
-        className="bg-red-600 h-2 rounded-full transition-all duration-300"
+        className='bg-red-600 h-2 rounded-full transition-all duration-300'
         style={{ width: `${progress}%` }}
       />
     </div>
@@ -44,20 +46,27 @@ export default function MediaUploadPage() {
 
     const newFile = files[0];
     if (songs.length < 3 && newFile) {
-      setSongs([...songs, {
-        file: newFile,
-        title: '',
-        features: '',
-        releaseDate: ''
-      }]);
+      setSongs([
+        ...songs,
+        {
+          file: newFile,
+          title: '',
+          features: '',
+          releaseDate: '',
+        },
+      ]);
     }
   };
 
-  const updateSongMetadata = (index: number, field: keyof Song, value: string) => {
+  const updateSongMetadata = (
+    index: number,
+    field: keyof Song,
+    value: string
+  ) => {
     const updatedSongs = [...songs];
     updatedSongs[index] = {
       ...updatedSongs[index],
-      [field]: value
+      [field]: value,
     };
     setSongs(updatedSongs);
   };
@@ -77,16 +86,13 @@ export default function MediaUploadPage() {
     } else if (type === 'gallery') {
       const newFiles = Array.from(files).slice(0, 6 - galleryImages.length);
       setGalleryImages([...galleryImages, ...newFiles]);
-      const newPreviews = newFiles.map(file => URL.createObjectURL(file));
+      const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
       setGalleryPreviews([...galleryPreviews, ...newPreviews]);
     }
   };
 
   // Helper function to remove files
-  const removeFile = (
-    index: number,
-    type: 'gallery' | 'youtube'
-  ) => {
+  const removeFile = (index: number, type: 'gallery' | 'youtube') => {
     if (type === 'gallery') {
       setGalleryImages(galleryImages.filter((_, i) => i !== index));
       setGalleryPreviews(galleryPreviews.filter((_, i) => i !== index));
@@ -106,27 +112,28 @@ export default function MediaUploadPage() {
   const uploadFile = async (file: File, bucket: string, index?: number) => {
     const fileExt = file.name.split('.').pop();
     const fileName = `${Math.random()}.${fileExt}`;
-    
+
     const uploadKey = index !== undefined ? `${bucket}-${index}` : bucket;
-    setUploadProgress(prev => ({ ...prev, [uploadKey]: 0 }));
+    setUploadProgress((prev) => ({ ...prev, [uploadKey]: 0 }));
 
     const { data, error } = await supabase.storage
       .from(bucket)
       .upload(fileName, file, {
         onUploadProgress: (progress) => {
           if (progress.totalBytes > 0) {
-            const percent = (progress.bytesUploaded / progress.totalBytes) * 100;
-            setUploadProgress(prev => ({ ...prev, [uploadKey]: percent }));
+            const percent =
+              (progress.bytesUploaded / progress.totalBytes) * 100;
+            setUploadProgress((prev) => ({ ...prev, [uploadKey]: percent }));
           }
         },
       });
-    
+
     if (error) throw error;
-    
-    const { data: { publicUrl } } = supabase.storage
-      .from(bucket)
-      .getPublicUrl(fileName);
-    
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from(bucket).getPublicUrl(fileName);
+
     return publicUrl;
   };
 
@@ -137,7 +144,9 @@ export default function MediaUploadPage() {
     setUploadProgress({}); // Reset progress
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
       let profileImageUrl = '';
@@ -145,18 +154,20 @@ export default function MediaUploadPage() {
         profileImageUrl = await uploadFile(profileImage, 'profile-images');
       }
 
-        const galleryUrls = await Promise.all(
-        galleryImages.map((file, index) => uploadFile(file, 'gallery-images', index))
-        );
+      const galleryUrls = await Promise.all(
+        galleryImages.map((file, index) =>
+          uploadFile(file, 'gallery-images', index)
+        )
+      );
 
-        const songUploads = await Promise.all(
+      const songUploads = await Promise.all(
         songs.map(async (song, index) => {
           const url = await uploadFile(song.file, 'demo-songs', index);
           return {
             url,
             title: song.title,
             features: song.features,
-            releaseDate: song.releaseDate
+            releaseDate: song.releaseDate,
           };
         })
       );
@@ -167,14 +178,13 @@ export default function MediaUploadPage() {
           profile_image_url: profileImageUrl,
           gallery_images: galleryUrls,
           demo_songs: songUploads,
-          youtube_links: youtubeLinks.filter(link => link),
+          youtube_links: youtubeLinks.filter((link) => link),
           artist_bio: artistBio,
-          registration_complete: true
+          registration_complete: true,
         })
         .eq('id', user.id);
-        console.log("update error", updateError)
+      console.log('update error', updateError);
       if (updateError) throw updateError;
-     
 
       router.push('/dashboard');
     } catch (err: any) {
@@ -185,122 +195,127 @@ export default function MediaUploadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 p-8">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold text-white mb-8">
+    <div className='min-h-screen bg-gray-900 p-8'>
+      <div className='max-w-3xl mx-auto'>
+        <h1 className='text-3xl font-bold text-white mb-8'>
           Step 2: Media Upload
         </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className='space-y-8'>
           {/* Profile Image Upload */}
-          <div className="bg-zinc-950 rounded-lg p-6 space-y-4">
-            <h2 className="text-xl font-semibold text-white mb-4">
+          <div className='bg-zinc-900 rounded-lg p-6 space-y-4'>
+            <h2 className='text-xl font-semibold text-white mb-4'>
               Profile Image
             </h2>
-            
-            <div className="space-y-4">
+
+            <div className='space-y-4'>
               <Label>Profile Picture</Label>
-                <div className="flex items-center gap-4">
+              <div className='flex items-center gap-4'>
                 <Input
-                  type="file"
-                  accept="image/*"
+                  type='file'
+                  accept='image/*'
                   onChange={(e) => handleFileSelect(e, 'profile')}
                 />
                 {profileImagePreview && (
-                  <div className="relative w-20 h-20">
-                  <img
-                    src={profileImagePreview}
-                    alt="Profile preview"
-                    className="w-full h-full object-cover rounded-lg"
-                  />
+                  <div className='relative w-20 h-20'>
+                    <img
+                      src={profileImagePreview}
+                      alt='Profile preview'
+                      className='w-full h-full object-cover rounded-lg'
+                    />
                   </div>
                 )}
-                </div>
-                {uploadProgress['profile-images'] > 0 && (
+              </div>
+              {uploadProgress['profile-images'] > 0 && (
                 <ProgressBar progress={uploadProgress['profile-images']} />
-                )}
+              )}
             </div>
           </div>
 
           {/* Gallery Images */}
-          <div className="bg-zinc-950 rounded-lg p-6 space-y-4">
-            <h2 className="text-xl font-semibold text-white mb-4">
+          <div className='bg-zinc-900 rounded-lg p-6 space-y-4'>
+            <h2 className='text-xl font-semibold text-white mb-4'>
               Gallery Images
             </h2>
-            
-            <div className="space-y-4">
+
+            <div className='space-y-4'>
               <Label>Upload up to 6 images</Label>
               <Input
-                type="file"
-                accept="image/*"
+                type='file'
+                accept='image/*'
                 multiple
                 onChange={(e) => handleFileSelect(e, 'gallery')}
                 disabled={galleryImages.length >= 6}
               />
-              <div className="grid grid-cols-3 gap-4">
+              <div className='grid grid-cols-3 gap-4'>
                 {galleryPreviews.map((preview, index) => (
-                  <div key={index} className="relative">
+                  <div key={index} className='relative'>
                     <img
                       src={preview}
                       alt={`Gallery ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-lg"
+                      className='w-full h-32 object-cover rounded-lg'
                     />
                     <Button
-                      variant="destructive"
-                      size="sm"
-                      className="absolute top-2 right-2"
+                      variant='destructive'
+                      size='sm'
+                      className='absolute top-2 right-2'
                       onClick={() => removeFile(index, 'gallery')}
                     >
                       X
                     </Button>
                     {uploadProgress[`gallery-images-${index}`] > 0 && (
-                      <ProgressBar progress={uploadProgress[`gallery-images-${index}`]} />
+                      <ProgressBar
+                        progress={uploadProgress[`gallery-images-${index}`]}
+                      />
                     )}
-                    </div>
+                  </div>
                 ))}
               </div>
             </div>
           </div>
 
           {/* Artist Bio */}
-          <div className="bg-zinc-950 rounded-lg p-6 space-y-4">
-            <h2 className="text-xl font-semibold text-white mb-4">
+          <div className='bg-zinc-900 rounded-lg p-6 space-y-4'>
+            <h2 className='text-xl font-semibold text-white mb-4'>
               Artist Bio
             </h2>
-            
-            <div className="space-y-4">
+
+            <div className='space-y-4'>
               <Label>Tell us about yourself</Label>
               <Textarea
                 value={artistBio}
                 onChange={(e) => setArtistBio(e.target.value)}
-                className="h-32"
-                placeholder="Share your story..."
+                className='h-32'
+                placeholder='Share your story...'
               />
             </div>
           </div>
 
           {/* Demo Songs */}
-          <div className="bg-zinc-950 rounded-lg p-6 space-y-4">
-            <h2 className="text-xl font-semibold text-white mb-4">
+          <div className='bg-zinc-900 rounded-lg p-6 space-y-4'>
+            <h2 className='text-xl font-semibold text-white mb-4'>
               Demo Songs
             </h2>
-            
-            <div className="space-y-4">
+
+            <div className='space-y-4'>
               <Label>Upload up to 3 MP3s</Label>
               <Input
-                type="file"
-                accept=".mp3"
+                type='file'
+                accept='.mp3'
                 onChange={handleSongUpload}
                 disabled={songs.length >= 3}
               />
-              <div className="space-y-4">
+              <div className='space-y-4'>
                 {songs.map((song, index) => (
-                  <div key={index} className="bg-zinc-800 p-4 rounded-lg space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-white">{song.file.name}</span>
+                  <div
+                    key={index}
+                    className='bg-zinc-800 p-4 rounded-lg space-y-3'
+                  >
+                    <div className='flex justify-between items-center'>
+                      <span className='text-white'>{song.file.name}</span>
                       <Button
-                        variant="destructive"
-                        size="sm"
+                        variant='destructive'
+                        size='sm'
                         onClick={() => {
                           const newSongs = [...songs];
                           newSongs.splice(index, 1);
@@ -308,18 +323,22 @@ export default function MediaUploadPage() {
                         }}
                       >
                         Remove
-                        </Button>
-                      </div>
-                      {uploadProgress[`demo-songs-${index}`] > 0 && (
-                        <ProgressBar progress={uploadProgress[`demo-songs-${index}`]} />
-                      )}
-                      <div className="grid gap-3">
+                      </Button>
+                    </div>
+                    {uploadProgress[`demo-songs-${index}`] > 0 && (
+                      <ProgressBar
+                        progress={uploadProgress[`demo-songs-${index}`]}
+                      />
+                    )}
+                    <div className='grid gap-3'>
                       <div>
                         <Label>Song Title</Label>
                         <Input
                           value={song.title}
-                          onChange={(e) => updateSongMetadata(index, 'title', e.target.value)}
-                          placeholder="Enter song title"
+                          onChange={(e) =>
+                            updateSongMetadata(index, 'title', e.target.value)
+                          }
+                          placeholder='Enter song title'
                           required
                         />
                       </div>
@@ -327,16 +346,28 @@ export default function MediaUploadPage() {
                         <Label>Features</Label>
                         <Input
                           value={song.features}
-                          onChange={(e) => updateSongMetadata(index, 'features', e.target.value)}
-                          placeholder="Enter featured artists (optional)"
+                          onChange={(e) =>
+                            updateSongMetadata(
+                              index,
+                              'features',
+                              e.target.value
+                            )
+                          }
+                          placeholder='Enter featured artists (optional)'
                         />
                       </div>
                       <div>
                         <Label>Release Date</Label>
                         <Input
-                          type="date"
+                          type='date'
                           value={song.releaseDate}
-                          onChange={(e) => updateSongMetadata(index, 'releaseDate', e.target.value)}
+                          onChange={(e) =>
+                            updateSongMetadata(
+                              index,
+                              'releaseDate',
+                              e.target.value
+                            )
+                          }
                           required
                         />
                       </div>
@@ -348,15 +379,15 @@ export default function MediaUploadPage() {
           </div>
 
           {/* YouTube Links */}
-          <div className="bg-zinc-950 rounded-lg p-6 space-y-4">
-            <h2 className="text-xl font-semibold text-white mb-4">
+          <div className='bg-zinc-900 rounded-lg p-6 space-y-4'>
+            <h2 className='text-xl font-semibold text-white mb-4'>
               YouTube Links
             </h2>
-            
-            <div className="space-y-4">
+
+            <div className='space-y-4'>
               <Label>Add up to 4 YouTube links</Label>
               {youtubeLinks.map((link, index) => (
-                <div key={index} className="flex gap-2">
+                <div key={index} className='flex gap-2'>
                   <Input
                     value={link}
                     onChange={(e) => {
@@ -364,10 +395,10 @@ export default function MediaUploadPage() {
                       newLinks[index] = e.target.value;
                       setYoutubeLinks(newLinks);
                     }}
-                    placeholder="YouTube URL"
+                    placeholder='YouTube URL'
                   />
                   <Button
-                    variant="destructive"
+                    variant='destructive'
                     onClick={() => removeFile(index, 'youtube')}
                   >
                     X
@@ -376,8 +407,8 @@ export default function MediaUploadPage() {
               ))}
               {youtubeLinks.length < 4 && (
                 <Button
-                  type="button"
-                  variant="outline"
+                  type='button'
+                  variant='outline'
                   onClick={addYoutubeLink}
                 >
                   Add Another Link
@@ -387,14 +418,14 @@ export default function MediaUploadPage() {
           </div>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
-              <p className="text-red-500 text-sm">{error}</p>
+            <div className='bg-red-500/10 border border-red-500/50 rounded-lg p-4'>
+              <p className='text-red-500 text-sm'>{error}</p>
             </div>
           )}
 
           <Button
-            type="submit"
-            className="w-full bg-red-600 hover:bg-red-700"
+            type='submit'
+            className='w-full bg-red-600 hover:bg-red-700'
             disabled={loading}
           >
             {loading ? 'Saving...' : 'Complete Registration'}

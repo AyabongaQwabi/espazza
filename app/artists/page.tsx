@@ -73,7 +73,7 @@ export default function ArtistsPage() {
   console.log('artsits', artists);
 
   return (
-    <div className='min-h-screen bg-zinc-950'>
+    <div className='min-h-screen bg-zinc-900'>
       {/* Extra Large Animated Hero Section */}
       <motion.div
         className='relative h-screen flex items-center justify-center overflow-hidden'
@@ -90,7 +90,7 @@ export default function ArtistsPage() {
           animate={{ scale: 1 }}
           transition={{ duration: 10, ease: 'easeOut' }}
         >
-          <div className='absolute inset-0 bg-zinc-950/60' />
+          <div className='absolute inset-0 bg-zinc-900/60' />
         </motion.div>
         <div className='relative z-10 text-center px-4 max-w-4xl'>
           <motion.h1
@@ -242,7 +242,7 @@ export default function ArtistsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
         >
-          <div className='inline-block p-8 bg-zinc-950 rounded-2xl'>
+          <div className='inline-block p-8 bg-zinc-900 rounded-2xl'>
             <UsersIcon className='h-12 w-12 text-red-600 mx-auto mb-4' />
             <h2 className='text-2xl font-bold text-white mb-4'>
               Ngumrhapi? Yiba yiNxalenye!

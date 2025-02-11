@@ -1,12 +1,16 @@
-"use client"; // ✅ Mark this as a client component
+'use client'; // ✅ Mark this as a client component
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from 'framer-motion';
 
-export default function AnimatedWrapper({ children }: { children: React.ReactNode }) {
+export default function AnimatedWrapper({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode='wait'>
       <motion.main
-        className="flex-1"
+        className='flex-1 mt-20'
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
