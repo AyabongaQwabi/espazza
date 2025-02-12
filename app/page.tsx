@@ -1,4 +1,4 @@
-loimport { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { MusicIcon, MenuIcon } from 'lucide-react';
 import Link from 'next/link';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
