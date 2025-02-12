@@ -27,9 +27,9 @@ export default function OnboardingRedirect() {
       }
 
       if (!profile.basic_info_complete) {
-        router.push('/dashboard/onboarding/basic-info');
+        router.push('/onboarding/basic-info');
       } else {
-        router.push('/dashboard/onboarding/media');
+        router.push('/onboarding/media');
       }
     }
 
