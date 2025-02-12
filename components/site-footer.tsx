@@ -49,7 +49,7 @@ export function SiteFooter() {
             <h3 className='text-white font-semibold mb-4'>Contact</h3>
             <ul className='space-y-2 text-gray-400'>
               <li>info@xhap.co.za</li>
-              <li>+27 (0) 21 123 4567</li>
+              <li>0603116777</li>
               <li>Cape Town, South Africa</li>
             </ul>
           </div>
