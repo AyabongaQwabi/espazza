@@ -369,7 +369,7 @@ export default function ArtistPage({
               <Calendar className='mr-2' />
               Book This Artist
             </Button>
-            <Button size='lg' className='bg-[#1DB954] hover:bg-[#1ed760]'>
+            {/* <Button size='lg' className='bg-[#1DB954] hover:bg-[#1ed760]'>
               <FaSpotify className='mr-2' />
               Listen on Spotify
             </Button>
@@ -378,10 +378,9 @@ export default function ArtistPage({
               variant='outline'
               className='text-white border-white hover:bg-white/10'
             >
-              {/* Added Lucide-react icon here */}
               <Users className='mr-2' />
               Follow on Socials
-            </Button>
+            </Button> */}
           </div>
         </div>
       </section>

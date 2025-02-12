@@ -37,14 +37,14 @@ const exists = (i) => !isEmpty(i) && !isNil(i);
 
 const SocialFollowButtons = ({ artist }) => {
   return (
-    <div className='flex space-x-2 mt-4'>
+    <div className='flex-col space-y-2 mt-4'>
       {artist.twitter_url && (
         <Button
           variant='outline'
           size='sm'
           onClick={() => window.open(artist.twitter_url, '_blank')}
         >
-          <Twitter className='w-4 h-4 mr-2' />
+          <FaTwitter className='w-4 h-4 mr-2' />
           Follow on Twitter
         </Button>
       )}
@@ -54,7 +54,7 @@ const SocialFollowButtons = ({ artist }) => {
           size='sm'
           onClick={() => window.open(artist.instagram_url, '_blank')}
         >
-          <Instagram className='w-4 h-4 mr-2' />
+          <FaInstagram className='w-4 h-4 mr-2' />
           Follow on Instagram
         </Button>
       )}
@@ -64,7 +64,7 @@ const SocialFollowButtons = ({ artist }) => {
           size='sm'
           onClick={() => window.open(artist.facebook_url, '_blank')}
         >
-          <Facebook className='w-4 h-4 mr-2' />
+          <FaFacebook className='w-4 h-4 mr-2' />
           Follow on Facebook
         </Button>
       )}
@@ -76,7 +76,7 @@ const SocialFollowButtons = ({ artist }) => {
             window.open(`https://wa.me/${artist.whatsapp_number}`, '_blank')
           }
         >
-          <Phone className='w-4 h-4 mr-2' />
+          <FaWhatsapp className='w-4 h-4 mr-2' />
           WhatsApp
         </Button>
       )}
@@ -253,11 +253,16 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
           <h2 className='text-3xl font-bold text-white mt-4 mb-2'>
             {artist_name}
           </h2>
-          <div className='flex space-x-4 mb-4'>
-            <FaTwitter className='text-2xl text-red-500 cursor-pointer hover:text-red-600' />
-            <FaInstagram className='text-2xl text-red-500 cursor-pointer hover:text-red-600' />
-            <FaFacebook className='text-2xl text-red-500 cursor-pointer hover:text-red-600' />
-          </div>
+          <p className='text-gray-300 text-lg'>@{username}</p>
+
+          <SocialFollowButtons
+            artist={{
+              instagram_url,
+              facebook_url,
+              twitter_url,
+              whatsapp_number,
+            }}
+          />
           <div className='flex space-x-2 mt-4'>
             <Link href={`/artists/${username}`} passHref>
               <Button variant='outline'>More</Button>
@@ -270,14 +275,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
                 <DialogHeader>
                   <DialogTitle>Share {artist_name}</DialogTitle>
                 </DialogHeader>
-                <SocialFollowButtons
-                  artist={{
-                    instagram_url,
-                    facebook_url,
-                    twitter_url,
-                    whatsapp_number,
-                  }}
-                />
+
                 <div className='flex justify-around mt-4'>
                   <Button
                     onClick={() => handleShare('facebook')}
