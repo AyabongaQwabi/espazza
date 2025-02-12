@@ -35,6 +35,55 @@ function getYouTubeVideoId(url: string) {
 
 const exists = (i) => !isEmpty(i) && !isNil(i);
 
+const SocialFollowButtons = ({ artist }) => {
+  return (
+    <div className='flex space-x-2 mt-4'>
+      {artist.twitter_url && (
+        <Button
+          variant='outline'
+          size='sm'
+          onClick={() => window.open(artist.twitter_url, '_blank')}
+        >
+          <Twitter className='w-4 h-4 mr-2' />
+          Follow on Twitter
+        </Button>
+      )}
+      {artist.instagram_url && (
+        <Button
+          variant='outline'
+          size='sm'
+          onClick={() => window.open(artist.instagram_url, '_blank')}
+        >
+          <Instagram className='w-4 h-4 mr-2' />
+          Follow on Instagram
+        </Button>
+      )}
+      {artist.facebook_url && (
+        <Button
+          variant='outline'
+          size='sm'
+          onClick={() => window.open(artist.facebook_url, '_blank')}
+        >
+          <Facebook className='w-4 h-4 mr-2' />
+          Follow on Facebook
+        </Button>
+      )}
+      {artist.whatsapp_number && (
+        <Button
+          variant='outline'
+          size='sm'
+          onClick={() =>
+            window.open(`https://wa.me/${artist.whatsapp_number}`, '_blank')
+          }
+        >
+          <Phone className='w-4 h-4 mr-2' />
+          WhatsApp
+        </Button>
+      )}
+    </div>
+  );
+};
+
 interface Song {
   title: string;
   url: string;
@@ -59,8 +108,12 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
   artist_bio,
   youtube_links,
   demo_songs,
+  instagram_url,
+  facebook_url,
+  twitter_url,
+  whatsapp_number,
 }) => {
-  const songs = demo_songs.map((i) => JSON.parse(i));
+  const songs = demo_songs?.map((i) => JSON.parse(i));
   console.log('songs', songs, username, artist_name);
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
@@ -217,6 +270,14 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
                 <DialogHeader>
                   <DialogTitle>Share {artist_name}</DialogTitle>
                 </DialogHeader>
+                <SocialFollowButtons
+                  artist={{
+                    instagram_url,
+                    facebook_url,
+                    twitter_url,
+                    whatsapp_number,
+                  }}
+                />
                 <div className='flex justify-around mt-4'>
                   <Button
                     onClick={() => handleShare('facebook')}

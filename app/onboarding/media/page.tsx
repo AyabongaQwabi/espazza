@@ -30,6 +30,12 @@ export default function MediaUploadPage() {
   const [songs, setSongs] = useState<Song[]>([]);
   const [youtubeLinks, setYoutubeLinks] = useState<string[]>(['']);
   const [artistBio, setArtistBio] = useState('');
+  const [formData, setFormData] = useState({
+    twitter_url: '',
+    instagram_url: '',
+    facebook_url: '',
+    whatsapp_number: '',
+  });
 
   const ProgressBar = ({ progress }: { progress: number }) => (
     <div className='w-full bg-zinc-800 rounded-full h-2 mt-2'>
@@ -181,6 +187,7 @@ export default function MediaUploadPage() {
           youtube_links: youtubeLinks.filter((link) => link),
           artist_bio: artistBio,
           registration_complete: true,
+          ...formData,
         })
         .eq('id', user.id);
       console.log('update error', updateError);
@@ -414,6 +421,61 @@ export default function MediaUploadPage() {
                   Add Another Link
                 </Button>
               )}
+            </div>
+          </div>
+          <div className='bg-zinc-900 rounded-lg p-6 space-y-4'>
+            <h3 className='text-lg font-semibold'>Social Media Links</h3>
+            <div>
+              <Label htmlFor='twitter'>Twitter</Label>
+              <Input
+                id='twitter'
+                name='twitter'
+                type='url'
+                placeholder='https://twitter.com/yourusername'
+                value={formData.twitter_url || ''}
+                onChange={(e) =>
+                  setFormData({ ...formData, twitter_url: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor='instagram'>Instagram</Label>
+              <Input
+                id='instagram'
+                name='instagram'
+                type='url'
+                placeholder='https://instagram.com/yourusername'
+                value={formData.instagram_url || ''}
+                onChange={(e) =>
+                  setFormData({ ...formData, instagram_url: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor='facebook'>Facebook</Label>
+              <Input
+                id='facebook'
+                name='facebook'
+                type='url'
+                placeholder='https://facebook.com/yourusername'
+                value={formData.facebook_url || ''}
+                onChange={(e) =>
+                  setFormData({ ...formData, facebook_url: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor='whatsapp'>WhatsApp Number</Label>
+              <Input
+                id='whatsapp'
+                name='whatsapp'
+                type='tel'
+                placeholder='+27 123 456 7890'
+                value={formData.whatsapp_number || ''}
+                onChange={(e) =>
+                  setFormData({ ...formData, whatsapp_number: e.target.value })
+                }
+              />
             </div>
           </div>
 

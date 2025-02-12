@@ -9,8 +9,11 @@ import ArtistCard from '@/components/ArtistCard';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import type { Database } from '@/lib/database.types';
+import { isNil, isEmpty } from 'ramda';
 
-const ARTISTS_PER_PAGE = 3;
+const ARTISTS_PER_PAGE = 10;
+
+const exists = (i) => !isNil(i) && !isEmpty(i);
 
 export default function ArtistsPage() {
   const [artists, setArtists] = useState([]);
@@ -47,7 +50,8 @@ export default function ArtistsPage() {
     if (error) {
       console.error('Error fetching artists:', error);
     } else {
-      setArtists(data || []);
+      const cleanData = data.filter((d) => exists(d.artist_name));
+      setArtists(cleanData || []);
       setTotalArtists(count || 0);
     }
     setLoading(false);
@@ -62,6 +66,7 @@ export default function ArtistsPage() {
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
+    fetchArtists();
     window.scrollTo(0, 0);
   };
 
@@ -201,6 +206,10 @@ export default function ArtistsPage() {
                   youtube_links={artist.youtube_links || []}
                   demo_songs={artist.demo_songs || []}
                   gallery_images={artist.gallery_images || []}
+                  instagram_url={artist.instagram_url}
+                  twitter_url={artist.twitter_url}
+                  facebook_url={artist.facebook_url}
+                  whatsapp_number={artist.whatsapp_number}
                 />
               </motion.div>
             ))}
