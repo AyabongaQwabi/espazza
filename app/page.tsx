@@ -25,8 +25,7 @@ export default function Home() {
           <img src="/logo.png" className="w-10 h-10 object-fit"/>
           </div>
           
-          <Navigation className="hidden md:block text-sm" />
-          
+         
           <div className="hidden md:flex items-center space-x-4">
             <Button asChild variant="ghost" size="sm">
               <Link href="/login">Ngena</Link>
