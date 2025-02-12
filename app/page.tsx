@@ -18,42 +18,7 @@ function Navigation({ className = "" }: { className?: string }) {
 export default function Home() {
   return (
     <div className="min-h-screen bg-gray-900">
-      {/* Header */}
-      <header className="fixed w-full z-50 bg-gray-900 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-          <img src="/logo.png" className="w-10 h-10 object-fit"/>
-          </div>
-          
-         
-          <div className="hidden md:flex items-center space-x-4">
-            <Button asChild variant="ghost" size="sm">
-              <Link href="/login">Ngena</Link>
-            </Button>
-            <Button asChild size="sm" className="bg-red-600 hover:bg-red-700">
-              <Link href="/register">Qala Apha</Link>
-            </Button>
-          </div>
-
-          <Sheet>
-            <SheetTrigger className="md:hidden">
-              <MenuIcon className="h-6 w-6" />
-            </SheetTrigger>
-            <SheetContent>
-              <div className="flex flex-col space-y-4 mt-8">
-                <Navigation className="flex flex-col space-y-4" />
-                <hr className="border-zinc-800" />
-                <Button asChild variant="ghost" size="sm">
-                  <Link href="/login">Ngena</Link>
-                </Button>
-                <Button asChild size="sm" className="bg-red-600 hover:bg-red-700">
-                  <Link href="/register">Qala Apha</Link>
-                </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
-      </header>
+     
 
       {/* Hero Section */}
       <div 
