@@ -30,6 +30,7 @@ export default function ArtistsPage() {
     let query = supabase
       .from('profiles')
       .select('*', { count: 'exact' })
+      .eq('user_type', 'artist')
       .order('created_at', { ascending: false });
 
     if (searchTerm) {
