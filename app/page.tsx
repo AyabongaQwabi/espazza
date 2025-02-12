@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+loimport { Button } from '@/components/ui/button';
 import { MusicIcon, MenuIcon } from 'lucide-react';
 import Link from 'next/link';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -87,7 +87,7 @@ export default function Home() {
       </div>
 
       {/* Features Section */}
-      {/* <div className="py-20 px-4 bg-gray-950">
+      <div className="py-20 px-4 bg-gray-950">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-4">
             Phakamisa iXhap
@@ -114,7 +114,7 @@ export default function Home() {
             />
           </div>
         </div>
-      </div> */}
+      </div> 
 
       {/* Featured Artists */}
       <div className="py-20 px-4 bg-gray-900">
