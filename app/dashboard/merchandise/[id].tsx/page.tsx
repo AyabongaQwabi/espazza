@@ -15,7 +15,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { ImageUploader } from '@/components/ImageUploader';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import Image from 'next/image';
 
 export default function EditProduct({ params }: { params: { id: string } }) {
