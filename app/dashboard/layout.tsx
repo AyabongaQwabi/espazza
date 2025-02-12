@@ -77,9 +77,9 @@ export default function DashboardLayout({
       if (
         profileData &&
         !profileData.registration_complete &&
-        pathname !== '/dashboard/onboarding'
+        pathname !== '/onboarding/basic-info'
       ) {
-        router.push('/dashboard/onboarding');
+        router.push('/onboarding');
       }
     }
     checkAuth();
