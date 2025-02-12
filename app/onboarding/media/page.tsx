@@ -8,35 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-
-const PROVINCES = [
-  'Eastern Cape',
-  'Free State',
-  'Gauteng',
-  'KwaZulu-Natal',
-  'Limpopo',
-  'Mpumalanga',
-  'Northern Cape',
-  'North West',
-  'Western Cape',
-];
-
 interface Song {
   file: File;
   title: string;
@@ -208,7 +179,7 @@ export default function MediaUploadPage() {
           gallery_images: galleryUrls,
           demo_songs: songUploads,
           youtube_links: youtubeLinks.filter((link) => link),
-          artist_artist_bio: artistBio,
+          artist_bio: artistBio,
           registration_complete: true,
         })
         .eq('id', user.id);
