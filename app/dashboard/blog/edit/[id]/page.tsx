@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ImageUploader } from '@/components/ImageUploader';
-import { supabase } from '@/lib/supabase';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Editor } from '@/components/Editor';
 import { toast } from '@/hooks/use-toast';
 
@@ -18,6 +18,7 @@ export default function EditBlogPost({ params }: { params: { id: string } }) {
   const [excerpt, setExcerpt] = useState('');
   const [featuredImage, setFeaturedImage] = useState('');
   const [published, setPublished] = useState(false);
+  const supabase = createClientComponentClient();
 
   useEffect(() => {
     async function fetchPost() {
@@ -45,7 +46,7 @@ export default function EditBlogPost({ params }: { params: { id: string } }) {
     }
 
     fetchPost();
-  }, [params.id, router]);
+  }, [params.id, router, supabase]);
 
   async function handleSave(publish: boolean) {
     setLoading(true);

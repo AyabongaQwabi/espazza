@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from 'react';
 import { Upload, X } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
 import Image from 'next/image';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { toast } from '@/hooks/use-toast';
@@ -161,7 +160,12 @@ export function ImageUploader({
             >
               <X className='w-4 h-4' />
             </button>
-            <Progress value={image.progress} className='w-full mt-2' />
+            <div className='w-full bg-gray-200 rounded-full h-2.5 mt-2'>
+              <div
+                className='bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-in-out'
+                style={{ width: `${image.progress}%` }}
+              ></div>
+            </div>
           </div>
         ))}
       </div>
