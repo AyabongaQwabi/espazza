@@ -199,6 +199,7 @@ export default function ArtistsPage() {
                   artist_bio={artist.artist_bio || 'No bio available.'}
                   youtube_links={artist.youtube_links || []}
                   demo_songs={artist.demo_songs || []}
+                  gallery_images={artist.gallery_images || []}
                 />
               </motion.div>
             ))}

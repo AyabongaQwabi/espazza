@@ -25,12 +25,15 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import Link from 'next/link';
+import { isNil, isEmpty } from 'ramda';
 
 function getYouTubeVideoId(url: string) {
   const regex = /(?:youtube\.com\/(?:.*v=|.*\/)|youtu\.be\/)([^?&]+)/;
   const match = url.match(regex);
   return match && match[1] ? match[1] : null;
 }
+
+const exists = (i) => !isEmpty(i) && !isNil(i);
 
 interface Song {
   title: string;
@@ -44,6 +47,7 @@ interface ArtistCardProps {
   profile_image_url: string;
   artist_bio: string;
   youtube_links: string[];
+  gallery_images: string[];
   demo_songs: Song[];
 }
 
@@ -51,6 +55,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
   artist_name,
   username,
   profile_image_url,
+  gallery_images,
   artist_bio,
   youtube_links,
   demo_songs,
@@ -178,7 +183,13 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
             className='relative overflow-hidden rounded-lg shadow-lg'
           >
             <Image
-              src={profile_image_url || '/placeholder.svg'}
+              src={
+                exists(profile_image_url)
+                  ? profile_image_url
+                  : exists(gallery_images[0])
+                  ? gallery_images[0]
+                  : '/placeholder.svg'
+              }
               alt={artist_name}
               onError={handleImageError}
               className='w-full h-64 object-cover'
