@@ -10,7 +10,7 @@ import AnimationWrapper from '@/components/AnimationWrapper';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Xhap - Xhosa Hip Hop Platform',
+  title: 'Xhapp - Xhosa Hip Hop App',
   description: 'Iplatform yabaRhepi baseKhaya - The home of Xhosa Hip Hop',
 };
 

@@ -246,7 +246,7 @@ export default function ArtistsPage() {
           <div className='inline-block p-8 bg-zinc-900 rounded-2xl'>
             <UsersIcon className='h-12 w-12 text-red-600 mx-auto mb-4' />
             <h2 className='text-2xl font-bold text-white mb-4'>
-              Ngumrhapi? Yiba yiNxalenye!
+              NgumRhepi? Yiba yiNxalenye!
             </h2>
             <p className='text-gray-400 mb-6 max-w-lg mx-auto'>
               Are you a Xhosa Hip Hop artist? Join our platform to showcase your

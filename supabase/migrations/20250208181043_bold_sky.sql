@@ -1,5 +1,5 @@
 /*
-  # Initial Schema Setup for Artist Platform
+  # Initial Schema Setup for Artist App
 
   1. New Tables
     - `profiles`
