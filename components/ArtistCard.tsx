@@ -45,7 +45,7 @@ interface ArtistCardProps {
   artist_name: string;
   username: string;
   profile_image_url: string;
-  artist_bio: string;
+  artist_artist_bio: string;
   youtube_links: string[];
   gallery_images: string[];
   demo_songs: Song[];

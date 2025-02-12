@@ -10,7 +10,7 @@ export default function AnimatedWrapper({
   return (
     <AnimatePresence mode='wait'>
       <motion.main
-        className='flex-1 mt-20'
+        className='flex-1 mt-16'
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}

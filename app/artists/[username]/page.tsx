@@ -109,7 +109,7 @@ export default function ArtistPage({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
-        className='relative h-[50vh] flex items-center justify-center mt-20'
+        className='relative h-[50vh] flex items-center justify-center '
       >
         <div
           className='absolute inset-0 bg-cover bg-center'
@@ -123,7 +123,7 @@ export default function ArtistPage({
           }}
         />
         <div className='absolute inset-0 bg-zinc-900 bg-opacity-50' />
-        <div className='relative z-10 text-center mt-20'>
+        <div className='relative z-10 text-center '>
           <Image
             src={artist.profile_image_url || DEFAULT_IMAGE}
             alt='Artist image'

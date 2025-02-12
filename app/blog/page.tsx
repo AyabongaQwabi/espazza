@@ -69,7 +69,7 @@ export default async function BlogPage({
         <div className='max-w-7xl mx-auto px-4'>
           <div className='text-center mb-12'>
             <h1 className='text-4xl md:text-5xl font-bold text-white mb-4'>
-              Amabali eXhapp
+              iiPosts
             </h1>
             <p className='text-gray-400 text-lg'>
               Stories from the Xhosa Hip Hop Community
@@ -97,7 +97,7 @@ export default async function BlogPage({
         <div className='max-w-7xl mx-auto px-4'>
           <div className='text-center mb-12'>
             <h1 className='text-4xl md:text-5xl font-bold text-white mb-4'>
-              Amabali eXhapp
+              iiPosts
             </h1>
             <p className='text-gray-400 text-lg'>
               Stories from the Xhosa Hip Hop Community
@@ -134,7 +134,7 @@ export default async function BlogPage({
       <div className='max-w-7xl mx-auto px-4'>
         <div className='text-center mb-12'>
           <h1 className='text-4xl md:text-5xl font-bold text-white mb-4'>
-            Amabali eXhapp
+            iiPosts
           </h1>
           <p className='text-gray-400 text-lg'>
             Stories from the Xhosa Hip Hop Community

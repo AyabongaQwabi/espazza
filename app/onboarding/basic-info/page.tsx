@@ -38,12 +38,12 @@ export default function BasicInfoPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [newLabel, setNewLabel] = useState('');
   const [towns, setTowns] = useState<any[]>([]);
-  const [recordLabels, setRecordLabels] = useState<any[]>([]);
-  const [distributors, setDistributors] = useState<any[]>([]);
   const [newTown, setNewTown] = useState('');
   const [newTownProvince, setNewTownProvince] = useState('');
-  const [newLabel, setNewLabel] = useState('');
+  const [recordLabels, setRecordLabels] = useState<any[]>([]);
+  const [distributors, setDistributors] = useState<any[]>([]);
   const [newDistributor, setNewDistributor] = useState('');
   const [formData, setFormData] = useState({
     government_name: '',
@@ -66,6 +66,7 @@ export default function BasicInfoPage() {
     risa_id: '',
     sampra_member: false,
     sampra_id: '',
+    genre: '',
   });
 
   useEffect(() => {
@@ -377,6 +378,18 @@ export default function BasicInfoPage() {
             <h2 className='text-xl font-semibold text-white mb-4'>
               Professional Information
             </h2>
+
+            <div className='space-y-4'>
+              <Label htmlFor='genre'>Genre</Label>
+              <Input
+                id='genre'
+                value={formData.genre}
+                onChange={(e) =>
+                  setFormData({ ...formData, genre: e.target.value })
+                }
+                required
+              />
+            </div>
 
             <div className='space-y-4'>
               <div>
