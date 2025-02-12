@@ -34,13 +34,13 @@ export default function AboutPage() {
             Injongo Yethu (Our Mission)
           </h2>
           <p className='text-gray-300 text-lg max-w-3xl mx-auto'>
-            XHAP yiplatform eyilwe yiXhosa Hip Hop Organisation ukuvula amathuba
-            kubaRhepi abasebenzisa isiXhosa. Injongo yethu kukusasaza umculo
-            weXhosa Hip Hop kwihlabathi lonke, sinika abaculi bethu ithuba
-            lokwabelana ngemisebenzi yabo simahla okanye bayithengise.
+            XHAPP yiplatform eyilwe yiXhosa Hip Hop Organisation ukuvula
+            amathuba kubaRhepi abasebenzisa isiXhosa. Injongo yethu kukusasaza
+            umculo weXhosa Hip Hop kwihlabathi lonke, sinika abaculi bethu
+            ithuba lokwabelana ngemisebenzi yabo simahla okanye bayithengise.
           </p>
           <p className='text-gray-400 text-lg max-w-3xl mx-auto mt-4'>
-            XHAP is a platform created by the Xhosa Hip Hop Organisation to
+            XHAPP is a platform created by the Xhosa Hip Hop Organisation to
             create opportunities for Xhosa-language rappers. Our mission is to
             spread Xhosa Hip Hop music globally, giving our artists a platform
             to share their work freely or monetize their talent.

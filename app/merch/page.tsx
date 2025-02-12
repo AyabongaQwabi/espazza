@@ -107,7 +107,7 @@ export default function MerchPage() {
 
   return (
     <div className='container mx-auto px-4 py-8'>
-      <h1 className='text-3xl font-bold mb-8'>XHAP Merchandise</h1>
+      <h1 className='text-3xl font-bold mb-8'>XHAPP Merchandise</h1>
 
       <div className='flex flex-col md:flex-row gap-4 mb-8'>
         <form onSubmit={handleSearch} className='flex-1'>

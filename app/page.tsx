@@ -172,7 +172,7 @@ export default function Home() {
             <FeatureCard
               title='Upload Your Music'
               subtitle='Share your talent with the world'
-              description='Easily upload and manage your music catalog on XHAP.'
+              description='Easily upload and manage your music catalog on XHAPP.'
               image='https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&q=80'
             />
             <FeatureCard
@@ -184,7 +184,7 @@ export default function Home() {
             <FeatureCard
               title='Grow Your Fame'
               subtitle='Reach a wider audience'
-              description="Gain exposure and grow your fanbase through XHAP's platform."
+              description="Gain exposure and grow your fanbase through XHAPP's platform."
               image='https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?auto=format&fit=crop&q=80'
             />
           </div>

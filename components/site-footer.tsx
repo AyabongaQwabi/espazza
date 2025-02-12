@@ -71,7 +71,7 @@ export function SiteFooter() {
         </div>
 
         <div className='border-t border-zinc-800 mt-12 pt-8 text-center text-gray-400'>
-          <p>&copy; {new Date().getFullYear()} XHAP. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} XHAPP. All rights reserved.</p>
         </div>
       </div>
     </footer>

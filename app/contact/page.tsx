@@ -22,7 +22,7 @@ export default function ContactPage() {
             Qhagamshelana
           </h1>
           <p className='text-xl text-gray-300 max-w-2xl mx-auto'>
-            Get in Touch with XHAP
+            Get in Touch with XHAPP
           </p>
         </div>
       </div>
