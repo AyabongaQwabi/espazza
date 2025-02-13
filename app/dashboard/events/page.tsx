@@ -33,7 +33,7 @@ import { supabase } from '@/lib/supabase';
 import { format } from 'date-fns';
 import { Plus, Search } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import type React from 'react'; // Added import for React
+import type React from 'react';
 
 export default function EventsManagement() {
   const [events, setEvents] = useState([]);
@@ -45,9 +45,9 @@ export default function EventsManagement() {
     town_id: '',
     date: new Date(),
     budget: '',
-    ticket_price: '',
-    max_attendees: '',
-    cover_image: '',
+    ticketPrice: '',
+    maxAttendees: '',
+    coverImage: '',
   });
   const [venues, setVenues] = useState([]);
   const [towns, setTowns] = useState([]);
@@ -145,9 +145,9 @@ export default function EventsManagement() {
         town_id: '',
         date: new Date(),
         budget: '',
-        ticket_price: '',
-        max_attendees: '',
-        cover_image: '',
+        ticketPrice: '',
+        maxAttendees: '',
+        coverImage: '',
       });
       toast({
         title: 'Success',
@@ -390,18 +390,18 @@ export default function EventsManagement() {
             <Input
               type='number'
               placeholder='Ticket Price'
-              value={newEvent.ticket_price}
+              value={newEvent.ticketPrice}
               onChange={(e) =>
-                setNewEvent({ ...newEvent, ticket_price: e.target.value })
+                setNewEvent({ ...newEvent, ticketPrice: e.target.value })
               }
               required
             />
             <Input
               type='number'
               placeholder='Maximum Attendees'
-              value={newEvent.max_attendees}
+              value={newEvent.maxAttendees}
               onChange={(e) =>
-                setNewEvent({ ...newEvent, max_attendees: e.target.value })
+                setNewEvent({ ...newEvent, maxAttendees: e.target.value })
               }
               required
             />
@@ -409,7 +409,7 @@ export default function EventsManagement() {
               <label className='text-sm font-medium'>Cover Image</label>
               <ImageUploader
                 onUploadComplete={(urls) =>
-                  setNewEvent({ ...newEvent, cover_image: urls[0] })
+                  setNewEvent({ ...newEvent, coverImage: urls[0] })
                 }
                 maxSizeInMB={5}
               />
@@ -438,7 +438,7 @@ export default function EventsManagement() {
               <TableCell>{event.venue}</TableCell>
               <TableCell>{event.south_african_towns?.name}</TableCell>
               <TableCell>
-                {event.ticket_price ? `$${event.ticket_price}` : 'Free'}
+                {event.ticketPrice ? `$${event.ticketPrice}` : 'Free'}
               </TableCell>
               <TableCell>
                 <Button
@@ -446,7 +446,7 @@ export default function EventsManagement() {
                   size='sm'
                   onClick={() => router.push(`/dashboard/events/${event.id}`)}
                 >
-                  Manage
+                  Edit
                 </Button>
               </TableCell>
             </TableRow>
