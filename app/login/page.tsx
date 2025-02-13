@@ -4,133 +4,149 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { PasswordField } from '@/components/ui/password-field';
 import Link from 'next/link';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { toast } from '@/hooks/use-toast';
 
 export default function Login() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const router = useRouter();
+  const supabase = createClientComponentClient();
 
-  async function handleSubmit() {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
     setLoading(true);
-    setError('');
+    //setError("") //This line was causing an error, as 'setError' was not defined.  It's removed.
 
-    if (!isSupabaseConfigured()) {
-      setError(
-        'Database connection not configured. Please connect to Supabase first.'
-      );
-      setLoading(false);
-      return;
-    }
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    try {
-      const { data, error: signInError } =
-        await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-      console.log(data, signInError);
-
-      if (signInError) {
-        if (signInError.message.includes('Invalid login credentials')) {
-          setError('Invalid email or password. Please try again.');
-        } else {
-          setError(signInError.message);
-        }
-        setLoading(false);
-        return;
-      }
-
-      if (!data.user) {
-        setError('Something went wrong. Please try again.');
-        setLoading(false);
-        return;
-      }
-
-      // Check if user has a profile
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', data.user.id)
-        .single();
-
-      if (profileError) {
-        console.error('Error fetching profile:', profileError);
-        setError('Error accessing your profile. Please try again.');
-        setLoading(false);
-        return;
-      }
-      console.log('routing to dash');
+    if (error) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } else {
       router.push('/dashboard');
-      console.log('done');
-    } catch (err: any) {
-      console.error('Login error:', err);
-      setError('An unexpected error occurred. Please try again.');
-    } finally {
-      setLoading(false);
     }
+
+    setLoading(false);
+  }
+
+  async function handleMagicLinkLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } else {
+      setMagicLinkSent(true);
+      toast({
+        title: 'Success',
+        description: 'Magic link sent to your email',
+      });
+    }
+
+    setLoading(false);
   }
 
   return (
-    <div className='min-h-screen bg-gray-900 flex items-center justify-center px-4'>
+    <div className='min-h-screen bg-black flex items-center justify-center px-4'>
       <div className='max-w-md w-full'>
         <div className='text-center mb-8'>
           <h1 className='text-3xl font-bold text-white mb-2'>Ngena (Login)</h1>
-          <p className='text-gray-400'>Welcome back to Xhapp</p>
+          <p className='text-gray-400'>Welcome back to Xhap</p>
         </div>
 
-        <div className='space-y-4'>
-          <div>
-            <Input
-              name='email'
-              type='email'
-              placeholder='Email'
-              required
-              className='w-full'
-              aria-label='Email address'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div>
-            <PasswordField
-              name='password'
-              placeholder='Password'
-              required
-              className='w-full'
-              aria-label='Password'
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+        {!magicLinkSent ? (
+          <>
+            <form onSubmit={handleSubmit} className='space-y-4'>
+              <div>
+                <Input
+                  name='email'
+                  type='email'
+                  placeholder='Email'
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className='w-full'
+                />
+              </div>
+              <div>
+                <Input
+                  name='password'
+                  type='password'
+                  placeholder='Password'
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className='w-full'
+                />
+              </div>
 
-          {error && (
-            <div className='bg-red-500/10 border border-red-500/50 rounded-lg p-4'>
-              <p className='text-red-500 text-sm'>{error}</p>
+              <Button
+                type='submit'
+                className='w-full bg-red-600 hover:bg-red-700'
+                disabled={loading}
+              >
+                {loading ? 'Logging in...' : 'Login'}
+              </Button>
+            </form>
+
+            <div className='mt-4 text-center'>
+              <Button
+                variant='link'
+                onClick={handleMagicLinkLogin}
+                disabled={loading}
+              >
+                Login with Magic Link
+              </Button>
             </div>
-          )}
 
-          <Button
-            type='submit'
-            className='w-full bg-red-600 hover:bg-red-700'
-            disabled={loading}
-            onClick={handleSubmit}
-          >
-            {loading ? 'Logging in...' : 'Login'}
-          </Button>
+            <div className='mt-4 text-center'>
+              <Link
+                href='/forgot-password'
+                className='text-red-500 hover:text-red-400'
+              >
+                Forgot Password?
+              </Link>
+            </div>
 
-          <p className='text-center text-gray-400 text-sm'>
-            Don't have an account?{' '}
-            <Link href='/register' className='text-red-500 hover:text-red-400'>
-              Qala Apha (Register)
-            </Link>
-          </p>
-        </div>
+            <p className='text-center text-gray-400 text-sm mt-4'>
+              Don't have an account?{' '}
+              <Link
+                href='/register'
+                className='text-red-500 hover:text-red-400'
+              >
+                Qala Apha (Register)
+              </Link>
+            </p>
+          </>
+        ) : (
+          <div className='text-center text-white'>
+            <p>Magic link sent! Check your email to log in.</p>
+            <Button onClick={() => setMagicLinkSent(false)} className='mt-4'>
+              Back to Login
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
