@@ -34,7 +34,8 @@ const navItems = [
   { href: '/blog', icon: BookOpenIcon, label: 'Amabali (Blog)' },
   { href: '/contact', icon: MailIcon, label: 'Qhagamshelana (Contact)' },
   { href: '/dashboard', icon: LayoutDashboardIcon, label: 'Dashboard' },
-  { href: '/dashboard/blog', icon: EditIcon, label: 'Manage Stories' },
+  { href: '/dashboard/profile', icon: EditIcon, label: 'Manage Profile' },
+  { href: '/dashboard/blog', icon: EditIcon, label: 'Manage Posts' },
   { href: '/dashboard/events', icon: CalendarPlusIcon, label: 'Manage Events' },
   {
     href: '/dashboard/merchandise',
