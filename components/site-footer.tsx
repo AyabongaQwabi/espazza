@@ -42,6 +42,19 @@ export function SiteFooter() {
                   iiPosts
                 </Link>
               </li>
+              <li>
+                <Link
+                  href='/privacy'
+                  className='text-zinc-400 hover:text-white'
+                >
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link href='/terms' className='text-zinc-400 hover:text-white'>
+                  Terms of Use
+                </Link>
+              </li>
             </ul>
           </div>
 
