@@ -15,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { redirect } from 'next/navigation';
 import { MusicIcon, MenuIcon } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
@@ -101,7 +102,15 @@ const ArtistCard = ({ name, image, genre }) => {
   );
 };
 
-export default function Home() {
+export default function Home({
+  searchParams,
+}: {
+  searchParams: { code?: string };
+}) {
+  // If there's a reset password code, redirect to reset password page
+  if (searchParams.code) {
+    redirect(`/reset-password?code=${searchParams.code}`);
+  }
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   return (
