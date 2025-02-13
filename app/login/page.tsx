@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { toast } from '@/hooks/use-toast';
+import { Facebook } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -19,7 +20,6 @@ export default function Login() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    //setError("") //This line was causing an error, as 'setError' was not defined.  It's removed.
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -67,12 +67,31 @@ export default function Login() {
     setLoading(false);
   }
 
+  async function handleFacebookLogin() {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'facebook',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+      setLoading(false);
+    }
+  }
+
   return (
     <div className='min-h-screen bg-black flex items-center justify-center px-4'>
       <div className='max-w-md w-full'>
         <div className='text-center mb-8'>
           <h1 className='text-3xl font-bold text-white mb-2'>Ngena (Login)</h1>
-          <p className='text-zinc-400'>Welcome back to eSpazza</p>
+          <p className='text-gray-400'>Welcome back to Xhap</p>
         </div>
 
         {!magicLinkSent ? (
@@ -110,6 +129,19 @@ export default function Login() {
               </Button>
             </form>
 
+            <div className='mt-4'>
+              <Button
+                type='button'
+                variant='outline'
+                className='w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white'
+                onClick={handleFacebookLogin}
+                disabled={loading}
+              >
+                <Facebook className='w-5 h-5' />
+                Continue with Facebook
+              </Button>
+            </div>
+
             <div className='mt-4 text-center'>
               <Button
                 variant='link'
@@ -129,7 +161,7 @@ export default function Login() {
               </Link>
             </div>
 
-            <p className='text-center text-zinc-400 text-sm mt-4'>
+            <p className='text-center text-gray-400 text-sm mt-4'>
               Don't have an account?{' '}
               <Link
                 href='/register'

@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { PasswordField } from '@/components/ui/password-field';
 import Link from 'next/link';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { Facebook } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
@@ -125,7 +127,7 @@ export default function Register() {
         );
       }
 
-      // Redirect to dashboard after successful registration
+      // Redirect to user type selection page after successful registration
       router.push('/user-type-selection');
     } catch (err: any) {
       console.error('Registration error:', err);
@@ -151,14 +153,33 @@ export default function Register() {
     }
   }
 
+  async function handleFacebookSignUp() {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'facebook',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+      setLoading(false);
+    }
+  }
+
   return (
-    <div className='min-h-screen bg-zinc-900 flex items-center justify-center px-4'>
+    <div className='min-h-screen bg-black flex items-center justify-center px-4'>
       <div className='max-w-md w-full'>
         <div className='text-center mb-8'>
           <h1 className='text-3xl font-bold text-white mb-2'>
             Qala Apha (Get Started)
           </h1>
-          <p className='text-zinc-400'>Join the Xhosa Hip Hop community</p>
+          <p className='text-gray-400'>Join the Xhosa Hip Hop community</p>
         </div>
 
         <form onSubmit={handleSubmit} className='space-y-4'>
@@ -221,7 +242,27 @@ export default function Register() {
             {loading ? 'Registering...' : 'Register'}
           </Button>
 
-          <p className='text-center text-zinc-400 text-sm'>
+          <div className='relative my-6'>
+            <div className='absolute inset-0 flex items-center'>
+              <div className='w-full border-t border-gray-700'></div>
+            </div>
+            <div className='relative flex justify-center text-sm'>
+              <span className='px-2 text-gray-400 bg-black'>or</span>
+            </div>
+          </div>
+
+          <Button
+            type='button'
+            variant='outline'
+            className='w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white'
+            onClick={handleFacebookSignUp}
+            disabled={loading}
+          >
+            <Facebook className='w-5 h-5' />
+            Continue with Facebook
+          </Button>
+
+          <p className='text-center text-gray-400 text-sm'>
             Already have an account?{' '}
             <Link href='/login' className='text-red-500 hover:text-red-400'>
               Ngena (Login)
