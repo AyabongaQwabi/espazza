@@ -192,7 +192,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
   }, [audioRef]); //Corrected useEffect dependency
 
   const handleShare = (platform: string) => {
-    const url = `https://xhap.co.za/artist/${username}`; // Replace with actual artist page URL
+    const url = `https://espazza.co.za/artist/${username}`; // Replace with actual artist page URL
     let shareUrl = '';
 
     switch (platform) {

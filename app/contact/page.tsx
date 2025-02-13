@@ -40,7 +40,7 @@ export default function ContactPage() {
                 <MailIcon className='h-6 w-6 text-red-600 mt-1 mr-4' />
                 <div>
                   <h3 className='text-white font-semibold mb-1'>Email</h3>
-                  <p className='text-zinc-400'>info@xhap.co.za</p>
+                  <p className='text-zinc-400'>info@espazza.co.za</p>
                 </div>
               </div>
               <div className='flex items-start'>
