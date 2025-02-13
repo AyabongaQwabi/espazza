@@ -70,8 +70,8 @@ const FeatureCard = ({ title, subtitle, description, image }) => {
         </div>
         <div className='p-6'>
           <h3 className='text-2xl font-bold mb-2'>{title}</h3>
-          <p className='text-gray-300 mb-4'>{subtitle}</p>
-          <p className='text-gray-400'>{description}</p>
+          <p className='text-zinc-300 mb-4'>{subtitle}</p>
+          <p className='text-zinc-400'>{description}</p>
         </div>
       </div>
     </motion.div>
@@ -95,7 +95,7 @@ const ArtistCard = ({ name, image, genre }) => {
       </div>
       <div className='p-4'>
         <h3 className='text-xl font-bold mb-2'>{name}</h3>
-        <p className='text-gray-600'>{genre}</p>
+        <p className='text-zinc-600'>{genre}</p>
       </div>
     </motion.div>
   );
@@ -127,7 +127,7 @@ export default function Home() {
           }}
         >
           {' '}
-          <div className='absolute inset-0 bg-gray-900/90' />
+          <div className='absolute inset-0 bg-zinc-900/90' />
           <div className='relative z-10 text-center'>
             <motion.h1
               className='text-5xl md:text-7xl font-bold mb-4 text-primary'
@@ -166,7 +166,7 @@ export default function Home() {
       <section className='py-16 bg-gradient-to-br from-background to-primary/20'>
         <div className='container mx-auto px-4'>
           <h2 className='text-4xl font-bold mb-12 text-center'>
-            Phakamisa iXhap
+            Welcome to the Spaza Shop
           </h2>
           <div className='flex flex-wrap -mx-4'>
             <FeatureCard
@@ -239,7 +239,7 @@ export default function Home() {
                 <div>
                   <label
                     htmlFor='location'
-                    className='block text-sm font-medium text-gray-700 mb-1'
+                    className='block text-sm font-medium text-zinc-700 mb-1'
                   >
                     Location
                   </label>
@@ -248,7 +248,7 @@ export default function Home() {
                 <div>
                   <label
                     htmlFor='date'
-                    className='block text-sm font-medium text-gray-700 mb-1'
+                    className='block text-sm font-medium text-zinc-700 mb-1'
                   >
                     Date
                   </label>
@@ -256,7 +256,7 @@ export default function Home() {
                     selected={selectedDate}
                     onChange={(date) => setSelectedDate(date)}
                     dateFormat='MMMM d, yyyy'
-                    className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary'
+                    className='w-full px-3 py-2 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary'
                   />
                 </div>
                 <RippleButton className='w-full'>Search Events</RippleButton>

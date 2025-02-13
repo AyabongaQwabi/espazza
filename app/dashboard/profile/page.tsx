@@ -930,7 +930,7 @@ export default function ArtistProfilePage() {
                         </Button>
                         <div>
                           <span className='font-semibold'>{song.title}</span>
-                          <p className='text-sm text-gray-400'>
+                          <p className='text-sm text-zinc-400'>
                             Features: {song.features || 'None'} | Released:{' '}
                             {song.releaseDate || 'N/A'}
                           </p>

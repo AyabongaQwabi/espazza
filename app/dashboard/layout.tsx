@@ -89,7 +89,7 @@ export default function DashboardLayout({
   if (loading) {
     return (
       <div className='min-h-screen bg-black flex items-center justify-center'>
-        <p className='text-gray-400'>Loading...</p>
+        <p className='text-zinc-400'>Loading...</p>
       </div>
     );
   }

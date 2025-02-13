@@ -108,7 +108,7 @@ export default function ArtistsPage() {
             Abaculi
           </motion.h1>
           <motion.p
-            className='text-xl md:text-2xl text-gray-300 mb-8'
+            className='text-xl md:text-2xl text-zinc-300 mb-8'
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.8 }}
@@ -159,7 +159,7 @@ export default function ArtistsPage() {
           transition={{ duration: 0.8, delay: 0.2 }}
         >
           <div className='flex flex-col items-center max-w-md mx-auto'>
-            <div className='flex items-center w-full bg-gray-800 rounded-lg overflow-hidden'>
+            <div className='flex items-center w-full bg-zinc-800 rounded-lg overflow-hidden'>
               <Input
                 type='text'
                 placeholder='Search artists...'
@@ -178,7 +178,7 @@ export default function ArtistsPage() {
               <Button
                 onClick={handleClearSearch}
                 variant='ghost'
-                className='mt-2 text-gray-400 hover:text-white'
+                className='mt-2 text-zinc-400 hover:text-white'
               >
                 <XIcon className='w-4 h-4 mr-2' />
                 Clear Search
@@ -258,7 +258,7 @@ export default function ArtistsPage() {
             <h2 className='text-2xl font-bold text-white mb-4'>
               NgumRhepi? Yiba yiNxalenye!
             </h2>
-            <p className='text-gray-400 mb-6 max-w-lg mx-auto'>
+            <p className='text-zinc-400 mb-6 max-w-lg mx-auto'>
               Are you a Xhosa Hip Hop artist? Join our platform to showcase your
               music and connect with fans.
             </p>

@@ -32,7 +32,7 @@ export default function DashboardBlog() {
   if (loading) {
     return (
       <div className='p-8'>
-        <p className='text-gray-400'>Loading...</p>
+        <p className='text-zinc-400'>Loading...</p>
       </div>
     );
   }
@@ -54,9 +54,9 @@ export default function DashboardBlog() {
             <h2 className='text-xl font-semibold text-white mb-2'>
               {post.title}
             </h2>
-            <p className='text-gray-400 mb-4'>{post.excerpt}</p>
+            <p className='text-zinc-400 mb-4'>{post.excerpt}</p>
             <div className='flex items-center justify-between'>
-              <div className='text-sm text-gray-500'>
+              <div className='text-sm text-zinc-500'>
                 {new Date(post.created_at).toLocaleDateString('en-ZA')}
                 <span className='mx-2'>•</span>
                 {post.published ? (
@@ -76,7 +76,7 @@ export default function DashboardBlog() {
 
         {posts.length === 0 && (
           <div className='text-center py-12'>
-            <p className='text-gray-400 mb-4'>
+            <p className='text-zinc-400 mb-4'>
               Awukabhali amabali (You haven't written any stories yet)
             </p>
             <Button asChild>

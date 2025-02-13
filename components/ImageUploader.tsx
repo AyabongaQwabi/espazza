@@ -119,15 +119,15 @@ export function ImageUploader({
       <div className='flex items-center justify-center w-full'>
         <label
           htmlFor='dropzone-file'
-          className='flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600'
+          className='flex flex-col items-center justify-center w-full h-32 border-2 border-zinc-300 border-dashed rounded-lg cursor-pointer bg-zinc-50 dark:hover:bg-bray-800 dark:bg-zinc-700 hover:bg-zinc-100 dark:border-zinc-600 dark:hover:border-zinc-500 dark:hover:bg-zinc-600'
         >
           <div className='flex flex-col items-center justify-center pt-5 pb-6'>
-            <Upload className='w-8 h-8 mb-4 text-gray-500 dark:text-gray-400' />
-            <p className='mb-2 text-sm text-gray-500 dark:text-gray-400'>
+            <Upload className='w-8 h-8 mb-4 text-zinc-500 dark:text-zinc-400' />
+            <p className='mb-2 text-sm text-zinc-500 dark:text-zinc-400'>
               <span className='font-semibold'>Click to upload</span> or drag and
               drop
             </p>
-            <p className='text-xs text-gray-500 dark:text-gray-400'>
+            <p className='text-xs text-zinc-500 dark:text-zinc-400'>
               PNG, JPG or GIF (MAX. {maxSizeInMB}MB)
             </p>
           </div>
@@ -160,7 +160,7 @@ export function ImageUploader({
             >
               <X className='w-4 h-4' />
             </button>
-            <div className='w-full bg-gray-200 rounded-full h-2.5 mt-2'>
+            <div className='w-full bg-zinc-200 rounded-full h-2.5 mt-2'>
               <div
                 className='bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-in-out'
                 style={{ width: `${image.progress}%` }}

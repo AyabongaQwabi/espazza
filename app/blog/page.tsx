@@ -71,7 +71,7 @@ export default async function BlogPage({
             <h1 className='text-4xl md:text-5xl font-bold text-white mb-4'>
               iiPosts
             </h1>
-            <p className='text-gray-400 text-lg'>
+            <p className='text-zinc-400 text-lg'>
               Stories from the Xhosa Hip Hop Community
             </p>
           </div>
@@ -80,11 +80,11 @@ export default async function BlogPage({
             <h2 className='text-2xl font-semibold text-white mb-4'>
               Oops! Something went wrong.
             </h2>
-            <p className='text-gray-400 mb-8'>
+            <p className='text-zinc-400 mb-8'>
               We're having trouble loading the blog posts. Please try again
               later.
             </p>
-            <p className='text-gray-500'>Error: {error}</p>
+            <p className='text-zinc-500'>Error: {error}</p>
           </div>
         </div>
       </div>
@@ -99,7 +99,7 @@ export default async function BlogPage({
             <h1 className='text-4xl md:text-5xl font-bold text-white mb-4'>
               iiPosts
             </h1>
-            <p className='text-gray-400 text-lg'>
+            <p className='text-zinc-400 text-lg'>
               Stories from the Xhosa Hip Hop Community
             </p>
           </div>
@@ -109,11 +109,11 @@ export default async function BlogPage({
             <h2 className='text-2xl font-semibold text-white mb-4'>
               Amabali Azakufika Kwakamsinya
             </h2>
-            <p className='text-gray-400 mb-8'>
+            <p className='text-zinc-400 mb-8'>
               Stories coming soon! Our writers are working on amazing content
               about Xhosa Hip Hop.
             </p>
-            <p className='text-gray-500'>
+            <p className='text-zinc-500'>
               Check back later for updates or{' '}
               <Link
                 href='/register'
@@ -136,7 +136,7 @@ export default async function BlogPage({
           <h1 className='text-4xl md:text-5xl font-bold text-white mb-4'>
             iiPosts
           </h1>
-          <p className='text-gray-400 text-lg'>
+          <p className='text-zinc-400 text-lg'>
             Stories from the Xhosa Hip Hop Community
           </p>
         </div>
@@ -156,11 +156,11 @@ export default async function BlogPage({
                     {post.title}
                   </h2>
                   {post.excerpt && (
-                    <p className='text-gray-400 mb-4 line-clamp-2'>
+                    <p className='text-zinc-400 mb-4 line-clamp-2'>
                       {post.excerpt}
                     </p>
                   )}
-                  <div className='flex items-center text-sm text-gray-500'>
+                  <div className='flex items-center text-sm text-zinc-500'>
                     <span>
                       {post.profiles?.full_name || post.profiles?.username}
                     </span>

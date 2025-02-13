@@ -158,7 +158,7 @@ export default function Register() {
           <h1 className='text-3xl font-bold text-white mb-2'>
             Qala Apha (Get Started)
           </h1>
-          <p className='text-gray-400'>Join the Xhosa Hip Hop community</p>
+          <p className='text-zinc-400'>Join the Xhosa Hip Hop community</p>
         </div>
 
         <form onSubmit={handleSubmit} className='space-y-4'>
@@ -221,7 +221,7 @@ export default function Register() {
             {loading ? 'Registering...' : 'Register'}
           </Button>
 
-          <p className='text-center text-gray-400 text-sm'>
+          <p className='text-center text-zinc-400 text-sm'>
             Already have an account?{' '}
             <Link href='/login' className='text-red-500 hover:text-red-400'>
               Ngena (Login)

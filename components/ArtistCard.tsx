@@ -227,7 +227,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
   };
 
   return (
-    <div className='max-w-4xl mx-auto p-8 bg-gradient-to-br from-gray-900 to-black rounded-xl shadow-2xl'>
+    <div className='max-w-4xl mx-auto p-8 bg-gradient-to-br from-zinc-900 to-black rounded-xl shadow-2xl'>
       <div className='grid md:grid-cols-3 gap-8'>
         <div className='md:col-span-1'>
           <motion.div
@@ -253,7 +253,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
           <h2 className='text-3xl font-bold text-white mt-4 mb-2'>
             {artist_name}
           </h2>
-          <p className='text-gray-300 text-lg'>@{username}</p>
+          <p className='text-zinc-300 text-lg'>@{username}</p>
 
           <SocialFollowButtons
             artist={{
@@ -291,13 +291,13 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
                   </Button>
                   <Button
                     onClick={() => handleShare('email')}
-                    className='bg-gray-600 hover:bg-gray-700'
+                    className='bg-zinc-600 hover:bg-zinc-700'
                   >
                     <FaEnvelope className='mr-2' /> Email
                   </Button>
                   <Button
                     onClick={() => handleShare('copy')}
-                    className='bg-gray-600 hover:bg-gray-700'
+                    className='bg-zinc-600 hover:bg-zinc-700'
                   >
                     <FaLink className='mr-2' /> Copy Link
                   </Button>
@@ -309,7 +309,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
 
         <div className='md:col-span-2 space-y-6'>
           <div>
-            <p className='text-gray-300 leading-relaxed'>
+            <p className='text-zinc-300 leading-relaxed'>
               {isExpanded ? artist_bio : `${artist_bio?.slice(0, 150)}...`}
             </p>
           </div>
@@ -355,7 +355,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
                 <motion.div
                   key={song.url}
                   whileHover={{ scale: 1.02 }}
-                  className='flex items-center justify-between p-3 bg-gray-800 rounded-lg'
+                  className='flex items-center justify-between p-3 bg-zinc-800 rounded-lg'
                 >
                   <div className='flex items-center space-x-3'>
                     <button
@@ -369,7 +369,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
                     </button>
                     <div>
                       <p className='font-medium text-white'>{song.title}</p>
-                      <p className='text-sm text-gray-400'>
+                      <p className='text-sm text-zinc-400'>
                         Released: {song.releaseDate}
                       </p>
                     </div>
@@ -383,7 +383,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
 
       {isModalOpen && (
         <div className='fixed inset-0 bg-zinc-900 bg-opacity-75 flex items-center justify-center z-50'>
-          <div className='bg-gray-900 p-4 rounded-lg w-full max-w-3xl'>
+          <div className='bg-zinc-900 p-4 rounded-lg w-full max-w-3xl'>
             <iframe
               src={`https://www.youtube.com/embed/${selectedVideo}`}
               className='w-full aspect-video rounded-lg'

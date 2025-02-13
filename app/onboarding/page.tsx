@@ -9,7 +9,9 @@ export default function OnboardingRedirect() {
 
   useEffect(() => {
     async function checkOnboardingStatus() {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         router.push('/login');
         return;
@@ -37,8 +39,8 @@ export default function OnboardingRedirect() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-      <p className="text-gray-400">Loading...</p>
+    <div className='min-h-screen bg-zinc-900 flex items-center justify-center'>
+      <p className='text-zinc-400'>Loading...</p>
     </div>
   );
 }

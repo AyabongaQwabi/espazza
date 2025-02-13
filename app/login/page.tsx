@@ -72,7 +72,7 @@ export default function Login() {
       <div className='max-w-md w-full'>
         <div className='text-center mb-8'>
           <h1 className='text-3xl font-bold text-white mb-2'>Ngena (Login)</h1>
-          <p className='text-gray-400'>Welcome back to Xhap</p>
+          <p className='text-zinc-400'>Welcome back to eSpazza</p>
         </div>
 
         {!magicLinkSent ? (
@@ -129,7 +129,7 @@ export default function Login() {
               </Link>
             </div>
 
-            <p className='text-center text-gray-400 text-sm mt-4'>
+            <p className='text-center text-zinc-400 text-sm mt-4'>
               Don't have an account?{' '}
               <Link
                 href='/register'

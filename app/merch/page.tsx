@@ -165,7 +165,7 @@ export default function MerchPage() {
               </CardHeader>
               <CardContent className='flex-grow'>
                 <CardTitle className='text-lg mb-2'>{product.name}</CardTitle>
-                <p className='text-sm text-gray-500 mb-2'>{product.category}</p>
+                <p className='text-sm text-zinc-500 mb-2'>{product.category}</p>
                 <p className='text-sm line-clamp-3'>{product.description}</p>
               </CardContent>
               <CardFooter className='flex justify-between items-center'>

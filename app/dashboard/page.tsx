@@ -49,7 +49,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className='p-8'>
-        <p className='text-gray-400'>Loading...</p>
+        <p className='text-zinc-400'>Loading...</p>
       </div>
     );
   }
@@ -61,7 +61,7 @@ export default function DashboardPage() {
         <h1 className='text-2xl font-bold text-white mb-2'>
           Molo, {profile?.username || 'Artist'}!
         </h1>
-        <p className='text-gray-400'>Welcome to your XHAPP dashboard</p>
+        <p className='text-zinc-400'>Welcome to your XHAPP dashboard</p>
       </div>
 
       {/* Create Post Button */}
@@ -116,7 +116,7 @@ export default function DashboardPage() {
                 <h3 className='text-lg font-medium text-white mb-2'>
                   {post.title}
                 </h3>
-                <div className='flex items-center text-sm text-gray-400'>
+                <div className='flex items-center text-sm text-zinc-400'>
                   <span>
                     {new Date(post.created_at).toLocaleDateString('en-ZA')}
                   </span>
@@ -135,7 +135,7 @@ export default function DashboardPage() {
 
           {posts.length === 0 && (
             <div className='text-center py-8'>
-              <p className='text-gray-400 mb-4'>No posts yet</p>
+              <p className='text-zinc-400 mb-4'>No posts yet</p>
               <Button asChild>
                 <Link href='/dashboard/blog/new'>Create Your First Post</Link>
               </Button>

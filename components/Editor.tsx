@@ -40,7 +40,7 @@ export function Editor({ value, onChange, onImageUpload }: EditorProps) {
   );
 
   return (
-    <div className='prose prose-invert max-w-none text-gray-800'>
+    <div className='prose prose-invert max-w-none text-zinc-800'>
       <ReactMde
         value={value}
         onChange={onChange}
@@ -62,7 +62,7 @@ export function Editor({ value, onChange, onImageUpload }: EditorProps) {
         type='file'
         ref={inputRef}
         style={{ display: 'none' }}
-        className='text-gray-800'
+        className='text-zinc-800'
         onChange={(e) => {
           if (e.target.files && e.target.files.length > 0) {
             handleImageUpload(new ArrayBuffer(0));

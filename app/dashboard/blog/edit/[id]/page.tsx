@@ -102,7 +102,7 @@ export default function EditBlogPost({ params }: { params: { id: string } }) {
 
       <div className='space-y-6'>
         <div>
-          <label className='block text-sm font-medium text-gray-400 mb-1'>
+          <label className='block text-sm font-medium text-zinc-400 mb-1'>
             Title
           </label>
           <Input
@@ -114,7 +114,7 @@ export default function EditBlogPost({ params }: { params: { id: string } }) {
         </div>
 
         <div>
-          <label className='block text-sm font-medium text-gray-400 mb-1'>
+          <label className='block text-sm font-medium text-zinc-400 mb-1'>
             Excerpt
           </label>
           <Textarea
@@ -126,7 +126,7 @@ export default function EditBlogPost({ params }: { params: { id: string } }) {
         </div>
 
         <div>
-          <label className='block text-sm font-medium text-gray-400 mb-1'>
+          <label className='block text-sm font-medium text-zinc-400 mb-1'>
             Featured Image
           </label>
           <ImageUploader
@@ -143,7 +143,7 @@ export default function EditBlogPost({ params }: { params: { id: string } }) {
         </div>
 
         <div>
-          <label className='block text-sm font-medium text-gray-400 mb-1'>
+          <label className='block text-sm font-medium text-zinc-400 mb-1'>
             Content
           </label>
           <Editor

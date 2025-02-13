@@ -64,7 +64,7 @@ export default async function BlogPost({
           <h1 className='text-4xl font-bold text-white mb-4'>
             Ibali Alifumaneki
           </h1>
-          <p className='text-gray-400 mb-8 max-w-md mx-auto'>
+          <p className='text-zinc-400 mb-8 max-w-md mx-auto'>
             The story you're looking for doesn't exist or has been moved.
           </p>
           <Button asChild>
@@ -103,7 +103,7 @@ export default async function BlogPost({
               <p className='text-white font-medium'>
                 {post.profiles.full_name || post.profiles.username}
               </p>
-              <p className='text-gray-400 text-sm'>
+              <p className='text-zinc-400 text-sm'>
                 {new Date(post.created_at).toLocaleDateString('en-ZA')}
               </p>
             </div>

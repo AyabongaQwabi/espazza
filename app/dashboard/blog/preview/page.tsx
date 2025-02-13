@@ -30,7 +30,7 @@ export default function PreviewBlogPost() {
           className='w-full h-64 object-cover rounded-lg mb-6'
         />
       )}
-      <div className='text-gray-400 mb-6'>{post.excerpt}</div>
+      <div className='text-zinc-400 mb-6'>{post.excerpt}</div>
       <div className='prose prose-invert max-w-none'>
         <ReactMarkdown>{post.content}</ReactMarkdown>
       </div>

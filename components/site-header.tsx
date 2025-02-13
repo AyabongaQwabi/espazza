@@ -42,7 +42,7 @@ export function SiteHeader() {
 
   return (
     <motion.header
-      className='fixed w-full z-50 bg-gray-900/90 backdrop-blur-sm'
+      className='fixed w-full z-50 bg-zinc-900/90 backdrop-blur-sm'
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}

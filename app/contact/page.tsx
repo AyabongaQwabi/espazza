@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 
 export default function ContactPage() {
   return (
-    <div className='min-h-screen bg-gray-900 pt-16'>
+    <div className='min-h-screen bg-zinc-900 pt-16'>
       {/* Hero Section */}
       <div className='relative h-[40vh] flex items-center justify-center'>
         <div
@@ -15,13 +15,13 @@ export default function ContactPage() {
               'url("https://images.unsplash.com/photo-1534536281715-e28d76689b4d?auto=format&fit=crop&q=80")',
           }}
         >
-          <div className='absolute inset-0 bg-gray-900/70' />
+          <div className='absolute inset-0 bg-zinc-900/70' />
         </div>
         <div className='relative z-10 text-center px-4'>
           <h1 className='text-4xl md:text-6xl font-bold text-white mb-4'>
             Qhagamshelana
           </h1>
-          <p className='text-xl text-gray-300 max-w-2xl mx-auto'>
+          <p className='text-xl text-zinc-300 max-w-2xl mx-auto'>
             Get in Touch with XHAPP
           </p>
         </div>
@@ -40,21 +40,21 @@ export default function ContactPage() {
                 <MailIcon className='h-6 w-6 text-red-600 mt-1 mr-4' />
                 <div>
                   <h3 className='text-white font-semibold mb-1'>Email</h3>
-                  <p className='text-gray-400'>info@xhap.co.za</p>
+                  <p className='text-zinc-400'>info@xhap.co.za</p>
                 </div>
               </div>
               <div className='flex items-start'>
                 <PhoneIcon className='h-6 w-6 text-red-600 mt-1 mr-4' />
                 <div>
                   <h3 className='text-white font-semibold mb-1'>Phone</h3>
-                  <p className='text-gray-400'>+27 (0) 21 123 4567</p>
+                  <p className='text-zinc-400'>+27 (0) 21 123 4567</p>
                 </div>
               </div>
               <div className='flex items-start'>
                 <MapPinIcon className='h-6 w-6 text-red-600 mt-1 mr-4' />
                 <div>
                   <h3 className='text-white font-semibold mb-1'>Address</h3>
-                  <p className='text-gray-400'>
+                  <p className='text-zinc-400'>
                     123 Main Street
                     <br />
                     Cape Town
@@ -75,25 +75,25 @@ export default function ContactPage() {
             </h2>
             <form className='space-y-6'>
               <div>
-                <label className='block text-sm font-medium text-gray-400 mb-1'>
+                <label className='block text-sm font-medium text-zinc-400 mb-1'>
                   Igama (Name)
                 </label>
                 <Input className='w-full' />
               </div>
               <div>
-                <label className='block text-sm font-medium text-gray-400 mb-1'>
+                <label className='block text-sm font-medium text-zinc-400 mb-1'>
                   I-imeyile (Email)
                 </label>
                 <Input type='email' className='w-full' />
               </div>
               <div>
-                <label className='block text-sm font-medium text-gray-400 mb-1'>
+                <label className='block text-sm font-medium text-zinc-400 mb-1'>
                   Umxeba (Phone)
                 </label>
                 <Input type='tel' className='w-full' />
               </div>
               <div>
-                <label className='block text-sm font-medium text-gray-400 mb-1'>
+                <label className='block text-sm font-medium text-zinc-400 mb-1'>
                   Umyalezo (Message)
                 </label>
                 <Textarea className='w-full h-32' />

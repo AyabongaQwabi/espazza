@@ -132,7 +132,7 @@ export default function ArtistPage({
             className='rounded-full mx-auto mb-4'
           />
           <h1 className='text-4xl font-bold mb-2'>{artist.artist_name}</h1>
-          <p className='text-lg text-gray-400 mt-2'>
+          <p className='text-lg text-zinc-400 mt-2'>
             <Music className='inline-block mr-2' />
             Hip Hop • <MapPin className='inline-block mr-2' />
             {artist.suburb}
@@ -146,11 +146,11 @@ export default function ArtistPage({
           <Award className='mr-2' />
           About the Artist
         </h2>
-        <p className='text-gray-300 mb-6'>{artist.artist_bio}</p>
+        <p className='text-zinc-300 mb-6'>{artist.artist_bio}</p>
         {/* {artist.achievements && (
           <div>
             <h3 className="text-xl font-semibold mb-2">Achievements</h3>
-            <ul className="list-disc list-inside text-gray-300">
+            <ul className="list-disc list-inside text-zinc-300">
               {artist.achievements.map((achievement, index) => (
                 <li key={index}>{achievement}</li>
               ))}
@@ -265,7 +265,7 @@ export default function ArtistPage({
         <div className='grid md:grid-cols-2 gap-8'>
           <div>
             <h3 className='text-xl font-semibold mb-2'>Book This Artist</h3>
-            <p className='text-gray-300 mb-4'>
+            <p className='text-zinc-300 mb-4'>
               Interested in booking {artist.artist_name} for an event or
               collaboration?
             </p>
@@ -315,9 +315,9 @@ export default function ArtistPage({
             <ul className='space-y-2'>
               <li>No upcoming events</li>
               {/* {artist.upcoming_events.map((event, index) => (
-                <li key={index} className="bg-gray-900 p-4 rounded-lg">
+                <li key={index} className="bg-zinc-900 p-4 rounded-lg">
                   <p className="font-semibold">{event.name}</p>
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-zinc-400">
                     <Calendar className="inline-block mr-2" />
                     {event.date} • <MapPin className="inline-block mr-2" />
                     {event.location}
@@ -338,7 +338,7 @@ export default function ArtistPage({
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {artist.merch.map((item, index) => (
-              <div key={index} className="bg-gray-900 p-4 rounded-lg">
+              <div key={index} className="bg-zinc-900 p-4 rounded-lg">
                 <Image
                   src={item.image || DEFAULT_IMAGE}
                   alt={item.name}
@@ -347,7 +347,7 @@ export default function ArtistPage({
                   className="w-full h-auto mb-2"
                 />
                 <p className="font-semibold">{item.name}</p>
-                <p className="text-sm text-gray-400">{item.price}</p>
+                <p className="text-sm text-zinc-400">{item.price}</p>
                 <Button className="mt-2 w-full">Buy</Button>
               </div>
             ))}
@@ -364,7 +364,7 @@ export default function ArtistPage({
           <div className='flex flex-wrap justify-center gap-4'>
             <Button
               size='lg'
-              className='bg-white text-red-600 hover:bg-gray-100'
+              className='bg-white text-red-600 hover:bg-zinc-100'
             >
               <Calendar className='mr-2' />
               Book This Artist
