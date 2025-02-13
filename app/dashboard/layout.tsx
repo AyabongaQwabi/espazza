@@ -21,6 +21,8 @@ import {
   EditIcon,
   CalendarPlusIcon,
   PackageIcon,
+  UserIcon,
+  MessageSquare,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import type React from 'react'; // Added import for React
@@ -34,8 +36,8 @@ const navItems = [
   { href: '/blog', icon: BookOpenIcon, label: 'Amabali (Blog)' },
   { href: '/contact', icon: MailIcon, label: 'Qhagamshelana (Contact)' },
   { href: '/dashboard', icon: LayoutDashboardIcon, label: 'Dashboard' },
-  { href: '/dashboard/profile', icon: EditIcon, label: 'Manage Profile' },
-  { href: '/dashboard/blog', icon: EditIcon, label: 'Manage Posts' },
+  { href: '/dashboard/profile', icon: UserIcon, label: 'Edit Profile' },
+  { href: '/dashboard/blog', icon: EditIcon, label: 'Manage Stories' },
   { href: '/dashboard/events', icon: CalendarPlusIcon, label: 'Manage Events' },
   {
     href: '/dashboard/merchandise',
@@ -43,6 +45,7 @@ const navItems = [
     label: 'Manage Merchandise',
   },
   { href: '/dashboard/bookings', icon: BookmarkIcon, label: 'Manage Bookings' },
+  { href: '/dashboard/messages', icon: MessageSquare, label: 'Messages' }, // Added new nav item
 ];
 
 export default function DashboardLayout({
@@ -78,9 +81,9 @@ export default function DashboardLayout({
       if (
         profileData &&
         !profileData.registration_complete &&
-        pathname !== '/onboarding/basic-info'
+        pathname !== '/dashboard/onboarding'
       ) {
-        router.push('/onboarding');
+        router.push('/dashboard/onboarding');
       }
     }
     checkAuth();
@@ -89,7 +92,7 @@ export default function DashboardLayout({
   if (loading) {
     return (
       <div className='min-h-screen bg-black flex items-center justify-center'>
-        <p className='text-zinc-400'>Loading...</p>
+        <p className='text-gray-400'>Loading...</p>
       </div>
     );
   }
@@ -129,7 +132,7 @@ export default function DashboardLayout({
           <div className='flex items-center space-x-2'>
             <MusicIcon className='h-6 w-6 text-red-600' />
             <span className='text-2xl font-bold text-white'>
-              <span className='text-red-600'>eSpazza</span>
+              X<span className='text-red-600'>HAP</span>
             </span>
           </div>
         </div>
@@ -163,7 +166,7 @@ export default function DashboardLayout({
           <div className='flex items-center space-x-2'>
             <MusicIcon className='h-6 w-6 text-red-600' />
             <span className='text-2xl font-bold text-white'>
-              <span className='text-red-600'>eSpazza</span>
+              X<span className='text-red-600'>HAP</span>
             </span>
           </div>
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>

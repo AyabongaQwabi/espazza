@@ -127,13 +127,35 @@ export default function BookingsPage() {
   async function handleSendMessage() {
     if (!selectedBooking || !message.trim()) return;
 
-    // In a real application, you would send this message to your backend
-    // and store it in a messages table. For now, we'll just show a toast.
-    toast({
-      title: 'Message Sent',
-      description: `Your message has been sent to ${selectedBooking.organizer_name}.`,
-    });
-    setMessage('');
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { error } = await supabase.from('messages').insert({
+        sender_id: user.id,
+        recipient_id: selectedBooking.organizer_id,
+        content: message,
+        booking_id: selectedBooking.id,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: 'Message sent successfully',
+      });
+      setMessage('');
+      setSelectedBooking(null);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to send message. Please try again.',
+        variant: 'destructive',
+      });
+    }
   }
 
   if (loading) {
