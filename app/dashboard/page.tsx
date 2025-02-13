@@ -61,7 +61,7 @@ export default function DashboardPage() {
         <h1 className='text-2xl font-bold text-white mb-2'>
           Molo, {profile?.username || 'Artist'}!
         </h1>
-        <p className='text-zinc-400'>Welcome to your XHAPP dashboard</p>
+        <p className='text-zinc-400'>Welcome to your eSpazza dashboard</p>
       </div>
 
       {/* Create Post Button */}

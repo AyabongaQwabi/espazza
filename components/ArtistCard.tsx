@@ -203,11 +203,11 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
         break;
       case 'whatsapp':
         shareUrl = `https://wa.me/?text=${encodeURIComponent(
-          `Check out ${artist_name} on XHAPP: ${url}`
+          `Check out ${artist_name} on eSpazza: ${url}`
         )}`;
         break;
       case 'email':
-        shareUrl = `mailto:?subject=Check out ${artist_name} on XHAPP&body=I thought you might be interested in this artist: ${url}`;
+        shareUrl = `mailto:?subject=Check out ${artist_name} on eSpazza&body=I thought you might be interested in this artist: ${url}`;
         break;
       case 'copy':
         navigator.clipboard.writeText(url).then(() => {

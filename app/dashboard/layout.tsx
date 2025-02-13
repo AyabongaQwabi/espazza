@@ -129,7 +129,7 @@ export default function DashboardLayout({
           <div className='flex items-center space-x-2'>
             <MusicIcon className='h-6 w-6 text-red-600' />
             <span className='text-2xl font-bold text-white'>
-              X<span className='text-red-600'>HAP</span>
+              <span className='text-red-600'>eSpazza</span>
             </span>
           </div>
         </div>
@@ -163,7 +163,7 @@ export default function DashboardLayout({
           <div className='flex items-center space-x-2'>
             <MusicIcon className='h-6 w-6 text-red-600' />
             <span className='text-2xl font-bold text-white'>
-              X<span className='text-red-600'>HAP</span>
+              <span className='text-red-600'>eSpazza</span>
             </span>
           </div>
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
