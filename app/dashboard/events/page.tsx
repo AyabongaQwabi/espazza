@@ -61,8 +61,8 @@ export default function EventsManagement() {
   const [searchVenue, setSearchVenue] = useState('');
   const [searchTown, setSearchTown] = useState('');
   const [paymentLink, setPaymentLink] = useState('');
-  const [eventId, setEventId] = useState(short.new());
-  const [transactionId, setTransactionId] = useState(short.new());
+  const [eventId, setEventId] = useState(short.generate());
+  const [transactionId, setTransactionId] = useState(short.generate());
   const router = useRouter();
 
   useEffect(() => {
