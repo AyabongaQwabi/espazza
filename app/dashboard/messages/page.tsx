@@ -8,7 +8,14 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import Image from 'next/image';
-import { Send, Search } from 'lucide-react';
+import { Send, Search, Plus } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 type Message = {
   id: string;
@@ -36,6 +43,13 @@ type Conversation = {
   unreadCount: number;
 };
 
+type User = {
+  id: string;
+  username: string;
+  artist_name: string;
+  profile_image_url: string;
+};
+
 export default function MessagesPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -43,6 +57,8 @@ export default function MessagesPage() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<User[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const supabase = createClientComponentClient();
 
@@ -60,7 +76,7 @@ export default function MessagesPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase]); // Added supabase to the dependency array
+  }, []);
 
   useEffect(() => {
     if (selectedUserId) {
@@ -83,7 +99,7 @@ export default function MessagesPage() {
     ) {
       setMessages((prev) => [...prev, payload.new]);
     }
-    fetchConversations(); // Refresh conversations list
+    fetchConversations();
   };
 
   async function fetchConversations() {
@@ -141,6 +157,32 @@ export default function MessagesPage() {
         variant: 'destructive',
       });
     }
+  }
+
+  async function searchUsers(query: string) {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, username, artist_name, profile_image_url')
+      .or(`username.ilike.%${query}%,artist_name.ilike.%${query}%`)
+      .limit(5);
+
+    if (error) {
+      console.error('Error searching users:', error);
+      return;
+    }
+
+    setSearchResults(data || []);
+  }
+
+  async function startNewConversation(userId: string) {
+    setSelectedUserId(userId);
+    setIsSearching(false);
+    setSearchResults([]);
   }
 
   async function fetchMessages(userId: string) {
@@ -217,14 +259,59 @@ export default function MessagesPage() {
       {/* Conversations Sidebar */}
       <div className='w-80 border-r border-zinc-800 flex flex-col'>
         <div className='p-4 border-b border-zinc-800'>
-          <div className='relative'>
-            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400' />
-            <Input
-              placeholder='Search conversations...'
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className='pl-10'
-            />
+          <div className='flex items-center justify-between mb-4'>
+            <div className='relative flex-1 mr-2'>
+              <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400' />
+              <Input
+                placeholder='Search conversations...'
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className='pl-10'
+              />
+            </div>
+            <Dialog open={isSearching} onOpenChange={setIsSearching}>
+              <DialogTrigger asChild>
+                <Button variant='outline' size='icon'>
+                  <Plus className='h-4 w-4' />
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>New Conversation</DialogTitle>
+                </DialogHeader>
+                <div className='mt-4'>
+                  <Input
+                    placeholder='Search for users...'
+                    onChange={(e) => searchUsers(e.target.value)}
+                  />
+                  <ScrollArea className='h-[300px] mt-4'>
+                    {searchResults.map((user) => (
+                      <div
+                        key={user.id}
+                        className='flex items-center p-2 hover:bg-zinc-800 cursor-pointer rounded-lg'
+                        onClick={() => startNewConversation(user.id)}
+                      >
+                        <Image
+                          src={user.profile_image_url || '/placeholder.svg'}
+                          alt={user.username}
+                          width={40}
+                          height={40}
+                          className='rounded-full'
+                        />
+                        <div className='ml-3'>
+                          <p className='font-medium text-white'>
+                            {user.artist_name || user.username}
+                          </p>
+                          <p className='text-sm text-zinc-400'>
+                            @{user.username}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </ScrollArea>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
         <ScrollArea className='flex-1'>

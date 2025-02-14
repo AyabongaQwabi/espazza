@@ -1,31 +1,24 @@
-'use client';
-
 import { motion } from 'framer-motion';
 import { DivideIcon as LucideIcon } from 'lucide-react';
 
 interface BounceIconProps {
-  icon: LucideIcon;
-  className?: string;
-  delay?: number;
+  Icon: LucideIcon;
+  size?: number;
+  color?: string;
 }
 
-export function BounceIcon({ 
-  icon: Icon, 
-  className = "", 
-  delay = 0 
-}: BounceIconProps) {
+export function BounceIcon({ Icon, size = 24, color = 'currentColor' }: BounceIconProps) {
   return (
     <motion.div
       initial={{ y: 0 }}
-      animate={{ y: [-5, 0, -5] }}
+      animate={{ y: [-2, 2, -2] }}
       transition={{
         duration: 2,
         repeat: Infinity,
-        delay
+        ease: 'easeInOut',
       }}
-      className={className}
     >
-      <Icon />
+      <Icon size={size} className={`text-${color}`} />
     </motion.div>
   );
 }

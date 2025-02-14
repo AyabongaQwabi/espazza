@@ -1,6 +1,5 @@
 'use client';
 
-import type React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import {
   FaPlay,
@@ -12,6 +11,7 @@ import {
   FaWhatsapp,
   FaEnvelope,
   FaLink,
+  FaHeart,
 } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/dialog';
 import Link from 'next/link';
 import { isNil, isEmpty } from 'ramda';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 function getYouTubeVideoId(url: string) {
   const regex = /(?:youtube\.com\/(?:.*v=|.*\/)|youtu\.be\/)([^?&]+)/;
@@ -94,10 +95,17 @@ interface ArtistCardProps {
   artist_name: string;
   username: string;
   profile_image_url: string;
-  artist_artist_bio: string;
+  artist_bio: string;
   youtube_links: string[];
   gallery_images: string[];
   demo_songs: Song[];
+  instagram_url?: string;
+  facebook_url?: string;
+  twitter_url?: string;
+  whatsapp_number?: string;
+  likes_count: number;
+  user_id?: string;
+  onLike?: () => void;
 }
 
 const ArtistCard: React.FC<ArtistCardProps> = ({
@@ -112,15 +120,71 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
   facebook_url,
   twitter_url,
   whatsapp_number,
+  likes_count,
+  user_id,
+  onLike,
 }) => {
   const songs = demo_songs?.map((i) => JSON.parse(i));
-  console.log('songs', songs, username, artist_name);
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const supabase = createClientComponentClient();
+
+  useEffect(() => {
+    if (user_id) {
+      checkIfLiked();
+    }
+  }, [user_id]);
+
+  async function checkIfLiked() {
+    const { data } = await supabase
+      .from('artist_likes')
+      .select('*')
+      .eq('user_id', user_id)
+      .eq('artist_id', username)
+      .single();
+
+    setIsLiked(!!data);
+  }
+
+  async function handleLike() {
+    if (!user_id) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please log in to like artists',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      if (isLiked) {
+        await supabase
+          .from('artist_likes')
+          .delete()
+          .eq('user_id', user_id)
+          .eq('artist_id', username);
+      } else {
+        await supabase
+          .from('artist_likes')
+          .insert([{ user_id, artist_id: username }]);
+      }
+
+      setIsLiked(!isLiked);
+      if (onLike) onLike();
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to like artist. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  }
 
   const handleImageError = (
     e: React.SyntheticEvent<HTMLImageElement, Event>
@@ -189,10 +253,10 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
         audio.removeEventListener('canplaythrough', handleCanPlayThrough);
       };
     }
-  }, [audioRef]); //Corrected useEffect dependency
+  }, [audioRef]);
 
   const handleShare = (platform: string) => {
-    const url = `https://espazza.co.za/artist/${username}`; // Replace with actual artist page URL
+    const url = `https://espazza.co.za/artist/${username}`;
     let shareUrl = '';
 
     switch (platform) {
@@ -225,7 +289,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
 
     setIsShareModalOpen(false);
   };
-
+  console.log('likes_count', likes_count);
   return (
     <div className='max-w-4xl mx-auto p-8 bg-gradient-to-br from-zinc-900 to-black rounded-xl shadow-2xl'>
       <div className='grid md:grid-cols-3 gap-8'>
@@ -239,7 +303,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
               src={
                 exists(profile_image_url)
                   ? profile_image_url
-                  : exists(gallery_images[0])
+                  : exists(gallery_images) && exists(gallery_images[0])
                   ? gallery_images[0]
                   : '/placeholder.svg'
               }
@@ -254,6 +318,18 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
             {artist_name}
           </h2>
           <p className='text-zinc-300 text-lg'>@{username}</p>
+
+          <div className='flex items-center mt-4 space-x-4'>
+            <Button
+              variant='ghost'
+              size='sm'
+              onClick={handleLike}
+              className={isLiked ? 'text-red-500' : ''}
+            >
+              <FaHeart className='mr-2' />
+              {likes_count.length} {likes_count === 1 ? 'Like' : 'Likes'}
+            </Button>
+          </div>
 
           <SocialFollowButtons
             artist={{

@@ -7,7 +7,7 @@
       - `username` (text, unique)
       - `email` (text)
       - `full_name` (text, nullable)
-      - `avatar_url` (text, nullable)
+      - `profile_image_url` (text, nullable)
       - `created_at` (timestamptz)
       - `updated_at` (timestamptz)
 
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   username text UNIQUE NOT NULL,
   email text NOT NULL,
   full_name text,
-  avatar_url text,
+  profile_image_url text,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );

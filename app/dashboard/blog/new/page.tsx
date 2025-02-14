@@ -17,6 +17,8 @@ export default function NewBlogPost() {
   const [content, setContent] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [featuredImage, setFeaturedImage] = useState('');
+  const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [audioFile, setAudioFile] = useState<File | null>(null);
 
   async function handleSaveAsDraft() {
     await handleSubmit(false);
@@ -35,6 +37,21 @@ export default function NewBlogPost() {
       } = await supabase.auth.getUser();
       if (!user) throw new Error('Please login to create a post');
 
+      let audioUrl = '';
+      if (audioFile) {
+        const { data: audioData, error: audioError } = await supabase.storage
+          .from('blog-audio')
+          .upload(`${Date.now()}-${audioFile.name}`, audioFile);
+
+        if (audioError) throw audioError;
+
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from('blog-audio').getPublicUrl(audioData.path);
+
+        audioUrl = publicUrl;
+      }
+
       const slug = title
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
@@ -48,6 +65,8 @@ export default function NewBlogPost() {
             content,
             excerpt,
             featured_image: featuredImage,
+            youtube_url: youtubeUrl,
+            audio_url: audioUrl,
             slug,
             author_id: user.id,
             published: publish,
@@ -77,19 +96,23 @@ export default function NewBlogPost() {
   }
 
   function handlePreview() {
-    // Store the current post data in localStorage
     localStorage.setItem(
       'previewPost',
-      JSON.stringify({ title, content, excerpt, featuredImage })
+      JSON.stringify({
+        title,
+        content,
+        excerpt,
+        featuredImage,
+        youtubeUrl,
+      })
     );
-    // Open the preview page in a new tab
     window.open('/dashboard/blog/preview', '_blank');
   }
 
   return (
     <div className='p-8 max-w-4xl mx-auto'>
       <h1 className='text-2xl font-bold text-white mb-8'>
-        Bhala Ibali Elitsha (Write New Story)
+        Bhala iPost Entsha (Write New Post)
       </h1>
 
       <div className='space-y-6'>
@@ -125,13 +148,29 @@ export default function NewBlogPost() {
             onUploadComplete={(urls) => setFeaturedImage(urls[0])}
             maxSizeInMB={5}
           />
-          {featuredImage && (
-            <img
-              src={featuredImage || '/placeholder.svg'}
-              alt='Featured'
-              className='mt-2 max-h-40 rounded'
-            />
-          )}
+        </div>
+
+        <div>
+          <label className='block text-sm font-medium text-zinc-400 mb-1'>
+            YouTube URL
+          </label>
+          <Input
+            type='url'
+            value={youtubeUrl}
+            onChange={(e) => setYoutubeUrl(e.target.value)}
+            placeholder='https://youtube.com/watch?v=...'
+          />
+        </div>
+
+        <div>
+          <label className='block text-sm font-medium text-zinc-400 mb-1'>
+            Audio File (MP3)
+          </label>
+          <Input
+            type='file'
+            accept='audio/mpeg'
+            onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
+          />
         </div>
 
         <div>

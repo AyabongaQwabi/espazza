@@ -41,10 +41,10 @@ export default function DashboardBlog() {
     <div className='p-8'>
       <div className='flex justify-between items-center mb-8'>
         <h1 className='text-2xl font-bold text-white'>
-          Amabali Am (My Stories)
+          iiPosts zam (My Posts)
         </h1>
         <Button asChild>
-          <Link href='/dashboard/blog/new'>Bhala Ibali (Write Story)</Link>
+          <Link href='/dashboard/blog/new'>Bhala iPost (Write a Post)</Link>
         </Button>
       </div>
 

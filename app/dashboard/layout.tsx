@@ -25,7 +25,8 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import type React from 'react'; // Added import for React
+import { ScrollArea } from '@/components/ui/scroll-area';
+import type React from 'react';
 
 const navItems = [
   { href: '/', icon: HomeIcon, label: 'Ikhaya (Home)' },
@@ -37,7 +38,7 @@ const navItems = [
   { href: '/contact', icon: MailIcon, label: 'Qhagamshelana (Contact)' },
   { href: '/dashboard', icon: LayoutDashboardIcon, label: 'Dashboard' },
   { href: '/dashboard/profile', icon: UserIcon, label: 'Edit Profile' },
-  { href: '/dashboard/blog', icon: EditIcon, label: 'Manage Stories' },
+  { href: '/dashboard/blog', icon: EditIcon, label: 'Manage Posts' },
   { href: '/dashboard/events', icon: CalendarPlusIcon, label: 'Manage Events' },
   {
     href: '/dashboard/merchandise',
@@ -45,7 +46,7 @@ const navItems = [
     label: 'Manage Merchandise',
   },
   { href: '/dashboard/bookings', icon: BookmarkIcon, label: 'Manage Bookings' },
-  { href: '/dashboard/messages', icon: MessageSquare, label: 'Messages' }, // Added new nav item
+  { href: '/dashboard/messages', icon: MessageSquare, label: 'Messages' },
 ];
 
 export default function DashboardLayout({
@@ -130,21 +131,17 @@ export default function DashboardLayout({
       <div className='hidden md:flex w-64 bg-zinc-900 border-r border-zinc-800 flex-col'>
         <div className='p-6'>
           <div className='flex items-center space-x-2'>
-            <MusicIcon className='h-6 w-6 text-red-600' />
-            <span className='text-2xl font-bold text-white'>
-              X<span className='text-red-600'>HAP</span>
-            </span>
+            <img src='/logo.png' className='w-10 h-10 rounded-full' />
+            <span className='text-2xl font-bold text-white'>eSpazza</span>
           </div>
         </div>
-        <nav className='flex-1 px-4 py-6'>
-          <ul className='space-y-2'>
+        <ScrollArea className='flex-1 px-4 py-6'>
+          <nav className='space-y-2'>
             {navItems.slice(7).map((item) => (
-              <li key={item.href}>
-                <NavLink {...item} />
-              </li>
+              <NavLink key={item.href} {...item} />
             ))}
-          </ul>
-        </nav>
+          </nav>
+        </ScrollArea>
         <div className='p-4 border-t border-zinc-800'>
           <Button
             variant='ghost'
@@ -164,10 +161,8 @@ export default function DashboardLayout({
       <div className='md:hidden fixed top-0 left-0 right-0 z-50 bg-zinc-900 border-b border-zinc-800 p-4'>
         <div className='flex items-center justify-between'>
           <div className='flex items-center space-x-2'>
-            <MusicIcon className='h-6 w-6 text-red-600' />
-            <span className='text-2xl font-bold text-white'>
-              X<span className='text-red-600'>HAP</span>
-            </span>
+            <img src='/logo.png' className='w-10 h-10 rounded-full' />
+            <span className='text-2xl font-bold text-white'>eSpazza</span>
           </div>
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
@@ -179,43 +174,41 @@ export default function DashboardLayout({
               side='left'
               className='w-[300px] sm:w-[400px] bg-zinc-900'
             >
-              <nav className='flex flex-col h-full'>
-                <div className='flex-1 py-6'>
-                  <h2 className='text-lg font-semibold text-white mb-2 px-4'>
-                    Main Pages
-                  </h2>
-                  <ul className='space-y-2 mb-6'>
-                    {navItems.slice(0, 7).map((item) => (
-                      <li key={item.href}>
-                        <NavLink {...item} />
-                      </li>
-                    ))}
-                  </ul>
-                  <h2 className='text-lg font-semibold text-white mb-2 px-4'>
-                    Dashboard
-                  </h2>
-                  <ul className='space-y-2'>
-                    {navItems.slice(7).map((item) => (
-                      <li key={item.href}>
-                        <NavLink {...item} />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className='p-4 border-t border-zinc-800'>
-                  <Button
-                    variant='ghost'
-                    className='w-full justify-start text-red-500 hover:text-red-400 hover:bg-red-500/10'
-                    onClick={async () => {
-                      await supabase.auth.signOut();
-                      router.push('/login');
-                    }}
-                  >
-                    <LogOutIcon className='h-4 w-4 mr-2' />
-                    Phuma (Logout)
-                  </Button>
-                </div>
-              </nav>
+              <ScrollArea className='h-full'>
+                <nav className='flex flex-col py-6'>
+                  <div className='flex-1'>
+                    <h2 className='text-lg font-semibold text-white mb-2 px-4'>
+                      Main Pages
+                    </h2>
+                    <div className='space-y-2 mb-6'>
+                      {navItems.slice(0, 7).map((item) => (
+                        <NavLink key={item.href} {...item} />
+                      ))}
+                    </div>
+                    <h2 className='text-lg font-semibold text-white mb-2 px-4'>
+                      Dashboard
+                    </h2>
+                    <div className='space-y-2'>
+                      {navItems.slice(7).map((item) => (
+                        <NavLink key={item.href} {...item} />
+                      ))}
+                    </div>
+                  </div>
+                  <div className='p-4 border-t border-zinc-800 mt-6'>
+                    <Button
+                      variant='ghost'
+                      className='w-full justify-start text-red-500 hover:text-red-400 hover:bg-red-500/10'
+                      onClick={async () => {
+                        await supabase.auth.signOut();
+                        router.push('/login');
+                      }}
+                    >
+                      <LogOutIcon className='h-4 w-4 mr-2' />
+                      Phuma (Logout)
+                    </Button>
+                  </div>
+                </nav>
+              </ScrollArea>
             </SheetContent>
           </Sheet>
         </div>

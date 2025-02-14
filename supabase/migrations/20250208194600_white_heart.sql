@@ -21,7 +21,7 @@ CREATE TABLE profiles (
   username text UNIQUE NOT NULL,
   email text NOT NULL,
   full_name text,
-  avatar_url text,
+  profile_image_url text,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now(),
   CONSTRAINT username_length CHECK (char_length(username) >= 3 AND char_length(username) <= 30),

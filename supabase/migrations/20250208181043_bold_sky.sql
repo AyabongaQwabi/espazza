@@ -7,7 +7,7 @@
       - `username` (text, unique)
       - `full_name` (text)
       - `bio` (text)
-      - `avatar_url` (text)
+      - `profile_image_url` (text)
       - `website` (text)
       - `created_at` (timestamp)
       - `updated_at` (timestamp)
@@ -32,7 +32,7 @@ CREATE TABLE profiles (
   username text UNIQUE NOT NULL,
   full_name text,
   bio text,
-  avatar_url text,
+  profile_image_url text,
   website text,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
