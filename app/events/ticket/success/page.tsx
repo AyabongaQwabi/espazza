@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import confetti from 'canvas-confetti';
-
-export default function TicketPurchaseSuccess() {
+import { Suspense } from 'react';
+function TicketPurchaseSuccess() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClientComponentClient();
@@ -103,3 +103,11 @@ export default function TicketPurchaseSuccess() {
     </div>
   );
 }
+
+export default () => {
+  return (
+    <Suspense fallback={<Loader2 className='h-12 w-12 text-white' />}>
+      <TicketPurchaseSuccess />
+    </Suspense>
+  );
+};
