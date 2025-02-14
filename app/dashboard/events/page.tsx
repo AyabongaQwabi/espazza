@@ -34,6 +34,10 @@ import { format } from 'date-fns';
 import { Plus, Search } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import type React from 'react';
+import crypto from 'crypto-js';
+import url from 'url';
+import axios from 'axios';
+import short from 'short-uuid';
 
 export default function EventsManagement() {
   const [events, setEvents] = useState([]);
@@ -45,6 +49,7 @@ export default function EventsManagement() {
     town_id: '',
     date: new Date(),
     budget: '',
+    status: 'unpaid',
     ticketPrice: '',
     maxAttendees: '',
     coverImage: '',
@@ -55,6 +60,9 @@ export default function EventsManagement() {
   const [newTown, setNewTown] = useState({ name: '', province: '' });
   const [searchVenue, setSearchVenue] = useState('');
   const [searchTown, setSearchTown] = useState('');
+  const [paymentLink, setPaymentLink] = useState('');
+  const [eventId, setEventId] = useState(short.new());
+  const [transactionId, setTransactionId] = useState(short.new());
   const router = useRouter();
 
   useEffect(() => {
@@ -149,6 +157,7 @@ export default function EventsManagement() {
         maxAttendees: '',
         coverImage: '',
       });
+      window.location.href = paymentLink;
       toast({
         title: 'Success',
         description: 'Event created successfully!',
@@ -217,6 +226,86 @@ export default function EventsManagement() {
   if (loading) {
     return <div className='p-4'>Loading events...</div>;
   }
+
+  const apiEndPoint = 'https://api.ikhokha.com/public-api/v1/api/payment';
+  const ApplicationId = 'IKF3SALX1F82BZ7IT6914BEGBEWQ55Y7';
+  const ApplicationKey = 'DaNAI4IUXeHdZiliiDnrxwWYPm2AE1Al';
+
+  const request = {
+    entityID: eventId,
+    externalEntityID: eventId,
+    amount: 100,
+    currency: 'ZAR',
+    requesterUrl: 'https://xhapp.co.za/dashboard/events',
+    description: 'Event Creation',
+    paymentReference: eventId,
+    mode: 'sandbox', // or live
+    externalTransactionID: eventId,
+    urls: {
+      callbackUrl: 'https://xhap.co.za/dashboard/events/callback',
+      successPageUrl: 'https://xhap.co.za/dashboard/events/success',
+      failurePageUrl: 'https://xhap.co.za/dashboard/events/failure',
+      cancelUrl: 'https://xhap.co.za/dashboard/events/cancel',
+    },
+  };
+
+  function createPayloadToSign(urlPath, body = '') {
+    try {
+      const parsedUrl = new url.parse(urlPath);
+      const basePath = parsedUrl.path;
+
+      if (!basePath) throw new Error('No basePath in url');
+      const payload = basePath + body;
+      return jsStringEscape(payload);
+    } catch (error) {
+      console.log('Error on createPayloadToSign' + ' ' + error);
+    }
+  }
+
+  function jsStringEscape(str) {
+    try {
+      return str.replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
+    } catch (error) {
+      console.log('Error on jsStringEscape' + ' ' + error);
+    }
+  }
+
+  async function createPaymentLink() {
+    let reqestbody = JSON.stringify(request);
+
+    if (reqestbody.startsWith("'") && reqestbody.endsWith("'")) {
+      reqestbody = reqestbody.substring(1, reqestbody.length - 1);
+    }
+
+    const payloadToSign = createPayloadToSign(apiEndPoint, reqestbody);
+    console.log(payloadToSign);
+    const signature = crypto
+      .HmacSHA256(payloadToSign, ApplicationKey.trim())
+      .toString(crypto.enc.Hex);
+
+    try {
+      const response = await axios.post(`${apiEndPoint}`, request, {
+        headers: {
+          Accept: 'application/json',
+          'IK-APPID': ApplicationId.trim(),
+          'IK-SIGN': signature.trim(),
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.log('Error on  create Payment link' + ' ' + error);
+    }
+  }
+
+  useEffect(() => {
+    createPaymentLink()
+      .then((paymentLink) => {
+        console.log('Payment Link:', paymentLink);
+      })
+      .catch((error) => {
+        console.error('Error occurred:', error);
+      });
+  }, []);
 
   return (
     <div className='p-4'>
