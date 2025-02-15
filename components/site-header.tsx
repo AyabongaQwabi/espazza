@@ -1,7 +1,6 @@
 'use client';
-import Link from 'next/link';
-import GoogleAdSense from './GoogleAdsense';
 
+import Link from 'next/link';
 import {
   HomeIcon,
   InfoIcon,
@@ -92,7 +91,6 @@ export function SiteHeader() {
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <GoogleAdSense />
       <div className='max-w-7xl mx-auto px-4 h-16 flex items-center justify-between'>
         <Link href='/' className='flex items-center space-x-2 hover-lift'>
           <img src='/logo.png' className='w-10 h-10 rounded-full' />
