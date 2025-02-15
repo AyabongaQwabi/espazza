@@ -27,6 +27,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type React from 'react';
+import { Analytics } from '@vercel/analytics/next';
 
 const navItems = [
   { href: '/', icon: HomeIcon, label: 'Ikhaya (Home)' },
@@ -218,6 +219,7 @@ export default function DashboardLayout({
       <div className='flex-1 overflow-auto'>
         <div className='md:hidden h-16' /> {/* Spacer for mobile header */}
         {children}
+        <Analytics />
       </div>
     </div>
   );

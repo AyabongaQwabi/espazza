@@ -8,17 +8,24 @@ import { SupabaseProvider } from '@/components/providers/supabase-provider';
 import AnimationWrapper from '@/components/AnimationWrapper';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import Script from 'next/script';
+import { Analytics } from '@vercel/analytics/next';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://espazza.co.za'),
+  metadataBase: new URL('https://xhap.co.za'),
   title: {
     default: 'eSpazza - Xhosa Hip Hop Spaza Shop',
     template: '%s | eSpazza',
   },
   description: 'Iplatform yabaRhepi baseKhaya - The home of Xhosa Hip Hop',
-  keywords: ['Xhosa Hip Hop', 'South African Music', 'Hip Hop', 'Rap', 'Music Platform'],
+  keywords: [
+    'Xhosa Hip Hop',
+    'South African Music',
+    'Hip Hop',
+    'Rap',
+    'Music Platform',
+  ],
   authors: [{ name: 'eSpazza Team' }],
   creator: 'eSpazza',
   publisher: 'eSpazza',
@@ -29,18 +36,18 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: '/logo.png',
-    apple: '/logo-apple.png',
+    apple: '/logo.png',
   },
   openGraph: {
     type: 'website',
     locale: 'en_ZA',
-    url: 'https://espazza.co.za',
+    url: 'https://xhap.co.za',
     title: 'eSpazza - Xhosa Hip Hop Spaza Shop',
     description: 'The home of Xhosa Hip Hop',
     siteName: 'eSpazza',
     images: [
       {
-        url: '/og-image.jpg',
+        url: '/logo.png',
         width: 1200,
         height: 630,
         alt: 'eSpazza - Xhosa Hip Hop Platform',
@@ -51,8 +58,8 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'eSpazza - Xhosa Hip Hop Spaza Shop',
     description: 'The home of Xhosa Hip Hop',
-    images: ['/twitter-image.jpg'],
-    creator: '@espazza',
+    images: ['/logo.jpg'],
+    creator: '@xhap',
   },
   manifest: '/manifest.json',
   themeColor: '#dc2626',
@@ -89,11 +96,11 @@ export default function RootLayout({
               '@context': 'https://schema.org',
               '@type': 'WebSite',
               name: 'eSpazza',
-              url: 'https://espazza.co.za',
+              url: 'https://xhap.co.za',
               description: 'The home of Xhosa Hip Hop',
               potentialAction: {
                 '@type': 'SearchAction',
-                target: 'https://espazza.co.za/search?q={search_term_string}',
+                target: 'https://xhap.co.za/search?q={search_term_string}',
                 'query-input': 'required name=search_term_string',
               },
             }),
@@ -102,14 +109,15 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <ErrorBoundary>
-          <a href="#main-content" className="skip-to-content">
+          <a href='#main-content' className='skip-to-content'>
             Skip to main content
           </a>
           <SupabaseProvider>
             <div className='flex flex-col min-h-screen bg-gradient-to-br from-zinc-900 to-zinc-800'>
               <SiteHeader />
-              <main id="main-content" className="flex-1">
+              <main id='main-content' className='flex-1'>
                 <AnimationWrapper>{children}</AnimationWrapper>
+                <Analytics />
               </main>
               <SiteFooter />
             </div>
