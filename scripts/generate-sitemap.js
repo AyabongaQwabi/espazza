@@ -4,7 +4,7 @@ require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 
 async function generateSitemap() {
-  const baseUrl = 'https://espazza.co.za';
+  const baseUrl = 'https://xhap.co.za';
 
   // Initialize Supabase client
   const supabase = createClient(
