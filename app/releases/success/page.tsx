@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 import { Suspense } from 'react';
 
-function SuccessPage() {
+export default function SuccessPage() {
   const [purchaseDetails, setPurchaseDetails] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
@@ -22,7 +22,7 @@ function SuccessPage() {
 
       const { data, error } = await supabase
         .from('purchases')
-        .select('*')
+        .select('*, release:releases (*)')
         .eq('transaction_id', transactionId)
         .single();
 
