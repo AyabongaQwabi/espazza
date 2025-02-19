@@ -4,8 +4,10 @@ import { useSearchParams } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { Loader2 } from 'lucide-react';
+import { Suspense } from 'react';
 
-export default function FailurePage() {
+function FailurePage() {
   const searchParams = useSearchParams();
   const errorMessage = searchParams.get('error') || 'An unknown error occurred';
 
@@ -33,3 +35,11 @@ export default function FailurePage() {
     </div>
   );
 }
+
+export default () => {
+  return (
+    <Suspense fallback={<Loader2 className='h-12 w-12 text-white' />}>
+      <FailurePage />
+    </Suspense>
+  );
+};
