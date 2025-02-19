@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Ticket, Calendar } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { SongPreview } from '@/components/SongPreview';
 
 export default function TicketsPage() {
   const [releases, setReleases] = useState([]);
@@ -40,6 +41,7 @@ export default function TicketsPage() {
         release: releases (
           title,
           description,
+          cover_image_url,
           tracks,
           profiles (
           username,
@@ -70,6 +72,8 @@ export default function TicketsPage() {
     return <div className='p-8'>Loading releases...</div>;
   }
 
+  console.log(releases);
+
   return (
     <div className='p-8'>
       <h1 className='text-2xl font-bold mb-8'>My Purchased Tracks</h1>
@@ -90,7 +94,7 @@ export default function TicketsPage() {
             <Card key={r.release.id}>
               <CardHeader>
                 <CardTitle className='flex items-center justify-between'>
-                  <span>{r.release.title}</span>
+                  <span>{r.release.profiles.artist_name}</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -129,6 +133,13 @@ export default function TicketsPage() {
                     <p className='my-3'>
                       Featuring: {track.featured_artists.join(', ')}
                     </p>
+                    <br />
+                    <SongPreview
+                      url={track.url}
+                      coverArt={r.release.cover_image_url}
+                      title={track.title}
+                      artist={r.release.profiles.artist_name}
+                    />
                     <br />
                     <a href={track.url} download={`${track.title}.mp3`}>
                       <Button>Download</Button>
