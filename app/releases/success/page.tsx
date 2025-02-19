@@ -30,6 +30,16 @@ function SuccessPage() {
         console.error('Error fetching purchase details:', error);
       } else {
         setPurchaseDetails(data);
+
+        // Update the purchase status to 'complete'
+        const { error: updateError } = await supabase
+          .from('purchases')
+          .update({ status: 'complete' })
+          .eq('transaction_id', transactionId);
+
+        if (updateError) {
+          console.error('Error updating purchase status:', updateError);
+        }
       }
       setLoading(false);
     }

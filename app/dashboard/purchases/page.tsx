@@ -52,8 +52,9 @@ export default function TicketsPage() {
       `
       )
       .eq('purchase_type', 'release')
+      .eq('status', 'complete')
       .order('created_at', { ascending: false });
-    console.log('user', user.id);
+    console.log('user', user.id, user);
     if (error) {
       console.error('Error fetching releases:', error);
       toast({
