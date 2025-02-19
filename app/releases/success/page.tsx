@@ -22,7 +22,7 @@ function SuccessPage() {
 
       const { data, error } = await supabase
         .from('purchases')
-        .select('*, release:releases(*)')
+        .select('*')
         .eq('transaction_id', transactionId)
         .single();
 
