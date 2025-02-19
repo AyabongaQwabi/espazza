@@ -39,12 +39,18 @@ const navItems = [
   { href: '/contact', icon: MailIcon, label: 'Qhagamshelana (Contact)' },
   { href: '/dashboard', icon: LayoutDashboardIcon, label: 'Dashboard' },
   { href: '/dashboard/profile', icon: UserIcon, label: 'Edit Profile' },
+  { href: '/dashboard/promotion', icon: UserIcon, label: 'Tracks' },
   { href: '/dashboard/blog', icon: EditIcon, label: 'Manage Posts' },
   { href: '/dashboard/events', icon: CalendarPlusIcon, label: 'Manage Events' },
   {
     href: '/dashboard/merchandise',
     icon: PackageIcon,
     label: 'Manage Merchandise',
+  },
+  {
+    href: '/dashboard/orders',
+    icon: PackageIcon,
+    label: 'Orders',
   },
   { href: '/dashboard/bookings', icon: BookmarkIcon, label: 'Manage Bookings' },
   { href: '/dashboard/messages', icon: MessageSquare, label: 'Messages' },

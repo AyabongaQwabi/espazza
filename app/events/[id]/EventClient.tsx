@@ -269,7 +269,7 @@ export default function EventClient({ eventId }: { eventId: string }) {
     setPurchaseLoading(true);
 
     try {
-      const transactionId = short.generate();
+      const transactionId = short().toUUID(short.generate());
       const totalPrice = event.ticket_price + SURCHARGE;
 
       const request = {
@@ -277,16 +277,16 @@ export default function EventClient({ eventId }: { eventId: string }) {
         externalEntityID: event.id,
         amount: totalPrice * 100, // Convert to cents
         currency: 'ZAR',
-        requesterUrl: 'https://xhapp.co.za/events',
+        requesterUrl: 'https://espazza.co.za/events',
         description: `Ticket for ${event.name} (includes R${SURCHARGE} service fee)`,
         paymentReference: event.id,
         mode: 'sandbox',
         externalTransactionID: transactionId,
         urls: {
-          callbackUrl: 'https://xhapp.co.za/events/ticket/callback',
-          successPageUrl: `https://xhapp.co.za/events/ticket/success?transaction_id=${transactionId}`,
-          failurePageUrl: 'https://xhapp.co.za/events/ticket/failure',
-          cancelUrl: 'https://xhapp.co.za/events/ticket/cancel',
+          callbackUrl: 'https://espazza.co.za/api/payment/callback',
+          successPageUrl: `https://espazza.co.za/events/ticket/success?transaction_id=${transactionId}`,
+          failurePageUrl: 'https://espazza.co.za/failure',
+          cancelUrl: 'https://espazza.co.za/cancel',
         },
       };
 
@@ -300,11 +300,19 @@ export default function EventClient({ eventId }: { eventId: string }) {
       console.log('Payment API response:', response.data);
       if (response.data?.paylinkUrl) {
         // Create ticket record
+        console.log('Creating ticket record...', {
+          event_id: event.id,
+          buyer_id: user.id,
+          quantity: 1,
+          total_price: totalPrice,
+          transaction_id: transactionId,
+          status: 'pending',
+        });
         const { error: ticketError } = await supabase
           .from('event_tickets')
           .insert([
             {
-              event_id: event.id,
+              event_id: event.id, // Explicitly specify the table
               buyer_id: user.id,
               quantity: 1,
               total_price: totalPrice,

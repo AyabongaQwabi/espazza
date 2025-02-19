@@ -63,6 +63,13 @@ function Navigation({ className = '' }: { className?: string }) {
           <span>iMerch</span>
         </Link>
         <Link
+          href='/releases'
+          className='hover:text-red-500 transition-colors flex items-center gap-2'
+        >
+          <HoverIcon Icon={ShoppingBagIcon} size={16} />
+          <span>iiTracks</span>
+        </Link>
+        <Link
           href='/events'
           className='hover:text-red-500 transition-colors flex items-center gap-2'
         >
@@ -189,6 +196,13 @@ export function SiteHeader() {
                 >
                   <HoverIcon Icon={ShoppingBagIcon} size={16} />
                   <span>iMerch</span>
+                </Link>
+                <Link
+                  href='/releases'
+                  className='hover:text-red-500 transition-colors flex items-center gap-2'
+                >
+                  <HoverIcon Icon={ShoppingBagIcon} size={16} />
+                  <span>iiTracks</span>
                 </Link>
                 <Link
                   href='/events'

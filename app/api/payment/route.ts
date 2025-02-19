@@ -11,11 +11,11 @@ function createPayloadToSign(urlPath: string, body = '') {
   try {
     const parsedUrl = url.parse(urlPath);
     const basePath = parsedUrl.path;
-    if (!basePath) throw new Error('No basePath in url');
+    if (!basePath) throw new Error('No basePath in URL');
     const payload = basePath + body;
     return jsStringEscape(payload);
   } catch (error) {
-    console.error('Error on createPayloadToSign:', error);
+    console.error('Error in createPayloadToSign:', error);
     return '';
   }
 }
@@ -24,7 +24,7 @@ function jsStringEscape(str: string) {
   try {
     return str.replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
   } catch (error) {
-    console.error('Error on jsStringEscape:', error);
+    console.error('Error in jsStringEscape:', error);
     return '';
   }
 }
@@ -32,29 +32,30 @@ function jsStringEscape(str: string) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    console.log('\n\nPayment API request body:', body);
+
     const requestBody = JSON.stringify(body);
-    console.log('\n\nPayment API request:', requestBody);
     const payloadToSign = createPayloadToSign(API_ENDPOINT, requestBody);
-    console.log('\n\nPayload to sign:', payloadToSign);
-    console.log('\n\nApplication key:', APPLICATION_KEY, APPLICATION_ID);
     const signature = crypto
       .HmacSHA256(payloadToSign, APPLICATION_KEY)
       .toString(crypto.enc.Hex);
+
+    console.log('\n\nPayload to sign:', payloadToSign);
     console.log('\n\nSignature:', signature);
 
     const response = await axios.post(API_ENDPOINT, body, {
       headers: {
         Accept: 'application/json',
+        'Content-Type': 'application/json', // ✅ Ensure proper Content-Type
         'IK-APPID': APPLICATION_ID,
         'IK-SIGN': signature,
       },
     });
 
     console.log('Payment API response:', response.data);
-
     return NextResponse.json(response.data);
-  } catch (error) {
-    console.error('Payment API error:', error);
+  } catch (error: any) {
+    console.error('Payment API error:', error.response?.data || error.message);
     return NextResponse.json(
       { error: 'Failed to process payment request' },
       { status: 500 }
