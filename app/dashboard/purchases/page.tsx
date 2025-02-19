@@ -18,7 +18,7 @@ import { Ticket, Calendar } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 export default function TicketsPage() {
-  const [tickets, setTickets] = useState([]);
+  const [releases, setReleases] = useState([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClientComponentClient();
 
@@ -32,107 +32,109 @@ export default function TicketsPage() {
     } = await supabase.auth.getUser();
     if (!user) return;
 
-    const { data: tickets, error } = await supabase
-      .from('event_tickets')
+    const { data: releases, error } = await supabase
+      .from('purchases')
       .select(
         `
         *,
-        events (
-          name,
-          date,
-          venue,
-          cover_image,
-          organizer_id,
-          profiles:organizer_id (username, artist_name)
+        release: releases (
+          title,
+          description,
+          tracks,
+          profiles (
+          username,
+          artist_name
+          )
         )
+        
       `
       )
-      .eq('buyer_id', user.id)
+      .eq('user_id', user.id)
+      .eq('purchase_type', 'release')
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching tickets:', error);
+      console.error('Error fetching releases:', error);
       toast({
         title: 'Error',
-        description: 'Failed to load tickets',
+        description: 'Failed to load releases',
         variant: 'destructive',
       });
     } else {
-      setTickets(tickets || []);
+      setReleases(releases || []);
     }
     setLoading(false);
   }
 
   if (loading) {
-    return <div className='p-8'>Loading tickets...</div>;
+    return <div className='p-8'>Loading releases...</div>;
   }
 
   return (
     <div className='p-8'>
-      <h1 className='text-2xl font-bold mb-8'>My Tickets</h1>
+      <h1 className='text-2xl font-bold mb-8'>My Purchased Tracks</h1>
 
-      {tickets.length === 0 ? (
+      {releases.length === 0 ? (
         <Card>
           <CardContent className='flex flex-col items-center justify-center py-12'>
             <Ticket className='h-12 w-12 text-zinc-400 mb-4' />
-            <p className='text-zinc-400 text-lg mb-4'>No tickets yet</p>
+            <p className='text-zinc-400 text-lg mb-4'>No releases yet</p>
             <Button asChild>
-              <a href='/events'>Browse Events</a>
+              <a href='/tracks'>Browse Tracks</a>
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className='space-y-6'>
-          {tickets.map((ticket) => (
-            <Card key={ticket.id}>
+        <div className='space-y-6 grid grid-cols-2 gap-4'>
+          {releases.map((r) => (
+            <Card key={r.release.id}>
               <CardHeader>
                 <CardTitle className='flex items-center justify-between'>
-                  <span>{ticket.events.name}</span>
-                  <Badge
-                    variant={
-                      ticket.status === 'confirmed'
-                        ? 'default'
-                        : ticket.status === 'pending'
-                        ? 'secondary'
-                        : 'destructive'
-                    }
-                  >
-                    {ticket.status}
-                  </Badge>
+                  <span>{r.release.title}</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className='flex items-center gap-4 mb-4'>
                   <div className='w-24 h-24 relative'>
                     <img
-                      src={ticket.events.cover_image || '/placeholder.svg'}
-                      alt={ticket.events.name}
+                      src={r.release.cover_image_url || '/placeholder.svg'}
+                      alt={r.release.title}
                       className='w-full h-full object-cover rounded'
                     />
                   </div>
-                  <div>
+                  {/* <div>
                     <div className='flex items-center text-sm text-zinc-400 mb-2'>
                       <Calendar className='w-4 h-4 mr-2' />
-                      {format(new Date(ticket.events.date), 'PPP')}
+                      {format(new Date(release.events.date), 'PPP')}
                     </div>
                     <p className='text-sm text-zinc-400'>
                       Organized by:{' '}
-                      {ticket.events.profiles.artist_name ||
-                        ticket.events.profiles.username}
+                      {release.events.profiles.artist_name ||
+                        release.events.profiles.username}
                     </p>
                     <p className='text-sm text-zinc-400'>
-                      Quantity: {ticket.quantity}
+                      Quantity: {release.quantity}
                     </p>
                     <p className='text-sm text-zinc-400'>
-                      Total: R{ticket.total_price}
+                      Total: R{release.total_price}
                     </p>
-                  </div>
+                  </div> */}
                 </div>
-                {ticket.status === 'confirmed' && (
-                  <div className='mt-4'>
-                    <Button className='w-full'>Download Ticket</Button>
+                {r.release.tracks.map((track) => (
+                  <div
+                    key={track.id}
+                    className='flex-col gap-2 space-y-3 items-center gap-4'
+                  >
+                    <p className='my-3'>Name: {track.title}</p>
+                    <p className='my-3'>
+                      Featuring: {track.featured_artists.join(', ')}
+                    </p>
+                    <br />
+                    <a href={track.url} download={`${track.title}.mp3`}>
+                      <Button>Download</Button>
+                    </a>
                   </div>
-                )}
+                ))}
               </CardContent>
             </Card>
           ))}
