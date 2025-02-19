@@ -6,8 +6,10 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { Loader2 } from 'lucide-react';
+import { Suspense } from 'react';
 
-export default function SuccessPage() {
+function SuccessPage() {
   const [purchaseDetails, setPurchaseDetails] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
@@ -81,3 +83,11 @@ export default function SuccessPage() {
     </div>
   );
 }
+
+export default () => {
+  return (
+    <Suspense fallback={<Loader2 className='h-12 w-12 text-white' />}>
+      <SuccessPage />
+    </Suspense>
+  );
+};
