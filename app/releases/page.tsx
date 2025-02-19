@@ -229,7 +229,7 @@ export default function ReleasesPage() {
 
         if (purchaseError) throw purchaseError;
         console.log('TRANSACTION ID', transactionId);
-        //window.location.href = response.data.paylinkUrl;
+        window.location.href = response.data.paylinkUrl;
       } else {
         throw new Error('No payment URL received');
       }
