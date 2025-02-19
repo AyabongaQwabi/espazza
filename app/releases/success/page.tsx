@@ -25,7 +25,7 @@ export default function SuccessPage() {
         .select('*, release:releases (*)')
         .eq('transaction_id', transactionId)
         .single();
-
+      console.log('data', data);
       if (error) {
         console.error('Error fetching purchase details:', error);
       } else {
