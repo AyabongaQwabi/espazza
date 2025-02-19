@@ -188,7 +188,7 @@ export default function ReleasesPage() {
       const request = {
         entityID: release.id,
         externalEntityID: release.id,
-        amount: totalPrice * 100, // Convert to cents
+        amount: totalPrice, // Convert to cents
         currency: 'ZAR',
         requesterUrl: 'https://espazza.co.za/releases',
         description: `Purchase of ${release.title} (includes R${SURCHARGE} service fee)`,
