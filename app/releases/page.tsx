@@ -183,8 +183,9 @@ export default function ReleasesPage() {
 
     try {
       const transactionId = short().toUUID(short.generate());
-      const totalPrice = calculateReleasePrice(release.tracks) + SURCHARGE;
-
+      const totalPrice =
+        (parseFloat(calculateReleasePrice(release.tracks)) + SURCHARGE) * 100;
+      console.log('totalPrice', totalPrice);
       const request = {
         entityID: release.id,
         externalEntityID: release.id,
