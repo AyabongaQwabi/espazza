@@ -99,13 +99,13 @@ export default function TicketsPage() {
               </CardHeader>
               <CardContent>
                 <div className='flex items-center gap-4 mb-4'>
-                  <div className='w-24 h-24 relative'>
+                  {/* <div className='w-24 h-24 relative'>
                     <img
                       src={r.release.cover_image_url || '/placeholder.svg'}
                       alt={r.release.title}
                       className='w-full h-full object-cover rounded'
                     />
-                  </div>
+                  </div> */}
                   {/* <div>
                     <div className='flex items-center text-sm text-zinc-400 mb-2'>
                       <Calendar className='w-4 h-4 mr-2' />
@@ -129,11 +129,6 @@ export default function TicketsPage() {
                     key={track.id}
                     className='flex-col gap-2 space-y-3 items-center gap-4'
                   >
-                    <p className='my-3'>Name: {track.title}</p>
-                    <p className='my-3'>
-                      Featuring: {track.featured_artists.join(', ')}
-                    </p>
-                    <br />
                     <SongPreview
                       url={track.url}
                       coverArt={r.release.cover_image_url}
