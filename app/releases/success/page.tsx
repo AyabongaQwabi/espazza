@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 import { Suspense } from 'react';
 
-export default function SuccessPage() {
+function SuccessPage() {
   const [purchaseDetails, setPurchaseDetails] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
