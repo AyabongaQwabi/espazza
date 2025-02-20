@@ -83,12 +83,16 @@ export default function ArtistsPage({
       .from('profiles')
       .select(
         `
-        *,
-        south_african_towns(*)
-      `,
+    *,
+    south_african_towns(*)
+    `,
         { count: 'exact' }
       )
-      .eq('user_type', 'artist');
+      .eq('user_type', 'artist')
+      .not('artist_name', 'is', null) // Exclude null values
+      .not('artist_name', 'eq', '')
+      .not('artist_bio', 'eq', '')
+      .not('artist_bio', 'eq', null);
 
     if (selectedProvince) {
       query = query.eq('province', selectedProvince);
