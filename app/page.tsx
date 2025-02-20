@@ -134,7 +134,7 @@ export default function Home({
           }}
         >
           <div className='absolute inset-0 bg-gradient-to-br from-zinc-900/90 to-zinc-900/70' />
-          <div className='relative z-10 text-center px-4 flex-col items-center justify-center space-x-4 text-center'>
+          <div className='relative z-10 text-center max-w-5xl px-4 flex-col items-center justify-center space-x-4 text-center'>
             <motion.h1
               className='text-5xl md:text-7xl font-bold mb-4 text-white '
               initial={{ opacity: 0, y: -50 }}
@@ -146,7 +146,7 @@ export default function Home({
                 className='inline-flex items-center w-72 h-72 rounded-full'
               />
               <div className=''>
-                <span>Discover. Book. Support. Elevate</span>
+                <span>Shop, Read and Support</span>
               </div>
             </motion.h1>
             <motion.p
@@ -155,7 +155,8 @@ export default function Home({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              Discover and connect with amazing artists all on one platform.
+              Discover and connect with amazing artists across Xhosa Trap, Xhosa
+              Drill, Xhosa RnB, Xhosa Hip Hop, Amapiano, Gqom, and Sijokojoko.{' '}
             </motion.p>
             <div className='space-x-4'>
               <Button asChild size='lg' className='bg-red-600 hover:bg-red-700'>
@@ -173,7 +174,6 @@ export default function Home({
           </div>
         </motion.div>
       </section>
-
       {/* Features Section */}
       <section className='py-16 bg-gradient-to-br from-zinc-900 to-zinc-800'>
         <div className='container mx-auto px-4'>
@@ -213,8 +213,45 @@ export default function Home({
             />
           </div>
         </div>
+      </section>{' '}
+      <section className='py-16 bg-gradient-to-br from-zinc-800 to-zinc-900'>
+        <div className='container mx-auto px-4'>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className='text-center mb-12'
+          >
+            <h2 className='text-4xl font-bold text-white mb-4'>
+              Iindidi Zomculo Ezamkelekileyo
+            </h2>
+            <p className='text-zinc-400 max-w-2xl mx-auto'>
+              eSpazza welcomes artists from all Xhosa music genres
+            </p>
+          </motion.div>
+          <div className='flex flex-wrap justify-center gap-4'>
+            {[
+              'Xhosa Trap',
+              'Xhosa Drill',
+              'Xhosa RnB',
+              'Xhosa Hip Hop',
+              'Amapiano',
+              'Gqom',
+              'Sijokojoko',
+            ].map((genre) => (
+              <motion.div
+                key={genre}
+                className='bg-red-600 text-white px-4 py-2 rounded-full text-sm font-semibold'
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {genre}
+              </motion.div>
+            ))}
+          </div>
+        </div>
       </section>
-
       {/* Featured Artists Section */}
       <section className='py-16 bg-gradient-to-br from-zinc-800 to-zinc-900'>
         <div className='container mx-auto px-4'>
@@ -254,7 +291,6 @@ export default function Home({
           </motion.div>
         </div>
       </section>
-
       {/* Event Search Section */}
       <section className='py-16 bg-gradient-to-br from-zinc-900 to-zinc-800'>
         <div className='container mx-auto px-4'>
