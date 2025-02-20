@@ -26,7 +26,22 @@ import {
 } from 'react-share';
 import { FacebookIcon, TwitterIcon, LinkedinIcon } from 'react-share';
 
-export default function BlogPostClient({ post }) {
+interface RelatedArticle {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+}
+
+interface BlogPostClientProps {
+  post: any;
+  relatedArticles: RelatedArticle[];
+}
+
+export default function BlogPostClient({
+  post,
+  relatedArticles,
+}: BlogPostClientProps) {
   const [likes, setLikes] = useState<any[]>([]);
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState('');
@@ -352,22 +367,20 @@ export default function BlogPostClient({ post }) {
             Related Articles
           </h3>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-            {/* Add related articles here */}
-            {/* Example: */}
-            <div className='bg-zinc-900 rounded-xl p-6'>
-              <h4 className='text-xl font-bold text-white mb-2'>
-                Another Great Article
-              </h4>
-              <p className='text-zinc-400 mb-4'>
-                A brief excerpt of the related article...
-              </p>
-              <Link
-                href='/blog/another-article'
-                className='text-red-600 hover:text-red-500'
-              >
-                Read More
-              </Link>
-            </div>
+            {relatedArticles.map((article) => (
+              <div key={article.id} className='bg-zinc-900 rounded-xl p-6'>
+                <h4 className='text-xl font-bold text-white mb-2'>
+                  {article.title}
+                </h4>
+                <p className='text-zinc-400 mb-4'>{article.excerpt}</p>
+                <Link
+                  href={`/blog/${article.slug}`}
+                  className='text-red-600 hover:text-red-500'
+                >
+                  Read More
+                </Link>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -395,7 +408,7 @@ export default function BlogPostClient({ post }) {
 
           {/* Disqus Comments */}
           <DiscussionEmbed
-            shortname='espazza'
+            shortname='your-disqus-shortname'
             config={{
               url: window.location.href,
               identifier: post.id,

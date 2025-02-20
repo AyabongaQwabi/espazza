@@ -49,5 +49,18 @@ export default async function BlogPost({ params }) {
     return <div>Post not found</div>;
   }
 
-  return <BlogPostClient post={post} />;
+  // Fetch 2 random related articles
+  const { data: relatedArticles } = await supabase
+    .from('blog_posts')
+    .select('id, title, slug, excerpt')
+    .neq('id', post.id)
+    .eq('published', true)
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  const randomRelatedArticles = relatedArticles
+    ? relatedArticles.sort(() => 0.5 - Math.random()).slice(0, 2)
+    : [];
+
+  return <BlogPostClient post={post} relatedArticles={randomRelatedArticles} />;
 }
