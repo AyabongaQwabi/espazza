@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "generate-sitemap": "node scripts/generate-sitemap.js"
+    "generate-sitemap": "node scripts/generate-sitemap.js",
+    "postbuild": "npm run generate-sitemap"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",

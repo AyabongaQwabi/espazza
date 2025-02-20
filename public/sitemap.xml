@@ -2,449 +2,673 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
     <url>
-      <loc>https://xhap.co.za/page.tsx</loc>
-      <lastmod>2025-02-15T00:07:40.240Z</lastmod>
+      <loc>https://espazza.co.za/page.tsx</loc>
+      <lastmod>2025-02-20T18:51:42.931Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/user-type-selection</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/user-type-selection</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/terms</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/terms</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/reset-password</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/reset-password</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/register</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/releases</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/privacy</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/releases/success</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/onboarding</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/releases/*</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/onboarding/merchandiser</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/register</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/onboarding/media</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/privacy</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/onboarding/fan</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/onboarding</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/onboarding/events_manager</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/onboarding/merchandiser</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/onboarding/blogger</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/onboarding/media</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/onboarding/basic-info</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/onboarding/fan</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/merch</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/onboarding/events_manager</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/login</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/onboarding/blogger</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/forgot-password</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/onboarding/basic-info</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/events</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/merch</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/events/ticket/success</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/login</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/events/ticket/failure</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/forgot-password</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/events/ticket/cancel</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/failure</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/events/ticket/callback</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/events</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/events/*</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/events/ticket/success</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/contact</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/events/ticket/failure</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/blog</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/events/ticket/cancel</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/blog/*</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/events/ticket/callback</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/events/*</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/*</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/contact</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/about</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/cancel</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/blog/king-donna-vuka</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/blog</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/blog/drip</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/blog/*</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/blog/keegan-idyan-bhvda-shermxn-they-working-on-their-joint-ep-which-will-be-dropped-this-year</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/artists</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/blog/new-xhosa-rapper</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/artists/*</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/blog/its-discipline-time</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/about</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/blog/i-have-released-new-song-featuring-emiky-rsa</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/blog/king-donna-vuka</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/blog/single-10-out-of-10</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/blog/drip</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/blog/true-dedication-always-pays</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/blog/keegan-idyan-bhvda-shermxn-they-working-on-their-joint-ep-which-will-be-dropped-this-year</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/blog/abekho-challenge</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/blog/new-xhosa-rapper</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/TixDelta</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/blog/its-discipline-time</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/Sniperrsa</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/blog/i-have-released-new-song-featuring-emiky-rsa</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/Ayla_Loc</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/blog/single-10-out-of-10</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/Kiing-Beezy5219</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/blog/true-dedication-always-pays</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/QuoteT</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/blog/abekho-challenge</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/KiingMaya</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/blog/hip-hop-soldier</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/Tsembeyi</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/blog/hosh-nonke</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/Lweija</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/artists/Ayla_Loc</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/Alter_kay_sa</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/artists/Surfics</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/SimGee</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/artists/Sniperrsa</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/Jayelkaynokhala</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/artists/Kiing-Beezy5219</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/lisohockysumie</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/artists/QuoteT</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/Kaytee</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/artists/KiingMaya</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/Mavuso</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/artists/Tsembeyi</loc>
+      <lastmod>2025-02-20T18:51:42.932Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/Bossbaby_Umphathi</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/artists/Lweija</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/Keeganidyan04</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/artists/Alter_kay_sa</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/A_Plus</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/artists/SimGee</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/Sliding_Door</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/artists/Jayelkaynokhala</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/Asive_Da_Prayer_240</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/artists/lisohockysumie</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/TarGee</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/artists/Kaytee</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/Jay_Ntonifa</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/artists/Mavuso</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/Picvsso03</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/artists/risky_thetrillest</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/MasterOne</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/artists/Bossbaby_Umphathi</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/OG_simjo</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/artists/Keeganidyan04</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/Rime</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/artists/A_Plus</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/artists/MntanoMxhosa</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/artists/Sliding_Door</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
   
     <url>
-      <loc>https://xhap.co.za/events/cace0318-2a03-4152-a344-11eaaf56a586</loc>
-      <lastmod>2025-02-15T00:07:40.241Z</lastmod>
+      <loc>https://espazza.co.za/artists/Asive_Da_Prayer_240</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/TarGee</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/Jay_Ntonifa</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/Picvsso03</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/MasterOne</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/P-something</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/OG_simjo</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/Rime</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/MntanoMxhosa</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/Nathi</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/Coolers</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/Ungamhoyi</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/Syda_ZA</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/beyondgospel</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/TixDelta</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/J1K</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/Zowa</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/KingKayMarly</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/buntu_dila</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/Yann_Sky</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/Flippa</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/Ekamireni1</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/Godfry</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/LegendMusicEc95</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/Slimtasha</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/Rahz_sg</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/AV-Mavelasi</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/Carter4Real043</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/_ceekayp</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/MsistosCsa</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/Phara_leSpaza</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/artists/Skiinny_Yung_Leo</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://espazza.co.za/events/cace0318-2a03-4152-a344-11eaaf56a586</loc>
+      <lastmod>2025-02-20T18:51:42.933Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
