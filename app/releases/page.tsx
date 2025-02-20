@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -40,6 +40,7 @@ import {
   Headphones,
   ChevronLeft,
   ChevronRight,
+  Share2,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -98,23 +99,7 @@ export default function ReleasesPage() {
   const router = useRouter();
   const supabase = createClientComponentClient();
 
-  useEffect(() => {
-    fetchReleases();
-  }, [searchTerm, genreFilter, priceRange, sortOption, currentPage]);
-
-  useEffect(() => {
-    fetchGenres();
-    checkUser();
-  }, []);
-
-  async function checkUser() {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    setCurrentUser(user);
-  }
-
-  async function fetchReleases() {
+  const fetchReleases = useCallback(async () => {
     setLoading(true);
     let query = supabase.from('releases').select(
       `
@@ -160,6 +145,22 @@ export default function ReleasesPage() {
       setTotalPages(Math.ceil((count || 0) / ITEMS_PER_PAGE));
     }
     setLoading(false);
+  }, [supabase, searchTerm, genreFilter, priceRange, sortOption, currentPage]);
+
+  useEffect(() => {
+    fetchReleases();
+  }, [fetchReleases]);
+
+  useEffect(() => {
+    fetchGenres();
+    checkUser();
+  }, []);
+
+  async function checkUser() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    setCurrentUser(user);
   }
 
   async function fetchGenres() {
@@ -247,6 +248,15 @@ export default function ReleasesPage() {
       console.log('Payment API response:', response.data);
       if (response.data?.paylinkUrl) {
         // Create purchase record
+        console.log({
+          release_id: release.id,
+          user_id: currentUser.id,
+          amount: totalPrice,
+          transaction_id: transactionId,
+          purchase_date: new Date(),
+          status: 'pending',
+          purchase_type: 'release',
+        });
         const { error: purchaseError } = await supabase
           .from('purchases')
           .insert([
@@ -324,11 +334,41 @@ export default function ReleasesPage() {
     window.scrollTo(0, 0);
   };
 
+  const handleShare = (release: Release) => {
+    if (navigator.share) {
+      navigator
+        .share({
+          title: release.title,
+          text: `Check out ${release.title} by ${
+            release.record_owner.artist_name || release.record_owner.username
+          }`,
+          url: `${window.location.origin}/releases/${release.id}`,
+        })
+        .then(() => {
+          console.log('Shared successfully');
+        })
+        .catch((error) => {
+          console.error('Error sharing:', error);
+        });
+    } else {
+      // Fallback for browsers that don't support navigator.share
+      const shareUrl = `${window.location.origin}/release/${release.id}`;
+      window.open(
+        `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+          `Check out ${release.title} by ${
+            release.record_owner.artist_name || release.record_owner.username
+          }`
+        )}&url=${encodeURIComponent(shareUrl)}`,
+        '_blank'
+      );
+    }
+  };
+
   return (
     <div className='flex flex-col min-h-screen'>
       <div className='relative h-[50vh] overflow-hidden'>
         <Image
-          src='/ndlu.jpg'
+          src='https://source.unsplash.com/random/?music,concert'
           alt='Music Hero'
           layout='fill'
           objectFit='cover'
@@ -450,12 +490,17 @@ export default function ReleasesPage() {
                       alt={release.title}
                       width={300}
                       height={300}
-                      className='w-full h-80 object-cover rounded-t-lg'
+                      className='w-full h-64 object-cover rounded-t-lg'
                     />
                   </CardHeader>
                   <CardContent className='flex-grow'>
                     <CardTitle className='text-xl mb-2'>
-                      {release.title}
+                      <Link
+                        href={`/release/${release.id}`}
+                        className='hover:underline'
+                      >
+                        {release.title}
+                      </Link>
                     </CardTitle>
                     <div className='flex items-center text-sm text-gray-500 mb-2'>
                       <User className='w-4 h-4 mr-1' />
@@ -521,12 +566,22 @@ export default function ReleasesPage() {
                     <span className='text-lg font-bold'>
                       R{calculateReleasePrice(release.tracks).toFixed(2)}
                     </span>
-                    <Button
-                      onClick={() => handlePurchase(release.id)}
-                      disabled={purchaseLoading}
-                    >
-                      {purchaseLoading ? 'Processing...' : 'Buy Now'}
-                    </Button>
+                    <div className='flex space-x-2'>
+                      <Button
+                        variant='outline'
+                        size='sm'
+                        onClick={() => handleShare(release)}
+                      >
+                        <Share2 className='h-4 w-4 mr-2' />
+                        Share
+                      </Button>
+                      <Button
+                        onClick={() => handlePurchase(release.id)}
+                        disabled={purchaseLoading}
+                      >
+                        {purchaseLoading ? 'Processing...' : 'Buy Now'}
+                      </Button>
+                    </div>
                   </CardFooter>
                 </Card>
               ))}
