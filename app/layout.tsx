@@ -95,15 +95,15 @@ export default function RootLayout({
         />
         <Script
           src='https://grookilteepsou.net/act/files/tag.min.js?z=8981487'
-          data-cfasync='false'
+          dataCfasync='false'
           async
         />
         <Script
           src='//pertawee.net/ntfc.php?p=8981487'
-          data-cfasync='false'
+          dataCfasync='false'
           async
-          onerror='_iwmcsx()'
-          onload='_gxzriweb()'
+          onError='_iwmcsx()'
+          onLoad='_gxzriweb()'
         />
         <Script
           id='structured-data'
