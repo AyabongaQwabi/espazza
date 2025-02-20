@@ -23,7 +23,6 @@ import {
   MapPin,
   Music,
   Award,
-  ShoppingBag,
   Users,
 } from 'lucide-react';
 
@@ -80,7 +79,14 @@ export default function ArtistPage({
   if (loading) {
     return (
       <div className='min-h-screen bg-zinc-900 text-white flex items-center justify-center'>
-        Loading...
+        <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className='text-4xl font-bold'
+        >
+          Loading...
+        </motion.div>
       </div>
     );
   }
@@ -88,16 +94,34 @@ export default function ArtistPage({
   if (!artist) {
     return (
       <div className='min-h-screen bg-zinc-900 text-white flex flex-col items-center justify-center'>
-        <h1 className='text-4xl font-bold mb-4'>Artist Not Found</h1>
-        <p className='text-xl mb-8'>
-          We couldn't find an artist with that username.
-        </p>
-        <Link
-          href='/artists'
-          className='bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded'
+        <motion.h1
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className='text-4xl font-bold mb-4'
         >
-          Back to Artists
-        </Link>
+          Artist Not Found
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className='text-xl mb-8'
+        >
+          We couldn't find an artist with that username.
+        </motion.p>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <Link
+            href='/artists'
+            className='bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300'
+          >
+            Back to Artists
+          </Link>
+        </motion.div>
       </div>
     );
   }
@@ -109,7 +133,7 @@ export default function ArtistPage({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
-        className='relative h-[50vh] flex items-center justify-center '
+        className='relative h-[60vh] flex items-center justify-center'
       >
         <div
           className='absolute inset-0 bg-cover bg-center'
@@ -123,77 +147,119 @@ export default function ArtistPage({
           }}
         />
         <div className='absolute inset-0 bg-zinc-900 bg-opacity-50' />
-        <div className='relative z-10 text-center '>
-          <Image
-            src={artist.profile_image_url || DEFAULT_IMAGE}
-            alt='Artist image'
-            width={150}
-            height={150}
-            className='rounded-full mx-auto mb-4'
-          />
-          <h1 className='text-4xl font-bold mb-2'>{artist.artist_name}</h1>
-          <p className='text-lg text-zinc-400 mt-2'>
+        <div className='relative z-10 text-center'>
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Image
+              src={artist.profile_image_url || DEFAULT_IMAGE}
+              alt='Artist image'
+              width={250}
+              height={250}
+              className='rounded-full mx-auto mb-6 border-4 border-white shadow-lg'
+            />
+          </motion.div>
+          <motion.h1
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className='text-5xl font-bold mb-2'
+          >
+            {artist.artist_name}
+          </motion.h1>
+          <motion.p
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className='text-xl text-zinc-300 mt-2'
+          >
             <Music className='inline-block mr-2' />
-            Hip Hop • <MapPin className='inline-block mr-2' />
+            Hip Hop • <MapPin className='inline-block mr-2 ml-2' />
             {artist.suburb}
-          </p>
+          </motion.p>
         </div>
       </motion.div>
 
       {/* About the Artist */}
-      <section className='max-w-4xl mx-auto px-4 py-12'>
-        <h2 className='text-2xl font-bold mb-4 flex items-center'>
-          <Award className='mr-2' />
+      <motion.section
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className='max-w-4xl mx-auto px-4 py-16'
+      >
+        <h2 className='text-3xl font-bold mb-6 flex items-center'>
+          <Award className='mr-3' />
           About the Artist
         </h2>
-        <p className='text-zinc-300 mb-6'>{artist.artist_bio}</p>
-        {/* {artist.achievements && (
-          <div>
-            <h3 className="text-xl font-semibold mb-2">Achievements</h3>
-            <ul className="list-disc list-inside text-zinc-300">
-              {artist.achievements.map((achievement, index) => (
-                <li key={index}>{achievement}</li>
-              ))}
-            </ul>
-          </div>
-        )} */}
-      </section>
+        <p className='text-zinc-300 mb-6 text-lg leading-relaxed whitespace-pre-line'>
+          {artist.artist_bio}
+        </p>
+      </motion.section>
 
       {/* Gallery */}
       {artist.gallery_images && artist.gallery_images.length > 0 && (
-        <section className='max-w-4xl mx-auto px-4 py-12'>
-          <div className='grid grid-cols-2 md:grid-cols-3 gap-4'>
+        <motion.section
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className='max-w-6xl mx-auto px-4 py-16'
+        >
+          <h2 className='text-3xl font-bold mb-6 flex items-center'>
+            <Award className='mr-3' />
+            Gallery
+          </h2>
+          <div className='grid grid-cols-2 md:grid-cols-3 gap-6'>
             {artist.gallery_images.map((image, index) => (
-              <Image
+              <motion.div
                 key={index}
-                src={image || DEFAULT_IMAGE}
-                alt={`${artist.artist_name} gallery image ${index + 1}`}
-                width={300}
-                height={300}
-                className='rounded-lg object-cover w-full h-64'
-              />
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <Image
+                  src={image || DEFAULT_IMAGE}
+                  alt={`${artist.artist_name} gallery image ${index + 1}`}
+                  width={400}
+                  height={400}
+                  className='rounded-lg object-cover w-full h-64 transition-transform duration-300 hover:scale-105'
+                />
+              </motion.div>
             ))}
           </div>
-        </section>
+        </motion.section>
       )}
 
       {/* Music & Media Showcase */}
-      <section className='max-w-4xl mx-auto px-4 py-12'>
-        <h2 className='text-2xl font-bold mb-4 flex items-center'>
-          <Music className='mr-2' />
+      <motion.section
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+        className='max-w-4xl mx-auto px-4 py-16'
+      >
+        <h2 className='text-3xl font-bold mb-6 flex items-center'>
+          <Music className='mr-3' />
           Music & Media
         </h2>
         {/* Featured Songs */}
-        <div className='mb-8'>
-          <h3 className='text-xl font-semibold mb-4'>Featured Songs</h3>
+        <div className='mb-12'>
+          <h3 className='text-2xl font-semibold mb-6'>Featured Songs</h3>
           {/* Add your music player component here */}
+          <p className='text-zinc-400'>Music player coming soon...</p>
         </div>
         {/* Music Videos & Performances */}
         <div>
-          <h3 className='text-xl font-semibold mb-4'>Videos</h3>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <h3 className='text-2xl font-semibold mb-6'>Videos</h3>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             {artist.youtube_links?.map((link, index) => (
-              <div key={index} className='aspect-w-16 aspect-h-9'>
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className='aspect-w-16 aspect-h-9'
+              >
                 <iframe
                   src={`https://www.youtube.com/embed/${getYouTubeVideoId(
                     link
@@ -201,17 +267,22 @@ export default function ArtistPage({
                   frameBorder='0'
                   allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
                   allowFullScreen
-                  className='w-full h-full'
+                  className='w-full h-full rounded-lg shadow-lg'
                 ></iframe>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Social & Streaming Links */}
-      <section className='max-w-4xl mx-auto px-4 py-12'>
-        <h2 className='text-2xl font-bold mb-4'>Follow & Listen</h2>
+      <motion.section
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
+        className='max-w-4xl mx-auto px-4 py-16'
+      >
+        <h2 className='text-3xl font-bold mb-6'>Follow & Listen</h2>
         <div className='flex flex-wrap gap-4'>
           <SocialLink
             href={artist.youtube_url}
@@ -244,28 +315,23 @@ export default function ArtistPage({
             label='TikTok'
           />
         </div>
-        {/* {artist.website && (
-          <Link
-            href={artist.website}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block mt-4 text-red-500 hover:text-red-400"
-          >
-            Visit Website
-          </Link>
-        )} */}
-      </section>
+      </motion.section>
 
       {/* Contact & Booking */}
-      <section className='max-w-4xl mx-auto px-4 py-12'>
-        <h2 className='text-2xl font-bold mb-4 flex items-center'>
-          <Phone className='mr-2' />
+      <motion.section
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.8 }}
+        className='max-w-4xl mx-auto px-4 py-16'
+      >
+        <h2 className='text-3xl font-bold mb-6 flex items-center'>
+          <Phone className='mr-3' />
           Contact & Booking
         </h2>
         <div className='grid md:grid-cols-2 gap-8'>
           <div>
-            <h3 className='text-xl font-semibold mb-2'>Book This Artist</h3>
-            <p className='text-zinc-300 mb-4'>
+            <h3 className='text-2xl font-semibold mb-4'>Book This Artist</h3>
+            <p className='text-zinc-300 mb-6 text-lg'>
               Interested in booking {artist.artist_name} for an event or
               collaboration?
             </p>
@@ -275,7 +341,7 @@ export default function ArtistPage({
                   onClick={() =>
                     window.open(`https://wa.me/${artist.cellphone}`, '_blank')
                   }
-                  className='bg-green-600 hover:bg-green-700'
+                  className='bg-green-600 hover:bg-green-700 transition-colors duration-300'
                 >
                   <FaWhatsapp className='mr-2' />
                   WhatsApp
@@ -286,7 +352,7 @@ export default function ArtistPage({
                   onClick={() =>
                     (window.location.href = `mailto:${artist.email}`)
                   }
-                  className='bg-blue-600 hover:bg-blue-700'
+                  className='bg-blue-600 hover:bg-blue-700 transition-colors duration-300'
                 >
                   <Mail className='mr-2' />
                   Email
@@ -295,95 +361,81 @@ export default function ArtistPage({
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Fan Interaction & Engagement */}
-      <section className='max-w-4xl mx-auto px-4 py-12'>
-        <h2 className='text-2xl font-bold mb-4 flex items-center'>
-          {/* Added Lucide-react icon here */}
-          <Users className='mr-2' />
+      <motion.section
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1 }}
+        className='max-w-4xl mx-auto px-4 py-16'
+      >
+        <h2 className='text-3xl font-bold mb-6 flex items-center'>
+          <Users className='mr-3' />
           Fan Zone
         </h2>
-        <Button className='mb-4'>Follow Artist</Button>
+        <Button className='mb-6 bg-red-600 hover:bg-red-700 transition-colors duration-300'>
+          Follow Artist
+        </Button>
         {/* Add comments/fan wall component here */}
+        <p className='text-zinc-400 mb-8'>
+          Fan interaction features coming soon...
+        </p>
         {artist.upcoming_events && (
-          <div className='mt-8'>
-            <h3 className='text-xl font-semibold mb-4 flex items-center'>
-              <Calendar className='mr-2' />
+          <div className='mt-12'>
+            <h3 className='text-2xl font-semibold mb-6 flex items-center'>
+              <Calendar className='mr-3' />
               Upcoming Events
             </h3>
-            <ul className='space-y-2'>
-              <li>No upcoming events</li>
-              {/* {artist.upcoming_events.map((event, index) => (
-                <li key={index} className="bg-zinc-900 p-4 rounded-lg">
-                  <p className="font-semibold">{event.name}</p>
-                  <p className="text-sm text-zinc-400">
-                    <Calendar className="inline-block mr-2" />
-                    {event.date} • <MapPin className="inline-block mr-2" />
-                    {event.location}
-                  </p>
-                </li>
-              ))} */}
+            <ul className='space-y-4'>
+              <li className='bg-zinc-800 p-6 rounded-lg transition-all duration-300 hover:bg-zinc-700'>
+                <p className='font-semibold text-lg'>No upcoming events</p>
+                <p className='text-zinc-400'>
+                  Check back later for future events!
+                </p>
+              </li>
             </ul>
           </div>
         )}
-      </section>
-
-      {/* Merch & Store (Optional) */}
-      {/* {artist.merch && (
-        <section className="max-w-4xl mx-auto px-4 py-12">
-          <h2 className="text-2xl font-bold mb-4 flex items-center">
-            <ShoppingBag className="mr-2" />
-            Merch
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {artist.merch.map((item, index) => (
-              <div key={index} className="bg-zinc-900 p-4 rounded-lg">
-                <Image
-                  src={item.image || DEFAULT_IMAGE}
-                  alt={item.name}
-                  width={200}
-                  height={200}
-                  className="w-full h-auto mb-2"
-                />
-                <p className="font-semibold">{item.name}</p>
-                <p className="text-sm text-zinc-400">{item.price}</p>
-                <Button className="mt-2 w-full">Buy</Button>
-              </div>
-            ))}
-          </div>
-        </section>
-      )} */}
+      </motion.section>
 
       {/* Call to Action */}
-      <section className='bg-red-600 py-12'>
+      <motion.section
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 1.2 }}
+        className='bg-red-600 py-16'
+      >
         <div className='max-w-4xl mx-auto px-4 text-center'>
-          <h2 className='text-3xl font-bold mb-6'>
+          <h2 className='text-4xl font-bold mb-8'>
             Support {artist.artist_name}
           </h2>
-          <div className='flex flex-wrap justify-center gap-4'>
+          <div className='flex flex-wrap justify-center gap-6'>
             <Button
               size='lg'
-              className='bg-white text-red-600 hover:bg-zinc-100'
+              className='bg-white text-red-600 hover:bg-zinc-100 transition-colors duration-300'
             >
               <Calendar className='mr-2' />
               Book This Artist
             </Button>
-            {/* <Button size='lg' className='bg-[#1DB954] hover:bg-[#1ed760]'>
+            <Button
+              size='lg'
+              className='bg-[#1DB954] hover:bg-[#1ed760] transition-colors duration-300'
+            >
               <FaSpotify className='mr-2' />
               Listen on Spotify
             </Button>
             <Button
               size='lg'
               variant='outline'
-              className='text-white border-white hover:bg-white/10'
+              className='text-white border-white hover:bg-white/10 transition-colors duration-300'
             >
               <Users className='mr-2' />
               Follow on Socials
-            </Button> */}
+            </Button>
           </div>
         </div>
-      </section>
+      </motion.section>
     </div>
   );
 }
@@ -391,15 +443,17 @@ export default function ArtistPage({
 function SocialLink({ href, icon, label }) {
   if (!href) return null;
   return (
-    <Link
-      href={href}
-      target='_blank'
-      rel='noopener noreferrer'
-      className='flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-full'
-    >
-      {icon}
-      <span>{label}</span>
-    </Link>
+    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+      <Link
+        href={href}
+        target='_blank'
+        rel='noopener noreferrer'
+        className='flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-full transition-colors duration-300'
+      >
+        {icon}
+        <span>{label}</span>
+      </Link>
+    </motion.div>
   );
 }
 
