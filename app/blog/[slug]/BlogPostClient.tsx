@@ -408,7 +408,7 @@ export default function BlogPostClient({
 
           {/* Disqus Comments */}
           <DiscussionEmbed
-            shortname='your-disqus-shortname'
+            shortname='espazza'
             config={{
               url: window.location.href,
               identifier: post.id,
