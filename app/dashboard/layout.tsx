@@ -41,6 +41,7 @@ const navItems = [
   { href: '/dashboard/profile', icon: UserIcon, label: 'Edit Profile' },
   { href: '/dashboard/promotion', icon: UserIcon, label: 'Tracks' },
   { href: '/dashboard/purchases', icon: UserIcon, label: 'Purchases' },
+  { href: '/dashboard/balances', icon: UserIcon, label: 'Balances' },
   { href: '/dashboard/tickets', icon: UserIcon, label: 'Tickets' },
   { href: '/dashboard/blog', icon: EditIcon, label: 'Manage Posts' },
   { href: '/dashboard/events', icon: CalendarPlusIcon, label: 'Manage Events' },
