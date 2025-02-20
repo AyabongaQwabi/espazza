@@ -156,7 +156,8 @@ export default function Home({
               transition={{ duration: 0.8, delay: 0.2 }}
             >
               Discover and connect with amazing artists across Xhosa Trap, Xhosa
-              Drill, Xhosa RnB, Xhosa Hip Hop, Amapiano, Gqom, and Sijokojoko.{' '}
+              Drill, Xhosa RnB, Xhosa Hip Hop, Amapiano, Gospel, Gqom, and
+              Sijokojoko.{' '}
             </motion.p>
             <div className='space-x-4'>
               <Button asChild size='lg' className='bg-red-600 hover:bg-red-700'>
@@ -237,6 +238,7 @@ export default function Home({
               'Xhosa RnB',
               'Xhosa Hip Hop',
               'Amapiano',
+              'Gospel',
               'Gqom',
               'Sijokojoko',
             ].map((genre) => (
