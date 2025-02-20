@@ -275,7 +275,7 @@ export default function ReleasesPage() {
             audioRef.current.currentTime = 0;
             setCurrentlyPlaying(null);
           }
-        }, 30000);
+        }, 50000);
       }
     }
   }
@@ -350,7 +350,7 @@ export default function ReleasesPage() {
                   alt={release.title}
                   width={300}
                   height={300}
-                  className='w-full h-48 object-cover rounded-t-lg'
+                  className='w-full h-96 object-cover rounded-t-lg'
                 />
               </CardHeader>
               <CardContent className='flex-grow'>

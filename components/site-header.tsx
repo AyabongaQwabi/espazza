@@ -28,13 +28,6 @@ function Navigation({ className = '' }: { className?: string }) {
     <nav className={`flex items-center ${className}`}>
       <div className='flex items-center space-x-8'>
         <Link
-          href='/'
-          className='hover:text-red-500 transition-colors flex items-center gap-2'
-        >
-          <HoverIcon Icon={HomeIcon} size={16} />
-          <span>Ikhaya</span>
-        </Link>
-        <Link
           href='/about'
           className='hover:text-red-500 transition-colors flex items-center gap-2'
         >
@@ -162,13 +155,6 @@ export function SiteHeader() {
           >
             <div className='flex flex-col space-y-6 mt-8'>
               <div className='flex flex-col space-y-4'>
-                <Link
-                  href='/'
-                  className='hover:text-red-500 transition-colors flex items-center gap-2'
-                >
-                  <HoverIcon Icon={HomeIcon} size={16} />
-                  <span>Ikhaya</span>
-                </Link>
                 <Link
                   href='/about'
                   className='hover:text-red-500 transition-colors flex items-center gap-2'
