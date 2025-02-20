@@ -26,13 +26,28 @@ import axios from 'axios';
 import crypto from 'crypto-js';
 import url from 'url';
 import short from 'short-uuid';
-import { Play, Pause, Music, User, Calendar, Tag } from 'lucide-react';
+import {
+  Play,
+  Pause,
+  Music,
+  User,
+  Calendar,
+  Tag,
+  Search,
+  DollarSign,
+  TrendingUp,
+  Star,
+  Headphones,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 import Link from 'next/link';
 
 const API_ENDPOINT = 'https://api.ikhokha.com/public-api/v1/api/payment';
 const APPLICATION_ID = 'IKF3SALX1F82BZ7IT6914BEGBEWQ55Y7';
 const APPLICATION_KEY = 'DaNAI4IUXeHdZiliiDnrxwWYPm2AE1Al';
 const SURCHARGE = 2;
+const ITEMS_PER_PAGE = 10;
 
 interface Release {
   id: string;
@@ -76,6 +91,8 @@ export default function ReleasesPage() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null);
   const [purchaseLoading, setPurchaseLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const router = useRouter();
@@ -83,6 +100,9 @@ export default function ReleasesPage() {
 
   useEffect(() => {
     fetchReleases();
+  }, [searchTerm, genreFilter, priceRange, sortOption, currentPage]);
+
+  useEffect(() => {
     fetchGenres();
     checkUser();
   }, []);
@@ -96,17 +116,15 @@ export default function ReleasesPage() {
 
   async function fetchReleases() {
     setLoading(true);
-    let query = supabase
-      .from('releases')
-      .select(
-        `
+    let query = supabase.from('releases').select(
+      `
         *,
         genre:genres(id, name),
         record_label:record_labels(name),
         record_owner:profiles(artist_name, username)
-      `
-      )
-      .order('release_date', { ascending: sortOption === 'oldest' });
+      `,
+      { count: 'exact' }
+    );
 
     if (searchTerm) {
       query = query.ilike('title', `%${searchTerm}%`);
@@ -120,12 +138,26 @@ export default function ReleasesPage() {
       query = query.gte('price', priceRange[0]).lte('price', priceRange[1]);
     }
 
-    const { data, error } = await query;
+    if (sortOption === 'newest') {
+      query = query.order('release_date', { ascending: false });
+    } else if (sortOption === 'oldest') {
+      query = query.order('release_date', { ascending: true });
+    } else if (sortOption === 'popular') {
+      query = query.order('popularity', { ascending: false });
+    } else if (sortOption === 'rating') {
+      query = query.order('average_rating', { ascending: false });
+    }
+
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE - 1;
+
+    const { data, error, count } = await query.range(startIndex, endIndex);
 
     if (error) {
       console.error('Error fetching releases:', error);
     } else {
       setReleases(data || []);
+      setTotalPages(Math.ceil((count || 0) / ITEMS_PER_PAGE));
     }
     setLoading(false);
   }
@@ -184,7 +216,8 @@ export default function ReleasesPage() {
     try {
       const transactionId = short().toUUID(short.generate());
       const totalPrice =
-        (parseFloat(calculateReleasePrice(release.tracks)) + SURCHARGE) * 100;
+        (Number.parseFloat(calculateReleasePrice(release.tracks)) + SURCHARGE) *
+        100;
       console.log('totalPrice', totalPrice);
       const request = {
         entityID: release.id,
@@ -245,10 +278,12 @@ export default function ReleasesPage() {
       setPurchaseLoading(false);
     }
   }
+
   const parseTimeString = (timeString) => {
     const [minutes, seconds] = timeString.split(':').map(Number);
     return minutes * 60 + seconds;
   };
+
   function handlePreview(trackUrl: string, previewStart: number) {
     if (currentlyPlaying === trackUrl) {
       // Stop playing
@@ -284,144 +319,250 @@ export default function ReleasesPage() {
     return tracks.reduce((total, track) => total + (track.price || 0), 0);
   };
 
-  console.log('releases', releases);
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    window.scrollTo(0, 0);
+  };
 
   return (
-    <div className='container mx-auto px-4 py-8'>
-      <h1 className='text-3xl font-bold mb-8'>Music Releases</h1>
-
-      <div className='flex flex-col md:flex-row gap-4 mb-8'>
-        <Input
-          type='text'
-          placeholder='Search releases...'
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className='md:w-1/3'
+    <div className='flex flex-col min-h-screen'>
+      <div className='relative h-[50vh] overflow-hidden'>
+        <Image
+          src='/ndlu.jpg'
+          alt='Music Hero'
+          layout='fill'
+          objectFit='cover'
+          className='animate-ken-burns'
         />
-        <Select value={genreFilter} onValueChange={setGenreFilter}>
-          <SelectTrigger className='md:w-1/4'>
-            <SelectValue placeholder='Filter by genre' />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='all'>All Genres</SelectItem>
-            {genres.map((genre) => (
-              <SelectItem key={genre.id} value={genre.id}>
-                {genre.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <div className='flex flex-col md:w-1/4'>
-          <span className='text-sm mb-2'>
-            Price Range: R{priceRange[0]} - R{priceRange[1]}
-          </span>
-          <Slider
-            min={0}
-            max={1000}
-            step={10}
-            value={priceRange}
-            onValueChange={setPriceRange}
-          />
+        <div className='absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center'>
+          <div className='text-center text-white'>
+            <h1 className='text-5xl font-bold mb-4 animate-fade-in-up'>
+              Discover New Music
+            </h1>
+            <p className='text-xl mb-8 animate-fade-in-up animation-delay-300'>
+              Purchase and preview the latest releases from your favorite
+              artists
+            </p>
+            <Button
+              size='lg'
+              className='animate-fade-in-up animation-delay-600'
+              onClick={() =>
+                document
+                  .getElementById('releases')
+                  ?.scrollIntoView({ behavior: 'smooth' })
+              }
+            >
+              <Headphones className='mr-2 h-5 w-5' /> Browse Releases
+            </Button>
+          </div>
         </div>
-        <Select value={sortOption} onValueChange={setSortOption}>
-          <SelectTrigger className='md:w-1/4'>
-            <SelectValue placeholder='Sort by' />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='newest'>Newest First</SelectItem>
-            <SelectItem value='oldest'>Oldest First</SelectItem>
-            <SelectItem value='popular'>Most Popular</SelectItem>
-            <SelectItem value='rating'>Highest Rated</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
-      {loading ? (
-        <div className='text-center'>Loading releases...</div>
-      ) : releases.length === 0 ? (
-        <div className='text-center'>No releases found.</div>
-      ) : (
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-          {releases.map((release) => (
-            <Card key={release.id} className='flex flex-col'>
-              <CardHeader>
-                <Image
-                  src={release.cover_image_url || '/placeholder.svg'}
-                  alt={release.title}
-                  width={300}
-                  height={300}
-                  className='w-full h-96 object-cover rounded-t-lg'
-                />
-              </CardHeader>
-              <CardContent className='flex-grow'>
-                <CardTitle className='text-xl mb-2'>{release.title}</CardTitle>
-                <div className='flex items-center text-sm text-gray-500 mb-2'>
-                  <User className='w-4 h-4 mr-1' />
-                  <Link
-                    href={`/artists/${release.record_owner.username}`}
-                    className='hover:underline'
-                  >
-                    {release.record_owner.artist_name ||
-                      release.record_owner.username}
-                  </Link>
-                </div>
-                <div className='flex items-center text-sm text-gray-500 mb-2'>
-                  <Calendar className='w-4 h-4 mr-1' />
-                  {new Date(release.release_date).toLocaleDateString()}
-                </div>
-                <div className='flex items-center text-sm text-gray-500 mb-4'>
-                  <Tag className='w-4 h-4 mr-1' />
-                  {release.genre.name}
-                </div>
-                <p className='text-sm text-gray-600 mb-4'>
-                  {release.description}
-                </p>
-                <div className='space-y-2 bg-gray-800 p-4 rounded-lg'>
-                  <h3 className='font-semibold mb-2 flex items-center'>
-                    <Music className='w-4 h-4 mr-2' />
-                    Tracks
-                  </h3>
-                  {release.tracks.map((track) => (
-                    <div
-                      key={track.id}
-                      className='flex justify-between items-center'
-                    >
-                      <span className='text-sm'>{track.title}</span>
-                      <Button
-                        variant='outline'
-                        size='sm'
-                        onClick={() =>
-                          handlePreview(track.url, track.preview_start)
-                        }
-                        className='flex items-center'
-                      >
-                        {currentlyPlaying === track.url ? (
-                          <Pause className='w-4 h-4 mr-1' />
-                        ) : (
-                          <Play className='w-4 h-4 mr-1' />
-                        )}
-                        {currentlyPlaying === track.url ? 'Stop' : 'Preview'}
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-              <CardFooter className='flex justify-between mt-auto'>
-                <span className='text-lg font-bold'>
-                  R{calculateReleasePrice(release.tracks).toFixed(2)}
-                </span>
-                <Button
-                  onClick={() => handlePurchase(release.id)}
-                  disabled={purchaseLoading}
+      <main className='flex-grow bg-gray-100 dark:bg-gray-900' id='releases'>
+        <div className='container mx-auto px-4 py-12'>
+          <h2 className='text-3xl font-bold mb-8 text-center'>
+            Latest Music Releases
+          </h2>
+
+          <div className='flex flex-col md:flex-row gap-4 mb-8'>
+            <div className='relative md:w-1/3'>
+              <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400' />
+              <Input
+                type='text'
+                placeholder='Search releases...'
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className='pl-10'
+              />
+            </div>
+            <Select value={genreFilter} onValueChange={setGenreFilter}>
+              <SelectTrigger className='md:w-1/4'>
+                <SelectValue placeholder='Filter by genre' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='all'>All Genres</SelectItem>
+                {genres.map((genre) => (
+                  <SelectItem key={genre.id} value={genre.id}>
+                    {genre.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className='flex flex-col md:w-1/4'>
+              <span className='text-sm mb-2 flex items-center'>
+                <DollarSign className='mr-1 h-4 w-4' />
+                Price Range: R{priceRange[0]} - R{priceRange[1]}
+              </span>
+              <Slider
+                min={0}
+                max={1000}
+                step={10}
+                value={priceRange}
+                onValueChange={setPriceRange}
+              />
+            </div>
+            <Select value={sortOption} onValueChange={setSortOption}>
+              <SelectTrigger className='md:w-1/4'>
+                <SelectValue placeholder='Sort by' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='newest'>
+                  <div className='flex items-center'>
+                    <Calendar className='mr-2 h-4 w-4' /> Newest First
+                  </div>
+                </SelectItem>
+                <SelectItem value='oldest'>
+                  <div className='flex items-center'>
+                    <Calendar className='mr-2 h-4 w-4' /> Oldest First
+                  </div>
+                </SelectItem>
+                <SelectItem value='popular'>
+                  <div className='flex items-center'>
+                    <TrendingUp className='mr-2 h-4 w-4' /> Most Popular
+                  </div>
+                </SelectItem>
+                <SelectItem value='rating'>
+                  <div className='flex items-center'>
+                    <Star className='mr-2 h-4 w-4' /> Highest Rated
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {loading ? (
+            <div className='text-center'>
+              <Headphones className='animate-spin h-10 w-10 mx-auto mb-4' />
+              Loading releases...
+            </div>
+          ) : releases.length === 0 ? (
+            <div className='text-center'>No releases found.</div>
+          ) : (
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+              {releases.map((release) => (
+                <Card
+                  key={release.id}
+                  className='flex flex-col hover:shadow-lg transition-shadow duration-300'
                 >
-                  {purchaseLoading ? 'Processing...' : 'Buy Now'}
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
+                  <CardHeader>
+                    <Image
+                      src={release.cover_image_url || '/placeholder.svg'}
+                      alt={release.title}
+                      width={300}
+                      height={300}
+                      className='w-full h-80 object-cover rounded-t-lg'
+                    />
+                  </CardHeader>
+                  <CardContent className='flex-grow'>
+                    <CardTitle className='text-xl mb-2'>
+                      {release.title}
+                    </CardTitle>
+                    <div className='flex items-center text-sm text-gray-500 mb-2'>
+                      <User className='w-4 h-4 mr-1' />
+                      <Link
+                        href={`/artists/${release.record_owner.username}`}
+                        className='hover:underline'
+                      >
+                        {release.record_owner.artist_name ||
+                          release.record_owner.username}
+                      </Link>
+                    </div>
+                    <div className='flex items-center text-sm text-gray-500 mb-2'>
+                      <Calendar className='w-4 h-4 mr-1' />
+                      {new Date(release.release_date).toLocaleDateString()}
+                    </div>
+                    <div className='flex items-center text-sm text-gray-500 mb-4'>
+                      <Tag className='w-4 h-4 mr-1' />
+                      {release.genre.name}
+                    </div>
+                    <p className='text-sm text-gray-600 mb-4 line-clamp-3'>
+                      {release.description}
+                    </p>
+                    <div className='space-y-2 bg-gray-800 p-4 rounded-lg'>
+                      <h3 className='font-semibold mb-2 flex items-center text-white'>
+                        <Music className='w-4 h-4 mr-2' />
+                        Tracks
+                      </h3>
+                      {release.tracks.slice(0, 3).map((track) => (
+                        <div
+                          key={track.id}
+                          className='flex justify-between items-center'
+                        >
+                          <span className='text-sm text-white'>
+                            {track.title}
+                          </span>
+                          <Button
+                            variant='outline'
+                            size='sm'
+                            onClick={() =>
+                              handlePreview(track.url, track.preview_start)
+                            }
+                            className='flex items-center'
+                          >
+                            {currentlyPlaying === track.url ? (
+                              <Pause className='w-4 h-4 mr-1' />
+                            ) : (
+                              <Play className='w-4 h-4 mr-1' />
+                            )}
+                            {currentlyPlaying === track.url
+                              ? 'Stop'
+                              : 'Preview'}
+                          </Button>
+                        </div>
+                      ))}
+                      {release.tracks.length > 3 && (
+                        <p className='text-sm text-gray-400 text-center mt-2'>
+                          +{release.tracks.length - 3} more tracks
+                        </p>
+                      )}
+                    </div>
+                  </CardContent>
+                  <CardFooter className='flex justify-between mt-auto'>
+                    <span className='text-lg font-bold'>
+                      R{calculateReleasePrice(release.tracks).toFixed(2)}
+                    </span>
+                    <Button
+                      onClick={() => handlePurchase(release.id)}
+                      disabled={purchaseLoading}
+                    >
+                      {purchaseLoading ? 'Processing...' : 'Buy Now'}
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {/* Pagination */}
+          <div className='flex justify-center mt-8'>
+            <div className='flex items-center space-x-2'>
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className='h-4 w-4' />
+                Previous
+              </Button>
+              <span className='text-sm'>
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Next
+                <ChevronRight className='h-4 w-4' />
+              </Button>
+            </div>
+          </div>
+
+          <audio ref={audioRef} className='hidden' />
         </div>
-      )}
-      <audio ref={audioRef} className='hidden' />
+      </main>
     </div>
   );
 }
