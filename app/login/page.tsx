@@ -71,20 +71,26 @@ export default function Login() {
 
   async function handleFacebookLogin() {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'facebook',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        scopes: 'email',
-      },
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          scopes: 'email,public_profile',
+        },
+      });
 
-    if (error) {
+      if (error) throw error;
+
+      // If there's no error, the user will be redirected to Facebook for authentication
+    } catch (error) {
+      console.error('Facebook login error:', error);
       toast({
         title: 'Error',
-        description: error.message,
+        description: 'Failed to login with Facebook. Please try again.',
         variant: 'destructive',
       });
+    } finally {
       setLoading(false);
     }
   }
@@ -141,7 +147,7 @@ export default function Login() {
                 disabled={loading}
               >
                 <Facebook className='w-5 h-5' />
-                Continue with Facebook
+                {loading ? 'Connecting...' : 'Continue with Facebook'}
               </Button>
             </div>
 
