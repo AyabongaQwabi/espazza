@@ -1,5 +1,7 @@
 'use client';
 
+import type React from 'react';
+
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -73,6 +75,7 @@ export default function Login() {
       provider: 'facebook',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
+        scopes: 'email',
       },
     });
 
