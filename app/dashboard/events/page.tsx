@@ -55,9 +55,9 @@ export default function EventsManagement() {
     date: new Date(),
     budget: '',
     status: 'unpaid',
-    ticketPrice: '',
-    maxAttendees: '',
-    coverImage: '',
+    ticket_price: '',
+    max_attendees: '',
+    cover_image: '',
   });
 
   const router = useRouter();
@@ -130,8 +130,8 @@ export default function EventsManagement() {
     } = await supabase.auth.getUser();
     if (!user) return;
 
-    const eventId = short.generate();
-    const transactionId = short.generate();
+    const eventId = short().toUUID(short.generate());
+    const transactionId = short().toUUID(short.generate());
 
     try {
       const { data, error } = await supabase
@@ -156,9 +156,9 @@ export default function EventsManagement() {
         date: new Date(),
         budget: '',
         status: 'unpaid',
-        ticketPrice: '',
-        maxAttendees: '',
-        coverImage: '',
+        ticket_price: '',
+        max_attendees: '',
+        cover_image: '',
       });
       setIsDialogOpen(false);
 
@@ -425,18 +425,18 @@ export default function EventsManagement() {
               <Input
                 type='number'
                 placeholder='Ticket Price'
-                value={newEvent.ticketPrice}
+                value={newEvent.ticket_price}
                 onChange={(e) =>
-                  setNewEvent({ ...newEvent, ticketPrice: e.target.value })
+                  setNewEvent({ ...newEvent, ticket_price: e.target.value })
                 }
                 required
               />
               <Input
                 type='number'
                 placeholder='Maximum Attendees'
-                value={newEvent.maxAttendees}
+                value={newEvent.max_attendees}
                 onChange={(e) =>
-                  setNewEvent({ ...newEvent, maxAttendees: e.target.value })
+                  setNewEvent({ ...newEvent, max_attendees: e.target.value })
                 }
                 required
               />
@@ -444,7 +444,7 @@ export default function EventsManagement() {
                 <label className='text-sm font-medium'>Cover Image</label>
                 <ImageUploader
                   onUploadComplete={(urls) =>
-                    setNewEvent({ ...newEvent, coverImage: urls[0] })
+                    setNewEvent({ ...newEvent, cover_image: urls[0] })
                   }
                   maxSizeInMB={5}
                 />
@@ -474,7 +474,7 @@ export default function EventsManagement() {
               <TableCell>{event.venue}</TableCell>
               <TableCell>{event.south_african_towns?.name}</TableCell>
               <TableCell>
-                {event.ticketPrice ? `$${event.ticketPrice}` : 'Free'}
+                {event.ticket_price ? `$${event.ticket_price}` : 'Free'}
               </TableCell>
               <TableCell>
                 <Button

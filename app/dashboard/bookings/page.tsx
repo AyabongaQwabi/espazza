@@ -68,13 +68,13 @@ export default function BookingsPage() {
       .select(
         `
         *,
-        events (name, date, venue),
-        profiles!organizer_id (username)
+        events (name, date, venues(*), profiles (artist_name, username), south_african_towns(*))
+        
       `
       )
       .eq('artist_id', user.id)
       .order('created_at', { ascending: false });
-
+    console.log(data);
     if (error) {
       console.error('Error fetching bookings:', error);
     } else {
@@ -82,9 +82,10 @@ export default function BookingsPage() {
         data.map((booking: any) => ({
           id: booking.id,
           event_name: booking.events.name,
-          organizer_name: booking.profiles.username,
+          organizer_name: booking.events.profiles.username,
           event_date: booking.events.date,
-          venue: booking.events.venue,
+          venue: booking.events.venues.name,
+          town: booking.events.south_african_towns.name,
           fee: booking.fee,
           payment_terms: booking.payment_terms,
           status: booking.status,
@@ -312,8 +313,12 @@ function BookingsList({
                 {booking.venue}
               </div>
               <div className='flex items-center'>
+                <MapPinIcon className='mr-2 h-4 w-4' />
+                {booking.town}
+              </div>
+              <div className='flex items-center'>
                 <DollarSignIcon className='mr-2 h-4 w-4' />
-                Fee: ${booking.fee} ({booking.payment_terms})
+                Fee: R{booking.fee} ({booking.payment_terms})
               </div>
               <div className='flex items-center'>
                 <Badge
