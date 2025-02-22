@@ -119,13 +119,13 @@ export default function DashboardPage() {
           </Link>
         </Button>
         <Button asChild variant='outline'>
-          <Link href='/dashboard/events/new'>
+          <Link href='/dashboard/events'>
             <PlusIcon className='h-4 w-4 mr-2' />
             Create Event
           </Link>
         </Button>
         <Button asChild variant='outline'>
-          <Link href='/dashboard/merchandise/new'>
+          <Link href='/dashboard/merchandise'>
             <PlusIcon className='h-4 w-4 mr-2' />
             Add Product
           </Link>
@@ -147,7 +147,9 @@ export default function DashboardPage() {
       >
         <Card className='bg-zinc-900 border-zinc-800'>
           <CardHeader className='flex flex-row items-center justify-between pb-2'>
-            <CardTitle className='text-lg font-medium text-white'>Posts</CardTitle>
+            <CardTitle className='text-lg font-medium text-white'>
+              Posts
+            </CardTitle>
             <BookOpenIcon className='h-5 w-5 text-red-600' />
           </CardHeader>
           <CardContent>
@@ -160,26 +162,40 @@ export default function DashboardPage() {
 
         <Card className='bg-zinc-900 border-zinc-800'>
           <CardHeader className='flex flex-row items-center justify-between pb-2'>
-            <CardTitle className='text-lg font-medium text-white'>Events</CardTitle>
+            <CardTitle className='text-lg font-medium text-white'>
+              Events
+            </CardTitle>
             <MusicIcon className='h-5 w-5 text-red-600' />
           </CardHeader>
           <CardContent>
             <div className='text-3xl font-bold text-white'>{events.length}</div>
             <p className='text-zinc-400 text-sm mt-1'>
-              {events.filter((event) => new Date(event.date) > new Date()).length} upcoming
+              {
+                events.filter((event) => new Date(event.date) > new Date())
+                  .length
+              }{' '}
+              upcoming
             </p>
           </CardContent>
         </Card>
 
         <Card className='bg-zinc-900 border-zinc-800'>
           <CardHeader className='flex flex-row items-center justify-between pb-2'>
-            <CardTitle className='text-lg font-medium text-white'>Bookings</CardTitle>
+            <CardTitle className='text-lg font-medium text-white'>
+              Bookings
+            </CardTitle>
             <UsersIcon className='h-5 w-5 text-red-600' />
           </CardHeader>
           <CardContent>
-            <div className='text-3xl font-bold text-white'>{bookings.length}</div>
+            <div className='text-3xl font-bold text-white'>
+              {bookings.length}
+            </div>
             <p className='text-zinc-400 text-sm mt-1'>
-              {bookings.filter((booking) => booking.status === 'Pending').length} pending
+              {
+                bookings.filter((booking) => booking.status === 'Pending')
+                  .length
+              }{' '}
+              pending
             </p>
           </CardContent>
         </Card>
@@ -208,15 +224,21 @@ export default function DashboardPage() {
                     className='block'
                   >
                     <div className='bg-zinc-800 p-4 rounded-lg hover:bg-zinc-700 transition-colors'>
-                      <h3 className='text-white font-medium mb-1'>{post.title}</h3>
+                      <h3 className='text-white font-medium mb-1'>
+                        {post.title}
+                      </h3>
                       <div className='flex items-center text-sm text-zinc-400'>
                         <span>
-                          {new Date(post.created_at).toLocaleDateString('en-ZA')}
+                          {new Date(post.created_at).toLocaleDateString(
+                            'en-ZA'
+                          )}
                         </span>
                         <span className='mx-2'>•</span>
                         <span
                           className={
-                            post.published ? 'text-green-500' : 'text-yellow-500'
+                            post.published
+                              ? 'text-green-500'
+                              : 'text-yellow-500'
                           }
                         >
                           {post.published ? 'Published' : 'Draft'}
@@ -229,7 +251,9 @@ export default function DashboardPage() {
                   <div className='text-center py-8'>
                     <p className='text-zinc-400 mb-4'>No posts yet</p>
                     <Button asChild>
-                      <Link href='/dashboard/blog/new'>Create Your First Post</Link>
+                      <Link href='/dashboard/blog/new'>
+                        Create Your First Post
+                      </Link>
                     </Button>
                   </div>
                 )}
@@ -259,7 +283,9 @@ export default function DashboardPage() {
                       </h3>
                       <div className='flex items-center text-sm text-zinc-400'>
                         <span>
-                          {new Date(booking.created_at).toLocaleDateString('en-ZA')}
+                          {new Date(booking.created_at).toLocaleDateString(
+                            'en-ZA'
+                          )}
                         </span>
                         <span className='mx-2'>•</span>
                         <span

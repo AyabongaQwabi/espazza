@@ -4,22 +4,31 @@ import { useState, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Ticket, Calendar } from 'lucide-react';
+import { Ticket, Calendar, QrCode } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import QRCode from 'qrcode.react';
+import Image from 'next/image';
+import axios from 'axios';
+import crypto from 'crypto-js';
+import url from 'url';
+import short from 'short-uuid';
+
+const API_ENDPOINT = 'https://api.ikhokha.com/public-api/v1/api/payment';
+const APPLICATION_ID = 'IKF3SALX1F82BZ7IT6914BEGBEWQ55Y7';
+const APPLICATION_KEY = 'DaNAI4IUXeHdZiliiDnrxwWYPm2AE1Al';
 
 export default function TicketsPage() {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedTicket, setSelectedTicket] = useState(null);
   const supabase = createClientComponentClient();
 
   useEffect(() => {
@@ -61,6 +70,69 @@ export default function TicketsPage() {
       setTickets(tickets || []);
     }
     setLoading(false);
+  }
+
+  function createPayloadToSign(urlPath: string, body = '') {
+    try {
+      const parsedUrl = url.parse(urlPath);
+      const basePath = parsedUrl.path;
+      if (!basePath) throw new Error('No basePath in url');
+      const payload = basePath + body;
+      return jsStringEscape(payload);
+    } catch (error) {
+      console.error('Error on createPayloadToSign:', error);
+      return '';
+    }
+  }
+
+  function jsStringEscape(str: string) {
+    return str.replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
+  }
+
+  async function handleCompletePayment(ticket) {
+    try {
+      const transactionId = short().toUUID(short.generate());
+      const totalPrice = ticket.total_price * 100; // Convert to cents
+
+      const request = {
+        entityID: ticket.event_id,
+        externalEntityID: ticket.id,
+        amount: totalPrice,
+        currency: 'ZAR',
+        requesterUrl: 'https://espazza.co.za/tickets',
+        description: `Payment for ticket to ${ticket.events.name}`,
+        paymentReference: `${ticket.buyer_id}-${ticket.id}`,
+        mode: 'sandbox',
+        externalTransactionID: transactionId,
+        urls: {
+          callbackUrl: 'https://espazza.co.za/api/payment/callback',
+          successPageUrl: `https://espazza.co.za/tickets/success?transaction_id=${transactionId}`,
+          failurePageUrl: 'https://espazza.co.za/tickets/failure',
+          cancelUrl: 'https://espazza.co.za/tickets',
+        },
+      };
+
+      const requestBody = JSON.stringify(request);
+      const payloadToSign = createPayloadToSign(API_ENDPOINT, requestBody);
+      const signature = crypto
+        .HmacSHA256(payloadToSign, APPLICATION_KEY.trim())
+        .toString(crypto.enc.Hex);
+
+      const response = await axios.post('/api/payment', request);
+
+      if (response.data?.paylinkUrl) {
+        window.location.href = response.data.paylinkUrl;
+      } else {
+        throw new Error('No payment URL received');
+      }
+    } catch (error) {
+      console.error('Error creating payment:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to process payment. Please try again.',
+        variant: 'destructive',
+      });
+    }
   }
 
   if (loading) {
@@ -128,16 +200,61 @@ export default function TicketsPage() {
                     </p>
                   </div>
                 </div>
-                {ticket.status === 'confirmed' && (
-                  <div className='mt-4'>
-                    <Button className='w-full'>Download Ticket</Button>
-                  </div>
-                )}
+                <div className='flex justify-between items-center mt-4'>
+                  {ticket.status === 'pending' && (
+                    <Button onClick={() => handleCompletePayment(ticket)}>
+                      Pay Now
+                    </Button>
+                  )}
+                  {ticket.status === 'confirmed' && (
+                    <Button onClick={() => setSelectedTicket(ticket)}>
+                      <QrCode className='mr-2 h-4 w-4' />
+                      View QR Code
+                    </Button>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))}
         </div>
       )}
+
+      <Dialog
+        open={!!selectedTicket}
+        onOpenChange={() => setSelectedTicket(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ticket QR Code</DialogTitle>
+          </DialogHeader>
+          {selectedTicket && (
+            <div className='flex flex-col items-center'>
+              <div className='relative'>
+                <QRCode
+                  value={`${process.env.NEXT_PUBLIC_BASE_URL}/verify-ticket/${selectedTicket.id}`}
+                  size={256}
+                  level='H'
+                  includeMargin={true}
+                />
+                <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
+                  <Image
+                    src='/logo.png'
+                    alt='Logo'
+                    width={64}
+                    height={64}
+                    className='opacity-50'
+                  />
+                </div>
+              </div>
+              <p className='mt-4 text-center'>
+                Event: {selectedTicket.events.name}
+                <br />
+                Date: {format(new Date(selectedTicket.events.date), 'PPP')}
+              </p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
