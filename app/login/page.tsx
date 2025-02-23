@@ -143,7 +143,7 @@ export default function Login() {
               <Button
                 type='button'
                 variant='outline'
-                className='w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-100 text-black'
+                className='w-full flex items-center justify-center gap-2 bg-white hover:text-red-500  hover:bg-gray-100 text-black'
                 onClick={handleGoogleLogin}
                 disabled={loading}
               >
@@ -152,7 +152,7 @@ export default function Login() {
               </Button>
             </div>
 
-            <div className='mt-4 text-center'>
+            <div className='mt-4 text-center 0'>
               <Button
                 variant='info'
                 onClick={handleMagicLinkLogin}
