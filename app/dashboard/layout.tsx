@@ -92,9 +92,9 @@ export default function DashboardLayout({
       if (
         profileData &&
         !profileData.registration_complete &&
-        pathname !== '/dashboard/onboarding'
+        pathname !== '/user-type-selection'
       ) {
-        router.push('/dashboard/onboarding');
+        router.push('/user-type-selection');
       }
     }
     checkAuth();
