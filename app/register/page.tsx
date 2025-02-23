@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { ChromeIcon as Google } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { FcGoogle } from 'react-icons/fc';
 
 export default function Register() {
   const router = useRouter();
@@ -253,12 +254,12 @@ export default function Register() {
           <Button
             type='button'
             variant='outline'
-            className='w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-100 text-black'
+            className='w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-100 hover:text-red-500 text-black'
             onClick={handleGoogleSignUp}
             disabled={loading}
           >
-            <Google className='w-5 h-5' />
-            Continue with Google
+            <FcGoogle className='w-5 h-5' />
+            Register with Google
           </Button>
 
           <p className='text-center text-gray-400 text-sm'>

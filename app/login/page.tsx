@@ -10,6 +10,8 @@ import Link from 'next/link';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { toast } from '@/hooks/use-toast';
 import { ChromeIcon as Google } from 'lucide-react';
+import { FcGoogle } from 'react-icons/fc';
+import { FaMagic } from 'react-icons/fa';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -145,17 +147,18 @@ export default function Login() {
                 onClick={handleGoogleLogin}
                 disabled={loading}
               >
-                <Google className='w-5 h-5' />
-                {loading ? 'Connecting...' : 'Continue with Google'}
+                <FcGoogle className='w-5 h-5' />
+                {loading ? 'Connecting...' : 'Ngena Nge Google Account'}
               </Button>
             </div>
 
             <div className='mt-4 text-center'>
               <Button
-                variant='link'
+                variant='info'
                 onClick={handleMagicLinkLogin}
                 disabled={loading}
               >
+                <FaMagic className='h-4 w-4 mr-2' />
                 Login with Magic Link
               </Button>
             </div>
