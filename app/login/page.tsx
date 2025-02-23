@@ -157,6 +157,7 @@ export default function Login() {
                 variant='info'
                 onClick={handleMagicLinkLogin}
                 disabled={loading}
+                className='hover:text-red-500'
               >
                 <FaMagic className='h-4 w-4 mr-2' />
                 Login with Magic Link
