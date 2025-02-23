@@ -79,6 +79,7 @@
     "recharts": "^2.12.2",
     "resend": "^3.2.0",
     "schema-dts": "^1.1.2",
+    "short-unique-id": "^5.2.0",
     "short-uuid": "^4.2.2",
     "showdown": "^2.1.0",
     "sonner": "^1.4.3",

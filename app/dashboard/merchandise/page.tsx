@@ -1,17 +1,13 @@
 'use client';
 
+import type React from 'react';
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { SearchableSelect } from '@/components/SearchableSelect';
 import {
   Dialog,
   DialogContent,
@@ -28,26 +24,38 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { supabase } from '@/lib/supabase';
-import { Plus, Edit, Trash } from 'lucide-react';
+import { Plus, Edit, Trash, X } from 'lucide-react';
 import Image from 'next/image';
 import { Label } from '@/components/ui/label';
 import { ImageUploader } from '@/components/ImageUploader';
 import { toast } from '@/hooks/use-toast';
+import ShortUniqueId from 'short-unique-id';
 
 export default function MerchandiseManagement() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [productCategories, setProductCategories] = useState([]);
   const [newProduct, setNewProduct] = useState({
+    id: '',
     name: '',
     description: '',
     price: '',
-    category: '',
+    product_category_id: '',
     stock: '',
     images: [] as string[],
   });
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
+  const uid = new ShortUniqueId({ length: 11 });
 
   useEffect(() => {
+    const loadOptions = async () => {
+      const { data: categoriesData } = await supabase
+        .from('product_categories')
+        .select('id, name');
+      if (categoriesData) setProductCategories(categoriesData);
+    };
+    loadOptions();
     fetchProducts();
   }, []);
 
@@ -62,7 +70,7 @@ export default function MerchandiseManagement() {
 
     const { data, error } = await supabase
       .from('products')
-      .select('*')
+      .select('*, category:product_categories(name)')
       .eq('seller_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -74,44 +82,75 @@ export default function MerchandiseManagement() {
     setLoading(false);
   }
 
-  async function handleCreateProduct(e: React.FormEvent) {
+  async function handleSubmitProduct(e: React.FormEvent) {
     e.preventDefault();
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) return;
 
-    const { data, error } = await supabase
-      .from('products')
-      .insert([
-        {
-          ...newProduct,
-          seller_id: user.id,
-        },
-      ])
-      .select();
+    const productData = {
+      name: newProduct.name,
+      code: uid.rnd(),
+      description: newProduct.description,
+      price: newProduct.price,
+      product_category_id: newProduct.product_category_id,
+      stock: newProduct.stock,
+      images: newProduct.images,
+      seller_id: user.id,
+    };
+
+    let result;
+    if (newProduct.id) {
+      // Update existing product
+      result = await supabase
+        .from('products')
+        .update(productData)
+        .eq('id', newProduct.id)
+        .select();
+    } else {
+      // Create new product
+      result = await supabase.from('products').insert([productData]).select();
+    }
+
+    const { data, error } = result;
 
     if (error) {
-      console.error('Error creating product:', error);
+      console.error('Error saving product:', error);
       toast({
         title: 'Error',
-        description: 'Failed to create product. Please try again.',
+        description: 'Failed to save product. Please try again.',
         variant: 'destructive',
       });
     } else {
-      setProducts([data[0], ...products]);
-      setNewProduct({
-        name: '',
-        description: '',
-        price: '',
-        category: '',
-        stock: '',
-        images: [],
-      });
-      toast({
-        title: 'Success',
-        description: 'Product created successfully!',
-      });
+      // Fetch the updated product with category information
+      const { data: updatedProduct, error: fetchError } = await supabase
+        .from('products')
+        .select('*, category:product_categories(name)')
+        .eq('id', data[0].id)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching updated product:', fetchError);
+      } else {
+        if (newProduct.id) {
+          setProducts(
+            products.map((p) =>
+              p.id === updatedProduct.id ? updatedProduct : p
+            )
+          );
+        } else {
+          setProducts([updatedProduct, ...products]);
+        }
+        resetForm();
+        setIsDialogOpen(false);
+        toast({
+          title: 'Success',
+          description: `Product ${
+            newProduct.id ? 'updated' : 'created'
+          } successfully!`,
+        });
+      }
     }
   }
 
@@ -142,8 +181,62 @@ export default function MerchandiseManagement() {
   const handleImageUpload = (urls: string[]) => {
     setNewProduct((prev) => ({
       ...prev,
-      images: urls,
+      images: [...prev.images, ...urls],
     }));
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setNewProduct((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleCreateNewProductCategory = async (name: string) => {
+    const { data, error } = await supabase
+      .from('product_categories')
+      .insert({ name })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating product category:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to create new category. Please try again.',
+        variant: 'destructive',
+      });
+      return null;
+    }
+
+    setProductCategories((prev) => [...prev, data]);
+    return data.id;
+  };
+
+  const handleEditProduct = (product) => {
+    setNewProduct({
+      id: product.id,
+      code: ShortUniqueId(),
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      product_category_id: product.product_category_id,
+      stock: product.stock,
+      images: product.images,
+    });
+    setIsDialogOpen(true);
+  };
+
+  const resetForm = () => {
+    setNewProduct({
+      id: '',
+      name: '',
+      description: '',
+      price: '',
+      product_category_id: '',
+      stock: '',
+      images: [],
+    });
   };
 
   if (loading) {
@@ -154,78 +247,125 @@ export default function MerchandiseManagement() {
     <div className='p-4'>
       <h1 className='text-2xl font-bold mb-4'>Merchandise Management</h1>
 
-      <Dialog>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
-          <Button className='mb-4'>
+          <Button className='mb-4' onClick={resetForm}>
             <Plus className='mr-2 h-4 w-4' /> Add New Product
           </Button>
         </DialogTrigger>
-        <DialogContent className='max-h-[90vh] overflow-y-auto sm:max-w-[425px]'>
+        <DialogContent className='max-h-[90vh] overflow-y-auto sm:max-w-[625px]'>
           <DialogHeader>
-            <DialogTitle>Add New Product</DialogTitle>
+            <DialogTitle>
+              {newProduct.id ? 'Edit Product' : 'Add New Product'}
+            </DialogTitle>
           </DialogHeader>
           <div className='max-h-[70vh] overflow-y-auto pr-6'>
-            <form onSubmit={handleCreateProduct} className='space-y-4'>
-              <Input
-                placeholder='Product Name'
-                value={newProduct.name}
-                onChange={(e) =>
-                  setNewProduct({ ...newProduct, name: e.target.value })
-                }
-                required
-              />
-              <Textarea
-                placeholder='Description'
-                value={newProduct.description}
-                onChange={(e) =>
-                  setNewProduct({ ...newProduct, description: e.target.value })
-                }
-                required
-              />
-              <Input
-                type='number'
-                placeholder='Price'
-                value={newProduct.price}
-                onChange={(e) =>
-                  setNewProduct({ ...newProduct, price: e.target.value })
-                }
-                required
-              />
-              <Select
-                value={newProduct.category}
-                onValueChange={(value) =>
-                  setNewProduct({ ...newProduct, category: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder='Select Category' />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value='clothing'>Clothing</SelectItem>
-                  <SelectItem value='accessories'>Accessories</SelectItem>
-                  <SelectItem value='digital'>Digital Downloads</SelectItem>
-                  <SelectItem value='other'>Other</SelectItem>
-                </SelectContent>
-              </Select>
-              <Input
-                type='number'
-                placeholder='Stock'
-                value={newProduct.stock}
-                onChange={(e) =>
-                  setNewProduct({ ...newProduct, stock: e.target.value })
-                }
-                required
-              />
-              <div className='space-y-2'>
-                <Label>Product Images</Label>
-                <ImageUploader
-                  onUploadComplete={(urls) =>
-                    setNewProduct({ ...newProduct, images: urls })
+            <form
+              onSubmit={handleSubmitProduct}
+              className='grid grid-cols-2 gap-4'
+            >
+              <div className='col-span-2'>
+                <Label htmlFor='name'>Product Name</Label>
+                <Input
+                  id='name'
+                  placeholder='Product Name'
+                  value={newProduct.name}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, name: e.target.value })
                   }
+                  required
+                />
+              </div>
+              <div className='col-span-2'>
+                <Label htmlFor='description'>Description</Label>
+                <Textarea
+                  id='description'
+                  placeholder='Description'
+                  value={newProduct.description}
+                  onChange={(e) =>
+                    setNewProduct({
+                      ...newProduct,
+                      description: e.target.value,
+                    })
+                  }
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor='price'>Price</Label>
+                <Input
+                  id='price'
+                  type='number'
+                  placeholder='Price'
+                  value={newProduct.price}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, price: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor='stock'>Stock</Label>
+                <Input
+                  id='stock'
+                  type='number'
+                  placeholder='Stock'
+                  value={newProduct.stock}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, stock: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div className='col-span-2'>
+                <Label htmlFor='category'>Category</Label>
+                <SearchableSelect
+                  id='category'
+                  name='category'
+                  displayName='Category'
+                  value={newProduct.product_category_id}
+                  onChange={(value) => {
+                    setNewProduct((prev) => ({
+                      ...prev,
+                      product_category_id: value,
+                    }));
+                  }}
+                  onCreateNew={handleCreateNewProductCategory}
+                  options={productCategories}
+                  placeholder='Select or create a category'
+                />
+              </div>
+              <div className='col-span-2'>
+                <Label>Product Images</Label>
+                <div className='grid grid-cols-3 gap-2 mb-2'>
+                  {newProduct.images.map((imageUrl, index) => (
+                    <div key={index} className='relative'>
+                      <Image
+                        src={imageUrl || '/placeholder.svg'}
+                        alt={`Product image ${index + 1}`}
+                        width={100}
+                        height={100}
+                        className='object-cover rounded'
+                      />
+                      <Button
+                        variant='destructive'
+                        size='icon'
+                        className='absolute top-0 right-0 h-6 w-6'
+                        onClick={() => handleRemoveImage(index)}
+                      >
+                        <X className='h-4 w-4' />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                <ImageUploader
+                  onUploadComplete={handleImageUpload}
                   maxSizeInMB={5}
                 />
               </div>
-              <Button type='submit'>Add Product</Button>
+              <Button type='submit' className='col-span-2'>
+                {newProduct.id ? 'Update Product' : 'Add Product'}
+              </Button>
             </form>
           </div>
         </DialogContent>
@@ -246,8 +386,8 @@ export default function MerchandiseManagement() {
           {products.map((product) => (
             <TableRow key={product.id}>
               <TableCell>{product.name}</TableCell>
-              <TableCell>{product.category}</TableCell>
-              <TableCell>${product.price}</TableCell>
+              <TableCell>{product.category?.name}</TableCell>
+              <TableCell>R{product.price}</TableCell>
               <TableCell>{product.stock}</TableCell>
               <TableCell>
                 <div className='flex space-x-2'>
@@ -268,9 +408,7 @@ export default function MerchandiseManagement() {
                   variant='outline'
                   size='sm'
                   className='mr-2'
-                  onClick={() =>
-                    router.push(`/dashboard/merchandise/${product.id}`)
-                  }
+                  onClick={() => handleEditProduct(product)}
                 >
                   <Edit className='h-4 w-4 mr-1' /> Edit
                 </Button>
