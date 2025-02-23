@@ -66,6 +66,15 @@ export default function MerchItemClient({ initialProduct }) {
   async function processOrder(orderDetails: OrderDetails) {
     setPurchaseLoading(true);
     setIsOrderModalOpen(false);
+    if (!currentUser) {
+      toast({
+        title: 'Error',
+        description: 'You need to be logged in to make a purchase.',
+        variant: 'destructive',
+      });
+      setPurchaseLoading(false);
+      return;
+    }
 
     try {
       const transactionId = short().toUUID(short.generate());
