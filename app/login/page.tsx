@@ -139,7 +139,7 @@ export default function Login() {
               </Button>
             </form>
 
-            <div className='mt-4'>
+            {/* <div className='mt-4'>
               <Button
                 type='button'
                 variant='outline'
@@ -150,7 +150,7 @@ export default function Login() {
                 <FcGoogle className='w-5 h-5' />
                 {loading ? 'Connecting...' : 'Ngena Nge Google Account'}
               </Button>
-            </div>
+            </div> */}
 
             <div className='mt-4 text-center 0'>
               <Button

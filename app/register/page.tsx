@@ -251,7 +251,7 @@ export default function Register() {
             </div>
           </div>
 
-          <Button
+          {/* <Button
             type='button'
             variant='outline'
             className='w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-100 hover:text-red-500 text-black'
@@ -260,7 +260,7 @@ export default function Register() {
           >
             <FcGoogle className='w-5 h-5' />
             Register with Google
-          </Button>
+          </Button> */}
 
           <p className='text-center text-gray-400 text-sm'>
             Already have an account?{' '}
