@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { toast } from '@/hooks/use-toast';
-import { Facebook } from 'lucide-react';
+import { ChromeIcon as Google } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -69,25 +69,24 @@ export default function Login() {
     setLoading(false);
   }
 
-  async function handleFacebookLogin() {
+  async function handleGoogleLogin() {
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'facebook',
+        provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
-          scopes: 'email,public_profile',
         },
       });
 
       if (error) throw error;
 
-      // If there's no error, the user will be redirected to Facebook for authentication
+      // If there's no error, the user will be redirected to Google for authentication
     } catch (error) {
-      console.error('Facebook login error:', error);
+      console.error('Google login error:', error);
       toast({
         title: 'Error',
-        description: 'Failed to login with Facebook. Please try again.',
+        description: 'Failed to login with Google. Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -142,12 +141,12 @@ export default function Login() {
               <Button
                 type='button'
                 variant='outline'
-                className='w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white'
-                onClick={handleFacebookLogin}
+                className='w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-100 text-black'
+                onClick={handleGoogleLogin}
                 disabled={loading}
               >
-                <Facebook className='w-5 h-5' />
-                {loading ? 'Connecting...' : 'Continue with Facebook'}
+                <Google className='w-5 h-5' />
+                {loading ? 'Connecting...' : 'Continue with Google'}
               </Button>
             </div>
 

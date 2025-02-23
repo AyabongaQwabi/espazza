@@ -1,5 +1,7 @@
 'use client';
 
+import type React from 'react';
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -7,11 +9,8 @@ import { Input } from '@/components/ui/input';
 import { PasswordField } from '@/components/ui/password-field';
 import Link from 'next/link';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import { Facebook } from 'lucide-react';
+import { ChromeIcon as Google } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000; // 1 second
 
 export default function Register() {
   const router = useRouter();
@@ -153,10 +152,10 @@ export default function Register() {
     }
   }
 
-  async function handleFacebookSignUp() {
+  async function handleGoogleSignUp() {
     setLoading(true);
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'facebook',
+      provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
       },
@@ -254,12 +253,12 @@ export default function Register() {
           <Button
             type='button'
             variant='outline'
-            className='w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white'
-            onClick={handleFacebookSignUp}
+            className='w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-100 text-black'
+            onClick={handleGoogleSignUp}
             disabled={loading}
           >
-            <Facebook className='w-5 h-5' />
-            Continue with Facebook
+            <Google className='w-5 h-5' />
+            Continue with Google
           </Button>
 
           <p className='text-center text-gray-400 text-sm'>
