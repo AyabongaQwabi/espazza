@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { SearchableSelect } from '@/components/SearchableSelect';
 
 const PROVINCES = [
   'Eastern Cape',
@@ -45,6 +46,7 @@ export default function BasicInfoPage() {
   const [recordLabels, setRecordLabels] = useState<any[]>([]);
   const [distributors, setDistributors] = useState<any[]>([]);
   const [newDistributor, setNewDistributor] = useState('');
+  const [genres, setGenres] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     government_name: '',
     artist_name: '',
@@ -170,6 +172,47 @@ export default function BasicInfoPage() {
       setLoading(false);
     }
   }
+
+  const handleNewGenreCreation = async (name: string) => {
+    const { data, error } = await supabase
+      .from('genres')
+      .insert({ name })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating product category:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to create new category. Please try again.',
+        variant: 'destructive',
+      });
+      return null;
+    }
+
+    setGenres((prev) => [...prev, data]);
+    return data.id;
+  };
+
+  useEffect(() => {
+    const loadOptions = async () => {
+      const { data: genresData } = await supabase
+        .from('genres')
+        .select('id, name');
+      if (genresData) setGenres(genresData);
+    };
+    loadOptions();
+  }, []);
+
+  const getGenreNameFromId = (id: string, genres: any[]) => {
+    const genre = genres.find((genre) => genre.id === id);
+    return genre ? genre.name : '';
+  };
+
+  const getGenreIdFromName = (name: string, genres: any[]) => {
+    const genre = genres.find((genre) => genre.name === name);
+    return genre ? genre.id : '';
+  };
 
   return (
     <div className='min-h-screen bg-zinc-900 p-8'>
@@ -381,13 +424,21 @@ export default function BasicInfoPage() {
 
             <div className='space-y-4'>
               <Label htmlFor='genre'>Genre</Label>
-              <Input
+              <SearchableSelect
                 id='genre'
-                value={formData.genre}
-                onChange={(e) =>
-                  setFormData({ ...formData, genre: e.target.value })
-                }
-                required
+                name='genre'
+                displayName='Genre'
+                value={getGenreIdFromName(formData.genre, genres)}
+                onChange={(value) => {
+                  console.log('setting value', value);
+                  setFormData((prev) => ({
+                    ...prev,
+                    genre: getGenreNameFromId(value, genres),
+                  }));
+                }}
+                onCreateNew={handleNewGenreCreation}
+                options={genres}
+                placeholder='Select or create a category'
               />
             </div>
 
