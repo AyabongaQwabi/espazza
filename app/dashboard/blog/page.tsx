@@ -31,7 +31,7 @@ export default function DashboardBlog() {
 
   if (loading) {
     return (
-      <div className='p-8'>
+      <div className='p-8 w-full h-screen flex items-center justify-center'>
         <p className='text-zinc-400'>Loading...</p>
       </div>
     );

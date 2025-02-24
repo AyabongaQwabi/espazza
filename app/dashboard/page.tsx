@@ -14,6 +14,49 @@ import {
 } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion } from 'framer-motion';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { YoutubeIcon } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from '@/hooks/use-toast';
+import sign from 'jwt-encode';
+import { EncryptJWT } from 'jose';
+import axios from 'axios';
+import crypto from 'crypto-js';
+import url from 'url';
+import short from 'short-uuid';
+import ShortUniqueId from 'short-unique-id';
+
+const SECRET_KEY = new Uint8Array(32);
+const keyMaterial = new TextEncoder().encode(
+  process.env.NEXT_PUBLIC_SECRET_KEY
+);
+SECRET_KEY.set(keyMaterial.slice(0, 32));
+const API_ENDPOINT = 'https://api.ikhokha.com/public-api/v1/api/payment';
+const APPLICATION_ID = process.env.NEXT_IKHOKA_APP_ID;
+const APPLICATION_KEY = process.env.NEXT_PUBLIC_IKHOKA_APP_KEY;
+const ITEMS_PER_PAGE = 12;
+
+async function encryptData(data: any) {
+  try {
+    console.log('Encrypting data:', data);
+    console.log('SECRET_KEY:', SECRET_KEY);
+    const jwt = await new EncryptJWT(data)
+      .setProtectedHeader({ alg: 'dir', enc: 'A256GCM' })
+      .setIssuedAt()
+      .encrypt(SECRET_KEY);
+    return jwt;
+  } catch (error) {
+    console.error('Encryption error:', error);
+    throw new Error('Failed to encrypt data');
+  }
+}
 
 export default function DashboardPage() {
   const [profile, setProfile] = useState<any>(null);
@@ -21,6 +64,9 @@ export default function DashboardPage() {
   const [events, setEvents] = useState<any[]>([]);
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [youtubeLink, setYoutubeLink] = useState('');
+  const [promotionalText, setPromotionalText] = useState('');
+  const [promotingVideo, setPromotingVideo] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -35,7 +81,7 @@ export default function DashboardPage() {
         .select('*')
         .eq('id', user.id)
         .single();
-
+      console.log('PROFILE', profileData);
       if (profileData) {
         setProfile(profileData);
       }
@@ -82,9 +128,128 @@ export default function DashboardPage() {
     loadData();
   }, []);
 
+  function createPayloadToSign(urlPath: string, body = '') {
+    try {
+      const parsedUrl = url.parse(urlPath);
+      const basePath = parsedUrl.path;
+      if (!basePath) throw new Error('No basePath in url');
+      const payload = basePath + body;
+      return jsStringEscape(payload);
+    } catch (error) {
+      console.error('Error on createPayloadToSign:', error);
+      return '';
+    }
+  }
+
+  function jsStringEscape(str: string) {
+    return str.replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
+  }
+
+  const handlePromoteVideo = async () => {
+    try {
+      setPromotingVideo(true);
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: 'Error',
+          description: 'User not authenticated',
+          variant: 'destructive',
+        });
+        setPromotingVideo(false);
+        return;
+      }
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', user.id)
+        .single();
+
+      if (!profileData?.username) {
+        toast({
+          title: 'Error',
+          description: 'Could not find user profile',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const transactionId = short().toUUID(short.generate());
+      const totalPrice = 100 * 100; // Convert to cents
+      const request = {
+        entityID: youtubeLink,
+        externalEntityID: youtubeLink,
+        amount: totalPrice,
+        currency: 'ZAR',
+        requesterUrl: 'https://espazza.co.za/dashboard',
+        description: `Purchase of YT Link Promotion: ${youtubeLink}}`,
+        paymentReference: `${user.id}-yt-promo-${transactionId}`,
+        mode: 'live',
+        externalTransactionID: transactionId,
+        urls: {
+          callbackUrl: 'https://espazza.co.za/api/payment/callback',
+          successPageUrl: `https://espazza.co.za/dashboard/success?transaction_id=${transactionId}`,
+          failurePageUrl: 'https://espazza.co.za/failure',
+          cancelUrl: 'https://espazza.co.za/cancel',
+        },
+      };
+
+      const requestBody = JSON.stringify(request);
+      const payloadToSign = createPayloadToSign(API_ENDPOINT, requestBody);
+      const signature = crypto
+        .HmacSHA256(payloadToSign, APPLICATION_KEY.trim())
+        .toString(crypto.enc.Hex);
+
+      const response = await axios.post('/api/payment', request);
+
+      if (response.data?.paylinkUrl) {
+        const { data, error } = await supabase
+          .from('video_promotion_queue')
+          .insert({
+            youtube_link: youtubeLink,
+            promotional_text: promotionalText,
+            user_id: user.id,
+            username: profileData.username,
+            transaction_id: transactionId,
+            status: 'not-paid',
+            created_at: new Date().toISOString(),
+          });
+        if (error) {
+          toast({
+            title: 'Error',
+            description: 'Failed to promote video',
+            variant: 'destructive',
+          });
+          setPromotingVideo(false);
+          throw error;
+        }
+
+        window.location.href = response.data.paylinkUrl;
+      } else {
+        setPromotingVideo(false);
+        throw new Error('No payment URL received');
+      }
+
+      // Insert into video_promotion_queue table
+
+      toast({
+        title: 'Success',
+        description: 'Video promotion request has been queued',
+      });
+    } catch (error) {
+      console.error('Error promoting video:', error);
+      toast({
+        title: 'Error',
+        description: 'An unexpected error occurred',
+        variant: 'destructive',
+      });
+    }
+  };
+
   if (loading) {
     return (
-      <div className='p-8'>
+      <div className='p-8 w-full h-screen flex items-center justify-center'>
         <p className='text-zinc-400'>Loading...</p>
       </div>
     );
@@ -136,6 +301,42 @@ export default function DashboardPage() {
             New Message
           </Link>
         </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant='outline'>
+              <YoutubeIcon className='h-4 w-4 mr-2' />
+              Promote YouTube Video
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Promote YouTube Video</DialogTitle>
+            </DialogHeader>
+            <div className='grid gap-4 py-4'>
+              <div className='grid gap-2'>
+                <label htmlFor='youtubeLink'>YouTube Video Link</label>
+                <Input
+                  id='youtubeLink'
+                  value={youtubeLink}
+                  onChange={(e) => setYoutubeLink(e.target.value)}
+                  placeholder='https://www.youtube.com/watch?v=...'
+                />
+              </div>
+              <div className='grid gap-2'>
+                <label htmlFor='promotionalText'>Promotional Text</label>
+                <Textarea
+                  id='promotionalText'
+                  value={promotionalText}
+                  onChange={(e) => setPromotionalText(e.target.value)}
+                  placeholder='Enter your promotional text here...'
+                />
+              </div>
+            </div>
+            <Button disabled={promotingVideo} onClick={handlePromoteVideo}>
+              {promotingVideo ? 'Saving...' : 'Promote Video'}
+            </Button>
+          </DialogContent>
+        </Dialog>
       </motion.div>
 
       {/* Stats Grid */}

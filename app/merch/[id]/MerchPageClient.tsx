@@ -21,8 +21,8 @@ import {
 } from '@/components/OrderDetailsModal';
 
 const API_ENDPOINT = 'https://api.ikhokha.com/public-api/v1/api/payment';
-const APPLICATION_ID = 'IKF3SALX1F82BZ7IT6914BEGBEWQ55Y7';
-const APPLICATION_KEY = 'DaNAI4IUXeHdZiliiDnrxwWYPm2AE1Al';
+const APPLICATION_ID = process.env.NEXT_IKHOKA_APP_ID;
+const APPLICATION_KEY = process.env.NEXT_PUBLIC_IKHOKA_APP_KEY;
 
 export default function MerchItemClient({ initialProduct }) {
   const [product, setProduct] = useState(initialProduct);
