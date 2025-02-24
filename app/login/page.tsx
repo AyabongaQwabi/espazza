@@ -9,8 +9,7 @@ import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { toast } from '@/hooks/use-toast';
-import { ChromeIcon as Google } from 'lucide-react';
-import { FcGoogle } from 'react-icons/fc';
+import { Eye, EyeOff } from 'lucide-react';
 import { FaMagic } from 'react-icons/fa';
 
 export default function Login() {
@@ -18,6 +17,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const supabase = createClientComponentClient();
 
@@ -118,16 +118,27 @@ export default function Login() {
                   className='w-full'
                 />
               </div>
-              <div>
+              <div className='relative'>
                 <Input
                   name='password'
-                  type='password'
+                  type={showPassword ? 'text' : 'password'}
                   placeholder='Password'
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className='w-full'
+                  className='w-full pr-10'
                 />
+                <button
+                  type='button'
+                  className='absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5'
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className='h-5 w-5 text-gray-400' />
+                  ) : (
+                    <Eye className='h-5 w-5 text-gray-400' />
+                  )}
+                </button>
               </div>
 
               <Button
@@ -138,19 +149,6 @@ export default function Login() {
                 {loading ? 'Logging in...' : 'Login'}
               </Button>
             </form>
-
-            {/* <div className='mt-4'>
-              <Button
-                type='button'
-                variant='outline'
-                className='w-full flex items-center justify-center gap-2 bg-white hover:text-red-500  hover:bg-gray-100 text-black'
-                onClick={handleGoogleLogin}
-                disabled={loading}
-              >
-                <FcGoogle className='w-5 h-5' />
-                {loading ? 'Connecting...' : 'Ngena Nge Google Account'}
-              </Button>
-            </div> */}
 
             <div className='mt-4 text-center 0'>
               <Button
