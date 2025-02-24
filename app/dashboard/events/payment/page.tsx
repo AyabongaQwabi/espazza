@@ -113,7 +113,7 @@ export default function EventPaymentPage() {
       if (response.data?.paylinkUrl) {
         // Create payment record
         const { error: purchaseError } = await supabase
-          .from('purchases')
+          .from('event_purchases')
           .insert([
             {
               event_id: event.id,
