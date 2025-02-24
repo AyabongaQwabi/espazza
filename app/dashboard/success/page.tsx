@@ -83,7 +83,7 @@ function SuccessPage() {
             </p>
           </div>
           <div className='mt-6 text-center'>
-            <Link href='/dashbaord'>
+            <Link href='/dashboard'>
               <Button>Back to Dashboard</Button>
             </Link>
           </div>
