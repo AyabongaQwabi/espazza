@@ -121,10 +121,10 @@ export function PasswordField({
       </div>
       <div className='mt-2 text-sm'>
         <PasswordCriteriaItem met={criteria.hasUppercase}>
-          Inoo nobumba omkhulu
+          Inoo nobumba abakhulu
         </PasswordCriteriaItem>
         <PasswordCriteriaItem met={criteria.hasLowercase}>
-          Inoo nobumba omncinci
+          Inoo nobumba abancinci
         </PasswordCriteriaItem>
         <PasswordCriteriaItem met={criteria.hasNumber}>
           Inenani
