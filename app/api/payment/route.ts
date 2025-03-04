@@ -32,7 +32,12 @@ function jsStringEscape(str: string) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    console.log('\n\nPayment API request body:', body);
+    console.log(
+      '\n\nPayment API request body:',
+      body,
+      APPLICATION_KEY,
+      APPLICATION_ID
+    );
 
     const requestBody = JSON.stringify(body);
     const payloadToSign = createPayloadToSign(API_ENDPOINT, requestBody);
@@ -52,9 +57,10 @@ export async function POST(request: Request) {
       },
     });
 
-    console.log('Payment API response:', response.data);
-    return NextResponse.json(response.data);
+    console.log('Payment API response:', response);
+    return NextResponse.json(response);
   } catch (error: any) {
+    console.log(error);
     console.error('Payment API error:', error.response?.data || error.message);
     return NextResponse.json(
       { error: 'Failed to process payment request' },

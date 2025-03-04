@@ -195,12 +195,6 @@ export default function DashboardPage() {
         },
       };
 
-      const requestBody = JSON.stringify(request);
-      const payloadToSign = createPayloadToSign(API_ENDPOINT, requestBody);
-      const signature = crypto
-        .HmacSHA256(payloadToSign, APPLICATION_KEY.trim())
-        .toString(crypto.enc.Hex);
-
       const response = await axios.post('/api/payment', request);
 
       if (response.data?.paylinkUrl) {

@@ -60,6 +60,7 @@ const navItems = [
     label: 'Orders',
   },
   { href: '/dashboard/bookings', icon: BookmarkIcon, label: 'Manage Bookings' },
+  { href: '/dashboard/ikhoka', icon: BookmarkIcon, label: 'iKhoka' },
   { href: '/dashboard/messages', icon: MessageSquare, label: 'Messages' },
 ];
 
