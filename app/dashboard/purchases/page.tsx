@@ -98,6 +98,9 @@ export default function TicketsPage() {
                 <CardTitle className='flex items-center justify-between'>
                   <span>{r.release.profiles.artist_name}</span>
                 </CardTitle>
+                <p className='text-sm text-zinc-400'>
+                  Payment Status : {r.status}
+                </p>
               </CardHeader>
               <CardContent>
                 <div className='flex items-center gap-4 mb-4'>
