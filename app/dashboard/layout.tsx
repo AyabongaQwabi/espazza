@@ -171,19 +171,9 @@ export default function DashboardLayout({
   return (
     <SidebarProvider defaultOpen>
       <div className='min-h-screen bg-black flex'>
-        {/* Sidebar is now part of the main layout structure */}
-        <div className='hidden md:block'>
-          <DashboardSidebar profile={profile} pathname={pathname} />
-        </div>
+        <DashboardSidebar profile={profile} pathname={pathname} />
 
-        {/* Mobile sidebar will be handled by the SidebarProvider */}
-        <div className='md:hidden'>
-          <Sidebar className='border-r border-zinc-800'>
-            <DashboardSidebar profile={profile} pathname={pathname} />
-          </Sidebar>
-        </div>
-
-        {/* Main Content - now properly separated from sidebar */}
+        {/* Main Content */}
         <div className='flex-1 flex flex-col w-full'>
           <div className='md:hidden h-16' /> {/* Spacer for mobile header */}
           <div className='md:hidden fixed top-0 left-0 right-0 z-40 bg-zinc-900 border-b border-zinc-800 p-4'>
@@ -220,7 +210,7 @@ function DashboardSidebar({
   const router = useRouter();
 
   return (
-    <>
+    <Sidebar className='border-r border-zinc-800'>
       <SidebarHeader className='border-b border-zinc-800'>
         <div className='flex items-center gap-2 px-2 py-3'>
           <img
@@ -331,7 +321,7 @@ function DashboardSidebar({
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
-    </>
+    </Sidebar>
   );
 }
 
