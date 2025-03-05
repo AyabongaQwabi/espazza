@@ -209,7 +209,14 @@ export default function ReleasesPage() {
   };
 
   const handlePaymentMethodSelection = async (method: string) => {
-    if (!selectedRelease || !currentUser) return;
+    if (!selectedRelease || !currentUser) {
+      toast({
+        title: 'Warning',
+        description: 'Invalid release or user data. Please log in again.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     const totalPrice =
       calculateReleasePrice(selectedRelease.tracks) + SURCHARGE;
