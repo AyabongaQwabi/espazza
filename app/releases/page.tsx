@@ -241,6 +241,7 @@ export default function ReleasesPage() {
     totalPrice: number,
     transactionId: string
   ) {
+    console.log('iKhoka payment:', release, totalPrice, transactionId);
     try {
       const request = {
         entityID: release.id,
@@ -287,6 +288,7 @@ export default function ReleasesPage() {
     totalPrice: number,
     transactionId: string
   ) {
+    console.log('PayPal payment:', release, totalPrice, transactionId);
     try {
       const { paypal } = release.record_owner.payment_credentials;
 
@@ -334,6 +336,7 @@ export default function ReleasesPage() {
     totalPrice: number,
     transactionId: string
   ) {
+    console.log('PayFast payment:', release, totalPrice, transactionId);
     try {
       const { merchant_id, merchant_key } =
         release.record_owner.payment_credentials.payfast!;
