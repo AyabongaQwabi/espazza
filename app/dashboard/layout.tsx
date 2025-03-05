@@ -104,7 +104,7 @@ const navGroups = [
         label: 'Music Bought',
       },
       { href: '/dashboard/tickets', icon: Ticket, label: 'Tickets Bought' },
-      { href: '/dashboard/ikhoka', icon: CreditCard, label: 'iKhoka' },
+      { href: '/dashboard/ikhoka', icon: CreditCard, label: 'Payments' },
     ],
   },
 ];

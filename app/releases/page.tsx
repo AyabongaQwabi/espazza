@@ -23,8 +23,6 @@ import { Slider } from '@/components/ui/slider';
 import { toast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import axios from 'axios';
-import crypto from 'crypto-js';
-import url from 'url';
 import short from 'short-uuid';
 import {
   Play,
@@ -43,10 +41,15 @@ import {
   Share2,
 } from 'lucide-react';
 import Link from 'next/link';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { postToURL } from '@/lib/payfast';
 
-const API_ENDPOINT = 'https://api.ikhokha.com/public-api/v1/api/payment';
-const APPLICATION_ID = process.env.NEXT_IKHOKA_APP_ID;
-const APPLICATION_KEY = process.env.NEXT_PUBLIC_IKHOKA_APP_KEY;
 const SURCHARGE = 2;
 const ITEMS_PER_PAGE = 10;
 
@@ -81,6 +84,10 @@ interface Track {
   release_date: string;
 }
 
+const convertZarTOUSD = (zarAmount: number) => {
+  return zarAmount / 18.5;
+};
+
 export default function ReleasesPage() {
   const [releases, setReleases] = useState<Release[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,6 +102,8 @@ export default function ReleasesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [selectedRelease, setSelectedRelease] = useState<Release | null>(null);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
 
   const router = useRouter();
   const supabase = createClientComponentClient();
@@ -106,7 +115,12 @@ export default function ReleasesPage() {
         *,
         genre:genres(id, name),
         record_label:record_labels(name),
-        record_owner:profiles(artist_name, username)
+        record_owner:profiles!inner(
+          id,
+          artist_name, 
+          username,
+          payment_credentials(ikhoka, payfast, paypal)
+        )
       `,
       { count: 'exact' }
     );
@@ -141,7 +155,20 @@ export default function ReleasesPage() {
     if (error) {
       console.error('Error fetching releases:', error);
     } else {
-      setReleases(data || []);
+      // Process the data to structure payment_credentials correctly
+      const processedData = data?.map((release) => ({
+        ...release,
+        record_owner: {
+          ...release.record_owner,
+          payment_credentials: {
+            ikhoka: release.record_owner.payment_credentials[0]?.ikhoka,
+            payfast: release.record_owner.payment_credentials[0]?.payfast,
+            paypal: release.record_owner.payment_credentials[0]?.paypal,
+          },
+        },
+      }));
+      console.log('processed data', processedData);
+      setReleases(processedData || []);
       setTotalPages(Math.ceil((count || 0) / ITEMS_PER_PAGE));
     }
     setLoading(false);
@@ -176,54 +203,49 @@ export default function ReleasesPage() {
     }
   }
 
-  function createPayloadToSign(urlPath: string, body = '') {
-    try {
-      const parsedUrl = url.parse(urlPath);
-      const basePath = parsedUrl.path;
-      if (!basePath) throw new Error('No basePath in url');
-      const payload = basePath + body;
-      return jsStringEscape(payload);
-    } catch (error) {
-      console.error('Error on createPayloadToSign:', error);
-      return '';
-    }
-  }
+  const handlePurchase = (release: Release) => {
+    setSelectedRelease(release);
+    setPaymentModalOpen(true);
+  };
 
-  function jsStringEscape(str: string) {
-    try {
-      return str.replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
-    } catch (error) {
-      console.error('Error on jsStringEscape:', error);
-      return '';
-    }
-  }
+  const handlePaymentMethodSelection = async (method: string) => {
+    if (!selectedRelease || !currentUser) return;
 
-  async function handlePurchase(releaseId: string) {
-    if (!currentUser) {
-      toast({
-        title: 'Authentication Required',
-        description: 'Please log in to purchase releases',
-        variant: 'destructive',
-      });
-      router.push('/login');
-      return;
+    const totalPrice =
+      calculateReleasePrice(selectedRelease.tracks) + SURCHARGE;
+    const transactionId = short().toUUID(short.generate());
+
+    switch (method) {
+      case 'ikhoka':
+        await handleIkhokaPayment(selectedRelease, totalPrice, transactionId);
+        break;
+      case 'paypal':
+        await handlePaypalPayment(selectedRelease, totalPrice, transactionId);
+        break;
+      case 'payfast':
+        await handlePayfastPayment(selectedRelease, totalPrice, transactionId);
+        break;
+      default:
+        toast({
+          title: 'Error',
+          description: 'Invalid payment method selected',
+          variant: 'destructive',
+        });
     }
 
-    const release = releases.find((r) => r.id === releaseId);
-    if (!release) return;
+    setPaymentModalOpen(false);
+  };
 
-    setPurchaseLoading(true);
-
+  async function handleIkhokaPayment(
+    release: Release,
+    totalPrice: number,
+    transactionId: string
+  ) {
     try {
-      const transactionId = short().toUUID(short.generate());
-      const totalPrice =
-        (Number.parseFloat(calculateReleasePrice(release.tracks)) + SURCHARGE) *
-        100;
-      console.log('totalPrice', totalPrice);
       const request = {
         entityID: release.id,
         externalEntityID: release.id,
-        amount: totalPrice, // Convert to cents
+        amount: totalPrice * 100, // Convert to cents
         currency: 'ZAR',
         requesterUrl: 'https://espazza.co.za/releases',
         description: `Purchase of ${release.title} (includes R${SURCHARGE} service fee)`,
@@ -238,57 +260,111 @@ export default function ReleasesPage() {
         },
       };
 
-      const requestBody = JSON.stringify(request);
-      const payloadToSign = createPayloadToSign(API_ENDPOINT, requestBody);
-      const signature = crypto
-        .HmacSHA256(payloadToSign, APPLICATION_KEY.trim())
-        .toString(crypto.enc.Hex);
-
       const response = await axios.post('/api/payment', request);
-      console.log('Payment API response:', response.data);
       if (response.data?.paylinkUrl) {
-        // Create purchase record
-        console.log({
-          release_id: release.id,
-          user_id: currentUser.id,
-          amount: totalPrice,
-          transaction_id: transactionId,
-          purchase_date: new Date(),
-          status: 'pending',
-          purchase_type: 'release',
-        });
-        const { error: purchaseError } = await supabase
-          .from('purchases')
-          .insert([
-            {
-              release_id: release.id,
-              user_id: currentUser.id,
-              amount: totalPrice,
-              transaction_id: transactionId,
-              purchase_date: new Date(),
-              status: 'pending',
-              purchase_type: 'release',
-            },
-          ]);
-
-        if (purchaseError) throw purchaseError;
-        console.log('TRANSACTION ID', transactionId);
+        await createPurchaseRecord(
+          release,
+          totalPrice,
+          transactionId,
+          'ikhoka'
+        );
         window.location.href = response.data.paylinkUrl;
       } else {
         throw new Error('No payment URL received');
       }
     } catch (error) {
-      console.error('Error creating payment:', error);
+      console.error('Error creating iKhoka payment:', error);
       toast({
         title: 'Error',
-        description: 'Failed to process purchase. Please try again.',
+        description: 'Failed to process iKhoka payment. Please try again.',
         variant: 'destructive',
       });
-    } finally {
-      setPurchaseLoading(false);
     }
   }
 
+  async function handlePaypalPayment(
+    release: Release,
+    totalPrice: number,
+    transactionId: string
+  ) {
+    try {
+      const { paypal } = release.record_owner.payment_credentials;
+
+      if (!paypal || !paypal.client_id || !paypal.secret) {
+        toast({
+          title: 'Error',
+          description: 'This artist has not set up PayPal payments.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Create order via backend
+      const response = await axios.post('/api/paypal/create-order', {
+        totalPrice: convertZarTOUSD(totalPrice),
+        currency: 'USD',
+        transactionId,
+        artistPaypalClientId: paypal.client_id,
+        artistPaypalSecret: paypal.secret,
+      });
+
+      if (response.data?.approvalUrl) {
+        await createPurchaseRecord(
+          release,
+          totalPrice,
+          transactionId,
+          'paypal'
+        );
+        window.location.href = response.data.approvalUrl;
+      } else {
+        throw new Error('No PayPal approval URL received');
+      }
+    } catch (error) {
+      console.error('Error creating PayPal payment:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to process PayPal payment. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  }
+
+  async function handlePayfastPayment(
+    release: Release,
+    totalPrice: number,
+    transactionId: string
+  ) {
+    try {
+      const { merchant_id, merchant_key } =
+        release.record_owner.payment_credentials.payfast!;
+      const paymentData = {
+        merchant_id: merchant_id,
+        merchant_key: merchant_key,
+        return_url: `https://espazza.co.za/releases/success?transaction_id=${transactionId}`,
+        cancel_url: 'https://espazza.co.za/cancel',
+        notify_url: 'https://espazza.co.za/releases/callback',
+        name_first: currentUser.user_metadata.full_name || 'Customer',
+        email_address: currentUser.email,
+        m_payment_id: transactionId,
+        amount: totalPrice.toFixed(2),
+        item_name: `Purchase of ${release.title}`,
+        item_description: `${release.title} by ${
+          release.record_owner.artist_name || release.record_owner.username
+        }`,
+        custom_str1: release.id,
+      };
+
+      await createPurchaseRecord(release, totalPrice, transactionId, 'payfast');
+      postToURL('https://sandbox.payfast.co.za/eng/process', paymentData);
+    } catch (error) {
+      console.error('Error creating PayFast payment:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to process PayFast payment. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  }
   const parseTimeString = (timeString) => {
     const [minutes, seconds] = timeString.split(':').map(Number);
     return minutes * 60 + seconds;
@@ -364,11 +440,60 @@ export default function ReleasesPage() {
     }
   };
 
+  async function createPurchaseRecord(
+    release: Release,
+    totalPrice: number,
+    transactionId: string,
+    paymentMethod: string
+  ) {
+    const { error: purchaseError } = await supabase.from('purchases').insert([
+      {
+        release_id: release.id,
+        user_id: currentUser.id,
+        amount: totalPrice,
+        transaction_id: transactionId,
+        purchase_date: new Date(),
+        status: 'pending',
+        purchase_type: 'release',
+        payment_method: paymentMethod,
+      },
+    ]);
+
+    if (purchaseError) throw purchaseError;
+  }
+
   return (
     <div className='flex flex-col min-h-screen'>
+      <Dialog open={paymentModalOpen} onOpenChange={setPaymentModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Select Payment Method</DialogTitle>
+            <DialogDescription>
+              Choose how you'd like to pay for this release
+            </DialogDescription>
+          </DialogHeader>
+          <div className='flex flex-col space-y-4'>
+            {selectedRelease?.record_owner.payment_credentials.ikhoka && (
+              <Button onClick={() => handlePaymentMethodSelection('ikhoka')}>
+                Pay with iKhoka
+              </Button>
+            )}
+            {selectedRelease?.record_owner.payment_credentials.paypal && (
+              <Button onClick={() => handlePaymentMethodSelection('paypal')}>
+                Pay with PayPal
+              </Button>
+            )}
+            {selectedRelease?.record_owner.payment_credentials.payfast && (
+              <Button onClick={() => handlePaymentMethodSelection('payfast')}>
+                Pay with PayFast
+              </Button>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
       <div className='relative h-[50vh] overflow-hidden'>
         <Image
-          src='https://source.unsplash.com/random/?music,concert'
+          src='/ndlu.jpg'
           alt='Music Hero'
           layout='fill'
           objectFit='cover'
@@ -397,7 +522,6 @@ export default function ReleasesPage() {
           </div>
         </div>
       </div>
-
       <main className='flex-grow bg-gray-100 dark:bg-gray-900' id='releases'>
         <div className='container mx-auto px-4 py-12'>
           <h2 className='text-3xl font-bold mb-8 text-center'>
@@ -576,7 +700,7 @@ export default function ReleasesPage() {
                         Share
                       </Button>
                       <Button
-                        onClick={() => handlePurchase(release.id)}
+                        onClick={() => handlePurchase(release)}
                         disabled={purchaseLoading}
                       >
                         {purchaseLoading ? 'Processing...' : 'Buy Now'}
