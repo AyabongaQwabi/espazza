@@ -52,8 +52,10 @@ export default function TicketsPage() {
       `
       )
       .eq('purchase_type', 'release')
-      .eq('status', 'complete')
+
       .order('created_at', { ascending: false });
+
+    //.eq('status', 'complete')
     console.log('user', user.id, user);
     if (error) {
       console.error('Error fetching releases:', error);
@@ -89,7 +91,7 @@ export default function TicketsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className='space-y-6 grid grid-cols-2 gap-4'>
+        <div className='space-y-6 grid grid-cols-1 gap-4'>
           {releases.map((r) => (
             <Card key={r.release.id}>
               <CardHeader>

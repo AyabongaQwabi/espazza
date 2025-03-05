@@ -85,7 +85,7 @@ export function SongPreview({
   };
 
   return (
-    <div className='flex items-center space-x-4 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 p-4 rounded-lg shadow-lg'>
+    <div className='flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 p-4 rounded-lg shadow-lg'>
       <img
         src={
           coverArt !== '' || coverArt !== null
@@ -93,12 +93,16 @@ export function SongPreview({
             : 'https://images.unsplash.com/photo-1511367461989-f85a21fda167'
         }
         alt={`${title} cover`}
-        className='w-16 h-16 rounded-md shadow-md'
+        className='w-24 h-24 sm:w-16 sm:h-16 rounded-md shadow-md'
       />
-      <div className='flex-grow'>
-        <h3 className='text-lg font-semibold text-white'>{title}</h3>
-        <p className='text-sm text-gray-200'>{artist}</p>
-        <div className='flex items-center mt-2'>
+      <div className='flex-grow w-full sm:w-auto'>
+        <h3 className='text-lg font-semibold text-white text-center sm:text-left'>
+          {title}
+        </h3>
+        <p className='text-sm text-gray-200 text-center sm:text-left'>
+          {artist}
+        </p>
+        <div className='flex flex-col sm:flex-row items-center mt-2 space-y-2 sm:space-y-0'>
           <Button
             variant='ghost'
             size='icon'
@@ -111,7 +115,7 @@ export function SongPreview({
               <Play className='h-6 w-6' />
             )}
           </Button>
-          <div className='flex-grow mx-2'>
+          <div className='flex-grow mx-2 w-full sm:w-auto'>
             <Slider
               value={[currentTime]}
               max={duration}
@@ -124,7 +128,7 @@ export function SongPreview({
               className='w-full'
             />
           </div>
-          <span className='text-xs text-white'>
+          <span className='text-xs text-white whitespace-nowrap'>
             {formatTime(currentTime)} / {formatTime(duration)}
           </span>
         </div>
