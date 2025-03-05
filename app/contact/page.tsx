@@ -26,7 +26,11 @@ export default function ContactPage() {
 
     try {
       // Validate form data
-      if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+      if (
+        !formData.name.trim() ||
+        !formData.email.trim() ||
+        !formData.message.trim()
+      ) {
         throw new Error('Please fill in all required fields');
       }
 
@@ -36,20 +40,21 @@ export default function ContactPage() {
         throw new Error('Please enter a valid email address');
       }
 
-      const { error } = await supabase
-        .from('contacts')
-        .insert([{
+      const { error } = await supabase.from('contacts').insert([
+        {
           name: formData.name.trim(),
           email: formData.email.trim(),
           phone: formData.phone.trim(),
           message: formData.message.trim(),
-        }]);
+        },
+      ]);
 
       if (error) throw error;
 
       toast({
         title: 'Message Sent',
-        description: 'Thank you for your message. We will get back to you soon.',
+        description:
+          'Thank you for your message. We will get back to you soon.',
       });
 
       // Reset form
@@ -63,7 +68,8 @@ export default function ContactPage() {
       console.error('Error sending message:', error);
       toast({
         title: 'Error',
-        description: error.message || 'Failed to send message. Please try again.',
+        description:
+          error.message || 'Failed to send message. Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -128,7 +134,7 @@ export default function ContactPage() {
                 <PhoneIcon className='h-6 w-6 text-red-600 mt-1 mr-4' />
                 <div>
                   <h3 className='text-white font-semibold mb-1'>Phone</h3>
-                  <p className='text-zinc-400'>+27 (0) 21 123 4567</p>
+                  <p className='text-zinc-400'>+27 (0) 60 311 6777</p>
                 </div>
               </div>
               <div className='flex items-start'>
@@ -136,7 +142,7 @@ export default function ContactPage() {
                 <div>
                   <h3 className='text-white font-semibold mb-1'>Address</h3>
                   <p className='text-zinc-400'>
-                    123 Main Street
+                    123 Long Street
                     <br />
                     Cape Town
                     <br />
@@ -166,7 +172,9 @@ export default function ContactPage() {
                 </label>
                 <Input
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   required
                   className='w-full'
                   placeholder='Enter your name'
@@ -179,7 +187,9 @@ export default function ContactPage() {
                 <Input
                   type='email'
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   required
                   className='w-full'
                   placeholder='Enter your email'
@@ -192,7 +202,9 @@ export default function ContactPage() {
                 <Input
                   type='tel'
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
                   className='w-full'
                   placeholder='Enter your phone number'
                 />
@@ -203,7 +215,9 @@ export default function ContactPage() {
                 </label>
                 <Textarea
                   value={formData.message}
-                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, message: e.target.value })
+                  }
                   required
                   className='w-full h-32'
                   placeholder='Enter your message'

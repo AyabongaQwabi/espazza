@@ -23,6 +23,7 @@ import { useSupabase } from '@/components/providers/supabase-provider';
 import { motion } from 'framer-motion';
 import { IconButton } from '@/components/ui/icon-button';
 import { HoverIcon } from '@/components/ui/hover-icon';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 function Navigation({ className = '' }: { className?: string }) {
   return (
@@ -152,176 +153,178 @@ export function SiteHeader() {
           </SheetTrigger>
           <SheetContent
             side='left'
-            className='bg-zinc-900 border-r border-zinc-800'
+            className='bg-zinc-900 border-r border-zinc-800 p-0'
           >
-            <div className='flex flex-col space-y-6 mt-8'>
-              <div className='flex flex-col space-y-4'>
-                <Link
-                  href='/about'
-                  className='hover:text-red-500 transition-colors flex items-center gap-2'
-                >
-                  <HoverIcon Icon={InfoIcon} size={16} />
-                  <span>Malunga Nathi</span>
-                </Link>
-                <Link
-                  href='/blog'
-                  className='hover:text-red-500 transition-colors flex items-center gap-2'
-                >
-                  <HoverIcon Icon={BookOpenIcon} size={16} />
-                  <span>iiPosts</span>
-                </Link>
-                <Link
-                  href='/artists'
-                  className='hover:text-red-500 transition-colors flex items-center gap-2'
-                >
-                  <HoverIcon Icon={UsersIcon} size={16} />
-                  <span>iiMCs</span>
-                </Link>
-                <Link
-                  href='/merch'
-                  className='hover:text-red-500 transition-colors flex items-center gap-2'
-                >
-                  <HoverIcon Icon={ShoppingBagIcon} size={16} />
-                  <span>iMerch</span>
-                </Link>
-                <Link
-                  href='/releases'
-                  className='hover:text-red-500 transition-colors flex items-center gap-2'
-                >
-                  <HoverIcon Icon={ShoppingBagIcon} size={16} />
-                  <span>iiTracks</span>
-                </Link>
-                <Link
-                  href='/events'
-                  className='hover:text-red-500 transition-colors flex items-center gap-2'
-                >
-                  <HoverIcon Icon={CalendarIcon} size={16} />
-                  <span>Iziganeko</span>
-                </Link>
-                <Link
-                  href='/contact'
-                  className='hover:text-red-500 transition-colors flex items-center gap-2'
-                >
-                  <HoverIcon Icon={MailIcon} size={16} />
-                  <span>Qhagamshelana</span>
-                </Link>
-              </div>
+            <ScrollArea className='h-full'>
+              <div className='flex flex-col space-y-6 mt-8 p-6'>
+                <div className='flex flex-col space-y-4'>
+                  <Link
+                    href='/about'
+                    className='hover:text-red-500 transition-colors flex items-center gap-2'
+                  >
+                    <HoverIcon Icon={InfoIcon} size={16} />
+                    <span>Malunga Nathi</span>
+                  </Link>
+                  <Link
+                    href='/blog'
+                    className='hover:text-red-500 transition-colors flex items-center gap-2'
+                  >
+                    <HoverIcon Icon={BookOpenIcon} size={16} />
+                    <span>iiPosts</span>
+                  </Link>
+                  <Link
+                    href='/artists'
+                    className='hover:text-red-500 transition-colors flex items-center gap-2'
+                  >
+                    <HoverIcon Icon={UsersIcon} size={16} />
+                    <span>iiMCs</span>
+                  </Link>
+                  <Link
+                    href='/merch'
+                    className='hover:text-red-500 transition-colors flex items-center gap-2'
+                  >
+                    <HoverIcon Icon={ShoppingBagIcon} size={16} />
+                    <span>iMerch</span>
+                  </Link>
+                  <Link
+                    href='/releases'
+                    className='hover:text-red-500 transition-colors flex items-center gap-2'
+                  >
+                    <HoverIcon Icon={ShoppingBagIcon} size={16} />
+                    <span>iiTracks</span>
+                  </Link>
+                  <Link
+                    href='/events'
+                    className='hover:text-red-500 transition-colors flex items-center gap-2'
+                  >
+                    <HoverIcon Icon={CalendarIcon} size={16} />
+                    <span>Iziganeko</span>
+                  </Link>
+                  <Link
+                    href='/contact'
+                    className='hover:text-red-500 transition-colors flex items-center gap-2'
+                  >
+                    <HoverIcon Icon={MailIcon} size={16} />
+                    <span>Qhagamshelana</span>
+                  </Link>
+                </div>
 
-              <hr className='border-zinc-800' />
+                <hr className='border-zinc-800' />
 
-              {!loading &&
-                (user ? (
-                  <div className='space-y-4'>
-                    <h3 className='text-sm font-semibold text-zinc-400'>
-                      Dashboard
-                    </h3>
-                    <div className='space-y-2'>
-                      <Link href='/dashboard'>
-                        <IconButton
-                          Icon={LayoutDashboardIcon}
-                          label='Overview'
-                          variant='ghost'
-                          className='w-full justify-start'
-                          asChild
-                        >
-                          Overview
-                        </IconButton>
-                      </Link>
-                      <Link href='/dashboard/profile'>
+                {!loading &&
+                  (user ? (
+                    <div className='space-y-4'>
+                      <h3 className='text-sm font-semibold text-zinc-400'>
+                        Dashboard
+                      </h3>
+                      <div className='space-y-2'>
+                        <Link href='/dashboard'>
+                          <IconButton
+                            Icon={LayoutDashboardIcon}
+                            label='Overview'
+                            variant='ghost'
+                            className='w-full justify-start'
+                            asChild
+                          >
+                            Overview
+                          </IconButton>
+                        </Link>
+                        <Link href='/dashboard/profile'>
+                          <IconButton
+                            Icon={UserIcon}
+                            label='Profile'
+                            variant='ghost'
+                            className='w-full justify-start'
+                            asChild
+                          >
+                            Profile
+                          </IconButton>
+                        </Link>
+                        <Link href='/dashboard/messages'>
+                          <IconButton
+                            Icon={MessageSquare}
+                            label='Messages'
+                            variant='ghost'
+                            className='w-full justify-start'
+                            asChild
+                          >
+                            Messages
+                          </IconButton>
+                        </Link>
+                        <Link href='/dashboard/blog'>
+                          <IconButton
+                            Icon={EditIcon}
+                            label='Manage Posts'
+                            variant='ghost'
+                            className='w-full justify-start'
+                            asChild
+                          >
+                            Manage Posts
+                          </IconButton>
+                        </Link>
+                        <Link href='/dashboard/merchandise'>
+                          <IconButton
+                            Icon={PackageIcon}
+                            label='Manage Merchandise'
+                            variant='ghost'
+                            className='w-full justify-start'
+                            asChild
+                          >
+                            Manage Merchandise
+                          </IconButton>
+                        </Link>
+                        <Link href='/dashboard/orders'>
+                          <IconButton
+                            Icon={ShoppingCart}
+                            label='Orders'
+                            variant='ghost'
+                            className='w-full justify-start'
+                            asChild
+                          >
+                            Orders
+                          </IconButton>
+                        </Link>
+                        <Link href='/dashboard/balances'>
+                          <IconButton
+                            Icon={BarChart3}
+                            label='Balances'
+                            variant='ghost'
+                            className='w-full justify-start'
+                            asChild
+                          >
+                            Balances
+                          </IconButton>
+                        </Link>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className='space-y-4'>
+                      <Link href='/login'>
                         <IconButton
                           Icon={UserIcon}
-                          label='Profile'
+                          label='Ngena'
                           variant='ghost'
-                          className='w-full justify-start'
+                          className='w-full'
                           asChild
                         >
-                          Profile
+                          Ngena
                         </IconButton>
                       </Link>
-                      <Link href='/dashboard/messages'>
+
+                      <Link href='/register'>
                         <IconButton
-                          Icon={MessageSquare}
-                          label='Messages'
-                          variant='ghost'
-                          className='w-full justify-start'
+                          Icon={MusicIcon}
+                          label='Qala Apha'
+                          className='bg-red-600 hover:bg-red-700 w-full'
                           asChild
                         >
-                          Messages
-                        </IconButton>
-                      </Link>
-                      <Link href='/dashboard/blog'>
-                        <IconButton
-                          Icon={EditIcon}
-                          label='Manage Posts'
-                          variant='ghost'
-                          className='w-full justify-start'
-                          asChild
-                        >
-                          Manage Posts
-                        </IconButton>
-                      </Link>
-                      <Link href='/dashboard/merchandise'>
-                        <IconButton
-                          Icon={PackageIcon}
-                          label='Manage Merchandise'
-                          variant='ghost'
-                          className='w-full justify-start'
-                          asChild
-                        >
-                          Manage Merchandise
-                        </IconButton>
-                      </Link>
-                      <Link href='/dashboard/orders'>
-                        <IconButton
-                          Icon={ShoppingCart}
-                          label='Orders'
-                          variant='ghost'
-                          className='w-full justify-start'
-                          asChild
-                        >
-                          Orders
-                        </IconButton>
-                      </Link>
-                      <Link href='/dashboard/balances'>
-                        <IconButton
-                          Icon={BarChart3}
-                          label='Balances'
-                          variant='ghost'
-                          className='w-full justify-start'
-                          asChild
-                        >
-                          Balances
+                          Qala Apha
                         </IconButton>
                       </Link>
                     </div>
-                  </div>
-                ) : (
-                  <div className='space-y-4'>
-                    <Link href='/login'>
-                      <IconButton
-                        Icon={UserIcon}
-                        label='Ngena'
-                        variant='ghost'
-                        className='w-full'
-                        asChild
-                      >
-                        Ngena
-                      </IconButton>
-                    </Link>
-
-                    <Link href='/register'>
-                      <IconButton
-                        Icon={MusicIcon}
-                        label='Qala Apha'
-                        className='bg-red-600 hover:bg-red-700 w-full'
-                        asChild
-                      >
-                        Qala Apha
-                      </IconButton>
-                    </Link>
-                  </div>
-                ))}
-            </div>
+                  ))}
+              </div>
+            </ScrollArea>
           </SheetContent>
         </Sheet>
       </div>
