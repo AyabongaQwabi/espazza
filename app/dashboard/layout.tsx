@@ -174,7 +174,7 @@ export default function DashboardLayout({
         <DashboardSidebar profile={profile} pathname={pathname} />
 
         {/* Main Content */}
-        <div className='flex-1 overflow-auto'>
+        <div className='flex-1 flex flex-col w-full'>
           <div className='md:hidden h-16' /> {/* Spacer for mobile header */}
           <div className='md:hidden fixed top-0 left-0 right-0 z-40 bg-zinc-900 border-b border-zinc-800 p-4'>
             <div className='flex items-center justify-between'>
@@ -189,9 +189,12 @@ export default function DashboardLayout({
               <SidebarTrigger />
             </div>
           </div>
-          {children}
+          <div className='flex-1 w-full h-full overflow-auto pb-16 md:pb-0'>
+            {children}
+          </div>
           <Analytics />
         </div>
+        <MobileNav profile={profile} pathname={pathname} />
       </div>
     </SidebarProvider>
   );
@@ -361,6 +364,68 @@ function LoadingState() {
           <div className='inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-zinc-500 border-r-2 border-zinc-500 border-b-2 border-transparent'></div>
           <p className='text-zinc-400 mt-4'>Loading dashboard...</p>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function MobileNav({ profile, pathname }: { profile: any; pathname: string }) {
+  const router = useRouter();
+
+  return (
+    <div className='md:hidden fixed bottom-0 left-0 right-0 z-40 bg-zinc-900 border-t border-zinc-800'>
+      <div className='grid grid-cols-5 h-16'>
+        <Link
+          href='/dashboard'
+          className={`flex flex-col items-center justify-center ${
+            pathname === '/dashboard' ? 'text-white' : 'text-zinc-400'
+          }`}
+        >
+          <LayoutDashboardIcon className='h-5 w-5' />
+          <span className='text-xs mt-1'>Overview</span>
+        </Link>
+
+        <Link
+          href='/dashboard/profile'
+          className={`flex flex-col items-center justify-center ${
+            pathname === '/dashboard/profile' ? 'text-white' : 'text-zinc-400'
+          }`}
+        >
+          <UserIcon className='h-5 w-5' />
+          <span className='text-xs mt-1'>Profile</span>
+        </Link>
+
+        <Link
+          href='/dashboard/promotion'
+          className={`flex flex-col items-center justify-center ${
+            pathname === '/dashboard/promotion' ? 'text-white' : 'text-zinc-400'
+          }`}
+        >
+          <MusicIcon className='h-5 w-5' />
+          <span className='text-xs mt-1'>Tracks</span>
+        </Link>
+
+        <Link
+          href='/dashboard/merchandise'
+          className={`flex flex-col items-center justify-center ${
+            pathname === '/dashboard/merchandise'
+              ? 'text-white'
+              : 'text-zinc-400'
+          }`}
+        >
+          <PackageIcon className='h-5 w-5' />
+          <span className='text-xs mt-1'>Merch</span>
+        </Link>
+
+        <Link
+          href='/dashboard/balances'
+          className={`flex flex-col items-center justify-center ${
+            pathname === '/dashboard/balances' ? 'text-white' : 'text-zinc-400'
+          }`}
+        >
+          <BarChart3 className='h-5 w-5' />
+          <span className='text-xs mt-1'>Finance</span>
+        </Link>
       </div>
     </div>
   );
