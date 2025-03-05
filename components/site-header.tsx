@@ -2,26 +2,27 @@
 
 import Link from 'next/link';
 import {
-  HomeIcon,
   InfoIcon,
   UsersIcon,
   CalendarIcon,
   ShoppingBagIcon,
   BookOpenIcon,
   MailIcon,
-  LogOutIcon,
   UserIcon,
   LayoutDashboardIcon,
   MenuIcon,
   MusicIcon,
+  MessageSquare,
+  EditIcon,
+  PackageIcon,
+  ShoppingCart,
+  BarChart3,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useSupabase } from '@/components/providers/supabase-provider';
 import { motion } from 'framer-motion';
 import { IconButton } from '@/components/ui/icon-button';
 import { HoverIcon } from '@/components/ui/hover-icon';
-import { BounceIcon } from '@/components/ui/bounce-icon';
 
 function Navigation({ className = '' }: { className?: string }) {
   return (
@@ -210,16 +211,90 @@ export function SiteHeader() {
 
               {!loading &&
                 (user ? (
-                  <Link href='/dashboard'>
-                    <IconButton
-                      Icon={LayoutDashboardIcon}
-                      label='Dashboard'
-                      className='bg-red-600 hover:bg-red-700 w-full'
-                      asChild
-                    >
+                  <div className='space-y-4'>
+                    <h3 className='text-sm font-semibold text-zinc-400'>
                       Dashboard
-                    </IconButton>
-                  </Link>
+                    </h3>
+                    <div className='space-y-2'>
+                      <Link href='/dashboard'>
+                        <IconButton
+                          Icon={LayoutDashboardIcon}
+                          label='Overview'
+                          variant='ghost'
+                          className='w-full justify-start'
+                          asChild
+                        >
+                          Overview
+                        </IconButton>
+                      </Link>
+                      <Link href='/dashboard/profile'>
+                        <IconButton
+                          Icon={UserIcon}
+                          label='Profile'
+                          variant='ghost'
+                          className='w-full justify-start'
+                          asChild
+                        >
+                          Profile
+                        </IconButton>
+                      </Link>
+                      <Link href='/dashboard/messages'>
+                        <IconButton
+                          Icon={MessageSquare}
+                          label='Messages'
+                          variant='ghost'
+                          className='w-full justify-start'
+                          asChild
+                        >
+                          Messages
+                        </IconButton>
+                      </Link>
+                      <Link href='/dashboard/blog'>
+                        <IconButton
+                          Icon={EditIcon}
+                          label='Manage Posts'
+                          variant='ghost'
+                          className='w-full justify-start'
+                          asChild
+                        >
+                          Manage Posts
+                        </IconButton>
+                      </Link>
+                      <Link href='/dashboard/merchandise'>
+                        <IconButton
+                          Icon={PackageIcon}
+                          label='Manage Merchandise'
+                          variant='ghost'
+                          className='w-full justify-start'
+                          asChild
+                        >
+                          Manage Merchandise
+                        </IconButton>
+                      </Link>
+                      <Link href='/dashboard/orders'>
+                        <IconButton
+                          Icon={ShoppingCart}
+                          label='Orders'
+                          variant='ghost'
+                          className='w-full justify-start'
+                          asChild
+                        >
+                          Orders
+                        </IconButton>
+                      </Link>
+                      <Link href='/dashboard/balances'>
+                        <IconButton
+                          Icon={BarChart3}
+                          label='Balances'
+                          variant='ghost'
+                          className='w-full justify-start'
+                          asChild
+                        >
+                          Balances
+                        </IconButton>
+                      </Link>
+                    </div>
+                  </div>
                 ) : (
                   <div className='space-y-4'>
                     <Link href='/login'>
