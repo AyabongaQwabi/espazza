@@ -72,6 +72,8 @@ export default function PaymentDashboard() {
           .eq('user_id', userData.user.id)
           .single();
 
+        console.log('Details data:', detailsData);
+
         if (detailsData) {
           setPaymentDetails(detailsData);
           setIkhokaAppId(detailsData.ikhoka?.app_id || '');
@@ -104,138 +106,41 @@ export default function PaymentDashboard() {
         return;
       }
 
-      const updatedDetails = { ...paymentDetails };
-
-      // Update the credentials for the active gateway
-      switch (activeGateway) {
-        case 'ikhoka':
-          if (!ikhokaAppId || !ikhokaAppKey) {
-            toast({
-              title: 'Error',
-              description: 'Please provide both App ID and App Key for iKhoka',
-              variant: 'destructive',
-            });
-            return;
-          }
-          updatedDetails.ikhoka = {
-            app_id: ikhokaAppId,
-            app_key: ikhokaAppKey,
-          };
-          break;
-        case 'paypal':
-          if (!paypalClientId || !paypalSecret) {
-            toast({
-              title: 'Error',
-              description:
-                'Please provide both Client ID and Secret for PayPal',
-              variant: 'destructive',
-            });
-            return;
-          }
-          updatedDetails.paypal = {
-            client_id: paypalClientId,
-            secret: paypalSecret,
-          };
-          break;
-        case 'payfast':
-          if (!payfastMerchantId || !payfastMerchantKey) {
-            toast({
-              title: 'Error',
-              description:
-                'Please provide both Merchant ID and Merchant Key for PayFast',
-              variant: 'destructive',
-            });
-            return;
-          }
-          updatedDetails.payfast = {
-            merchant_id: payfastMerchantId,
-            merchant_key: payfastMerchantKey,
-          };
-          break;
-      }
-
-      console.log('Updated details:', updatedDetails);
-      // Upsert all credentials in a single operation
-      const { data: existingRecord, error: fetchError } = await supabase
-        .from('payment_credentials')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-
-      console.log('Existing record:', existingRecord);
-
-      if (fetchError && fetchError.code !== 'PGRST116') {
-        // Handle error (not a "no rows returned" error)
-        console.error('Error checking for existing record:', fetchError);
-        return { error: fetchError };
-      }
-
-      if (existingRecord) {
-        // Record exists, update it
-        console.log('Updating existing record');
-
-        const ikhoka = {
+      const updatedDetails = {
+        ikhoka: {
           app_id: ikhokaAppId,
           app_key: ikhokaAppKey,
-        };
-        const paypal = {
+        },
+        paypal: {
           client_id: paypalClientId,
           secret: paypalSecret,
-        };
-        const payfast = {
+        },
+        payfast: {
           merchant_id: payfastMerchantId,
           merchant_key: payfastMerchantKey,
-        };
+        },
+        updated_at: new Date().toISOString(),
+      };
 
-        const dataUpdate = {
-          ikhoka,
-          paypal,
-          payfast,
-          user_id: user.id,
-          updated_at: new Date().toISOString(),
-        };
-        console.log(
-          'Updating record with:',
-          { ikhoka, paypal, payfast },
-          'to',
-          {
-            ...existingRecord,
-            ...dataUpdate,
-          }
-        );
-        const { data, error } = await supabase
-          .from('payment_credentials')
-          .update({ ...existingRecord, ...dataUpdate })
-          .eq('id', existingRecord.id);
-        console.log('Error:', error, 'Data:', data);
-        if (error) throw error;
-      } else {
-        console.log('Inserting new record because record does not exist');
-        const { error } = await supabase.from('payment_credentials').insert({
-          user_id: user.id,
-          ikhoka: {
-            app_id: ikhokaAppId,
-            app_key: ikhokaAppKey,
-          },
-          paypal: {
-            client_id: paypalClientId,
-            secret: paypalSecret,
-          },
-          payfast: {
-            merchant_id: payfastMerchantId,
-            merchant_key: payfastMerchantKey,
-          },
-          updated_at: new Date().toISOString(),
-        });
+      console.log('Updating details:', updatedDetails);
 
-        if (error) throw error;
-      }
+      const { data, error } = await supabase
+        .from('payment_credentials')
+        .update(updatedDetails)
+        .eq('user_id', user.id);
 
-      setPaymentDetails(updatedDetails);
+      if (error) throw error;
+
+      console.log('Update result:', data);
+
+      setPaymentDetails((prevDetails) => ({
+        ...prevDetails,
+        ...updatedDetails,
+      }));
 
       toast({
         title: 'Success',
-        description: `${activeGateway.toUpperCase()} credentials saved successfully`,
+        description: 'Payment credentials updated successfully',
       });
 
       setOpenCredentialsDialog(false);

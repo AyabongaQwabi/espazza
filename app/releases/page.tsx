@@ -155,15 +155,16 @@ export default function ReleasesPage() {
     if (error) {
       console.error('Error fetching releases:', error);
     } else {
+      console.log(data);
       // Process the data to structure payment_credentials correctly
       const processedData = data?.map((release) => ({
         ...release,
         record_owner: {
           ...release.record_owner,
           payment_credentials: {
-            ikhoka: release.record_owner.payment_credentials[0]?.ikhoka,
-            payfast: release.record_owner.payment_credentials[0]?.payfast,
-            paypal: release.record_owner.payment_credentials[0]?.paypal,
+            ikhoka: release.record_owner.payment_credentials?.ikhoka,
+            payfast: release.record_owner.payment_credentials?.payfast,
+            paypal: release.record_owner.payment_credentials?.paypal,
           },
         },
       }));
