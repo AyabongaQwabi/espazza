@@ -173,21 +173,6 @@ export default function PaymentDashboard() {
       if (existingRecord) {
         // Record exists, update it
         console.log('Updating existing record');
-        console.log({
-          ikhoka: {
-            app_id: ikhokaAppId,
-            app_key: ikhokaAppKey,
-          },
-          paypal: {
-            client_id: paypalClientId,
-            secret: paypalSecret,
-          },
-          payfast: {
-            merchant_id: payfastMerchantId,
-            merchant_key: payfastMerchantKey,
-          },
-          updated_at: new Date().toISOString(),
-        });
 
         const ikhoka = {
           app_id: ikhokaAppId,
@@ -201,7 +186,7 @@ export default function PaymentDashboard() {
           merchant_id: payfastMerchantId,
           merchant_key: payfastMerchantKey,
         };
-
+        console.log('Updating record with:', { ikhoka, paypal, payfast });
         const dataUpdate = {
           ikhoka,
           paypal,
