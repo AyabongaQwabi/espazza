@@ -174,37 +174,44 @@ export default function PaymentDashboard() {
         // Record exists, update it
         console.log('Updating existing record');
         console.log({
-             ikhoka: {
+          ikhoka: {
             app_id: ikhokaAppId,
-            app_key: ikhokaAppKey
+            app_key: ikhokaAppKey,
           },
           paypal: {
             client_id: paypalClientId,
             secret: paypalSecret,
           },
-          payfast:{
+          payfast: {
             merchant_id: payfastMerchantId,
-            merchant_key: payfastMerchantKey
+            merchant_key: payfastMerchantKey,
           },
-            updated_at: new Date().toISOString(),
-          })
+          updated_at: new Date().toISOString(),
+        });
+
+        const ikhoka = {
+          app_id: ikhokaAppId,
+          app_key: ikhokaAppKey,
+        };
+        const paypal = {
+          client_id: paypalClientId,
+          secret: paypalSecret,
+        };
+        const payfast = {
+          merchant_id: payfastMerchantId,
+          merchant_key: payfastMerchantKey,
+        };
+
+        const dataUpdate = {
+          ikhoka,
+          paypal,
+          payfast,
+          updated_at: new Date().toISOString(),
+        };
+
         const { error } = await supabase
           .from('payment_credentials')
-          .update({
-             ikhoka: {
-            app_id: ikhokaAppId,
-            app_key: ikhokaAppKey
-          },
-          paypal: {
-            client_id: paypalClientId,
-            secret: paypalSecret,
-          },
-          payfast:{
-            merchant_id: payfastMerchantId,
-            merchant_key: payfastMerchantKey
-          },
-            updated_at: new Date().toISOString(),
-          })
+          .update(dataUpdate)
           .eq('user_id', user.id);
 
         if (error) throw error;
@@ -214,16 +221,16 @@ export default function PaymentDashboard() {
           user_id: user.id,
           ikhoka: {
             app_id: ikhokaAppId,
-            app_key: ikhokaAppKey
+            app_key: ikhokaAppKey,
           },
           paypal: {
             client_id: paypalClientId,
             secret: paypalSecret,
           },
-          payfast:{
+          payfast: {
             merchant_id: payfastMerchantId,
-            merchant_key: payfastMerchantKey
-          }
+            merchant_key: payfastMerchantKey,
+          },
           updated_at: new Date().toISOString(),
         });
 
