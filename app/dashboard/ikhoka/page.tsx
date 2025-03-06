@@ -172,9 +172,18 @@ export default function PaymentDashboard() {
         const { error } = await supabase
           .from('payment_credentials')
           .update({
-            ikhoka: updatedDetails.ikhoka,
-            paypal: updatedDetails.paypal,
-            payfast: updatedDetails.payfast,
+             ikhoka: {
+            app_id: ikhokaAppId,
+            app_key: ikhokaAppKey
+          },
+          paypal: {
+            client_id: paypalClientId,
+            secret: paypalSecret,
+          },
+          payfast:{
+            merchant_id: payfastMerchantId,
+            merchant_key: payfastMerchantKey
+          },
             updated_at: new Date().toISOString(),
           })
           .eq('user_id', user.id);
@@ -184,9 +193,18 @@ export default function PaymentDashboard() {
         // Record doesn't exist, insert it
         const { error } = await supabase.from('payment_credentials').insert({
           user_id: user.id,
-          ikhoka: updatedDetails.ikhoka,
-          paypal: updatedDetails.paypal,
-          payfast: updatedDetails.payfast,
+          ikhoka: {
+            app_id: ikhokaAppId,
+            app_key: ikhokaAppKey
+          },
+          paypal: {
+            client_id: paypalClientId,
+            secret: paypalSecret,
+          },
+          payfast:{
+            merchant_id: payfastMerchantId,
+            merchant_key: payfastMerchantKey
+          }
           updated_at: new Date().toISOString(),
         });
 
