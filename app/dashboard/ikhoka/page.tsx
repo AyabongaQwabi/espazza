@@ -195,11 +195,11 @@ export default function PaymentDashboard() {
           updated_at: new Date().toISOString(),
         };
 
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('payment_credentials')
           .update(dataUpdate)
           .eq('user_id', user.id);
-        console.log('Error:', error);
+        console.log('Error:', error, 'Data:', data);
         if (error) throw error;
       } else {
         console.log('Inserting new record because record does not exist');
