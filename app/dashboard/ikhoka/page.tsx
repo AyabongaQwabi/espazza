@@ -191,6 +191,7 @@ export default function PaymentDashboard() {
           ikhoka,
           paypal,
           payfast,
+          user_id: user.id,
           updated_at: new Date().toISOString(),
         };
 
