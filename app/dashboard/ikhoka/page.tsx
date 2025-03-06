@@ -169,6 +169,22 @@ export default function PaymentDashboard() {
 
       if (existingRecord) {
         // Record exists, update it
+        console.log('Updating existing record');
+        console.log({
+             ikhoka: {
+            app_id: ikhokaAppId,
+            app_key: ikhokaAppKey
+          },
+          paypal: {
+            client_id: paypalClientId,
+            secret: paypalSecret,
+          },
+          payfast:{
+            merchant_id: payfastMerchantId,
+            merchant_key: payfastMerchantKey
+          },
+            updated_at: new Date().toISOString(),
+          })
         const { error } = await supabase
           .from('payment_credentials')
           .update({
