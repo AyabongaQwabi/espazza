@@ -154,12 +154,15 @@ export default function PaymentDashboard() {
           break;
       }
 
+      console.log('Updated details:', updatedDetails);
       // Upsert all credentials in a single operation
       const { data: existingRecord, error: fetchError } = await supabase
         .from('payment_credentials')
         .select('user_id')
         .eq('user_id', user.id)
         .single();
+
+      console.log('Existing record:', existingRecord);
 
       if (fetchError && fetchError.code !== 'PGRST116') {
         // Handle error (not a "no rows returned" error)
@@ -206,7 +209,7 @@ export default function PaymentDashboard() {
 
         if (error) throw error;
       } else {
-        // Record doesn't exist, insert it
+        console.log('Inserting new record because record does not exist');
         const { error } = await supabase.from('payment_credentials').insert({
           user_id: user.id,
           ikhoka: {
