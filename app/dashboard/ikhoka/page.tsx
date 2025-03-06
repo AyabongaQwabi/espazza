@@ -186,7 +186,7 @@ export default function PaymentDashboard() {
           merchant_id: payfastMerchantId,
           merchant_key: payfastMerchantKey,
         };
-        console.log('Updating record with:', { ikhoka, paypal, payfast });
+
         const dataUpdate = {
           ikhoka,
           paypal,
@@ -194,7 +194,15 @@ export default function PaymentDashboard() {
           user_id: user.id,
           updated_at: new Date().toISOString(),
         };
-
+        console.log(
+          'Updating record with:',
+          { ikhoka, paypal, payfast },
+          'to',
+          {
+            ...existingRecord,
+            ...dataUpdate,
+          }
+        );
         const { data, error } = await supabase
           .from('payment_credentials')
           .update({ ...existingRecord, ...dataUpdate })
