@@ -158,7 +158,7 @@ export default function PaymentDashboard() {
       // Upsert all credentials in a single operation
       const { data: existingRecord, error: fetchError } = await supabase
         .from('payment_credentials')
-        .select('user_id')
+        .select('*')
         .eq('user_id', user.id)
         .single();
 
@@ -199,7 +199,7 @@ export default function PaymentDashboard() {
           .from('payment_credentials')
           .update(dataUpdate)
           .eq('user_id', user.id);
-
+        console.log('Error:', error);
         if (error) throw error;
       } else {
         console.log('Inserting new record because record does not exist');
