@@ -198,7 +198,7 @@ export default function PaymentDashboard() {
         const { data, error } = await supabase
           .from('payment_credentials')
           .update(dataUpdate)
-          .eq('user_id', user.id);
+          .eq('id', existingRecord.id);
         console.log('Error:', error, 'Data:', data);
         if (error) throw error;
       } else {
