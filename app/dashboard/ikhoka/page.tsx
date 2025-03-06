@@ -155,18 +155,43 @@ export default function PaymentDashboard() {
       }
 
       // Upsert all credentials in a single operation
-      const { error } = await supabase.from('payment_credentials').upsert(
-        {
+      const { data: existingRecord, error: fetchError } = await supabase
+        .from('payment_credentials')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        // Handle error (not a "no rows returned" error)
+        console.error('Error checking for existing record:', fetchError);
+        return { error: fetchError };
+      }
+
+      if (existingRecord) {
+        // Record exists, update it
+        const { error } = await supabase
+          .from('payment_credentials')
+          .update({
+            ikhoka: updatedDetails.ikhoka,
+            paypal: updatedDetails.paypal,
+            payfast: updatedDetails.payfast,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+      } else {
+        // Record doesn't exist, insert it
+        const { error } = await supabase.from('payment_credentials').insert({
           user_id: user.id,
           ikhoka: updatedDetails.ikhoka,
           paypal: updatedDetails.paypal,
           payfast: updatedDetails.payfast,
           updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'user_id' }
-      );
+        });
 
-      if (error) throw error;
+        if (error) throw error;
+      }
 
       setPaymentDetails(updatedDetails);
 
