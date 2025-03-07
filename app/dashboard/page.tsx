@@ -195,35 +195,36 @@ export default function DashboardPage() {
         },
       };
 
-      const response = await axios.post('/api/payment', request);
+      // const response = await axios.post('/api/payment', request);
+      const { data, error } = await supabase
+        .from('video_promotion_queue')
+        .insert({
+          youtube_link: youtubeLink,
+          promotional_text: promotionalText,
+          user_id: user.id,
+          username: profileData.username,
+          transaction_id: transactionId,
+          status: 'pending',
+          created_at: new Date().toISOString(),
+        });
 
-      if (response.data?.paylinkUrl) {
-        const { data, error } = await supabase
-          .from('video_promotion_queue')
-          .insert({
-            youtube_link: youtubeLink,
-            promotional_text: promotionalText,
-            user_id: user.id,
-            username: profileData.username,
-            transaction_id: transactionId,
-            status: 'not-paid',
-            created_at: new Date().toISOString(),
-          });
-        if (error) {
-          toast({
-            title: 'Error',
-            description: 'Failed to promote video',
-            variant: 'destructive',
-          });
-          setPromotingVideo(false);
-          throw error;
-        }
-
-        window.location.href = response.data.paylinkUrl;
-      } else {
+      if (error) {
+        toast({
+          title: 'Error',
+          description: 'Failed to promote video',
+          variant: 'destructive',
+        });
         setPromotingVideo(false);
-        throw new Error('No payment URL received');
+        throw error;
       }
+
+      // if (response.data?.paylinkUrl) {
+
+      //   window.location.href = response.data.paylinkUrl;
+      // } else {
+      //   setPromotingVideo(false);
+      //   throw new Error('No payment URL received');
+      // }
 
       // Insert into video_promotion_queue table
 
@@ -231,6 +232,7 @@ export default function DashboardPage() {
         title: 'Success',
         description: 'Video promotion request has been queued',
       });
+      setPromotingVideo(false);
     } catch (error) {
       console.error('Error promoting video:', error);
       toast({
