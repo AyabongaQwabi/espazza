@@ -218,6 +218,9 @@ export default function DashboardPage() {
         throw error;
       }
 
+      setYoutubeLink('');
+      setPromotionalText('');
+
       // if (response.data?.paylinkUrl) {
 
       //   window.location.href = response.data.paylinkUrl;
