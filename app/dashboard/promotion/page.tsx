@@ -36,7 +36,7 @@ import ProgressBar from '@/components/ProgressBar';
 
 interface Song {
   id: string;
-  file: File;
+  file?: File;
   title: string;
   cover_image_url: string;
   url: string;
@@ -52,9 +52,15 @@ interface Song {
 interface Release {
   id: string;
   title: string;
+  description?: string;
   release_date: string;
+  record_label_id?: string;
+  distributor_id?: string;
+  genre_id?: string;
   record_label: { name: string };
   distributor: { name: string };
+  genre?: { name: string };
+  cover_image_url?: string;
   tracks: Song[];
 }
 
@@ -74,6 +80,7 @@ export default function ReleasesManagement() {
     [key: string]: number;
   }>({});
   const [newRelease, setNewRelease] = useState({
+    id: '',
     title: '',
     description: '',
     record_label_id: '',
@@ -99,6 +106,7 @@ export default function ReleasesManagement() {
     [key: string]: boolean;
   }>({});
   const [creationStatus, setCreationStatus] = useState<string | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   const router = useRouter();
 
   const fetchReleases = useCallback(async () => {
@@ -121,6 +129,7 @@ export default function ReleasesManagement() {
 
       `
       )
+      .eq('record_owner', user.id) // Filter by the current user's ID
       .order('release_date', { ascending: false });
 
     if (search) {
@@ -159,6 +168,29 @@ export default function ReleasesManagement() {
     loadOptions();
   }, []);
 
+  const resetForm = () => {
+    setNewRelease({
+      id: '',
+      title: '',
+      description: '',
+      record_label_id: '',
+      distributor_id: '',
+      genre_id: '',
+      cover_image_url: '',
+      tracks: [],
+      release_date: new Date(),
+    });
+    setReleaseSongs([]);
+    setCoverImage(null);
+    setCoverImagePreview(null);
+    setIsEditMode(false);
+  };
+
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
+    resetForm();
+  };
+
   const handleCreateRelease = async (e: React.FormEvent) => {
     e.preventDefault();
     const {
@@ -169,7 +201,9 @@ export default function ReleasesManagement() {
       return;
     }
 
-    setCreationStatus('Uploading cover image...');
+    setCreationStatus(
+      isEditMode ? 'Updating release...' : 'Uploading cover image...'
+    );
     let updatedCoverImageUrl = newRelease.cover_image_url;
     if (coverImage) {
       const coverImageUrl = await uploadFile(
@@ -182,80 +216,163 @@ export default function ReleasesManagement() {
       }
     }
 
+    // Process songs that have files (new uploads)
     const uploadedSongs = await Promise.all(
       newReleaseSongs.map(async (song, index) => {
-        setCreationStatus(`Uploading song ${index + 1}...`);
-        setCurrentUploadingFile(song.title);
-        const url = await uploadFile(song.file, 'release-songs', song.id);
-        if (!url) return null;
+        // If the song has a file property, it needs to be uploaded
+        if (song.file) {
+          setCreationStatus(`Uploading song ${index + 1}...`);
+          setCurrentUploadingFile(song.title);
+          const url = await uploadFile(song.file, 'release-songs', song.id);
+          if (!url) return null;
 
-        return {
-          id: song.id,
-          title: song.title,
-          featured_artists: song.featured_artists,
-          producers: song.producers,
-          lyrics: song.lyrics,
-          price: song.price,
-          preview_start: song.preview_start,
-          release_date: newRelease.release_date,
-          url,
-          genre: song.genre,
-        };
+          return {
+            id: song.id,
+            title: song.title,
+            featured_artists: song.featured_artists,
+            producers: song.producers,
+            lyrics: song.lyrics,
+            price: song.price,
+            preview_start: song.preview_start,
+            release_date: newRelease.release_date,
+            url,
+            genre_id: song.genre_id,
+          };
+        } else {
+          // If no file, just return the song data as is
+          return {
+            id: song.id,
+            title: song.title,
+            featured_artists: song.featured_artists,
+            producers: song.producers,
+            lyrics: song.lyrics,
+            price: song.price,
+            preview_start: song.preview_start,
+            release_date: newRelease.release_date,
+            url: song.url,
+            genre_id: song.genre_id,
+          };
+        }
       })
     );
 
     const tracks = uploadedSongs.filter((song): song is Song => song !== null);
 
-    setCreationStatus('Saving to database...');
-    console.log('newRelease', {
-      ...newRelease,
-      record_owner: user.id,
-      cover_image_url: updatedCoverImageUrl,
-      tracks,
-    });
+    setCreationStatus(
+      isEditMode ? 'Saving changes...' : 'Saving to database...'
+    );
+
     try {
-      const { data, error } = await supabase
-        .from('releases')
-        .insert([
-          {
-            ...newRelease,
-            record_owner: user.id,
+      if (isEditMode) {
+        // Update existing release
+        const { error } = await supabase
+          .from('releases')
+          .update({
+            title: newRelease.title,
+            description: newRelease.description,
+            record_label_id: newRelease.record_label_id,
+            distributor_id: newRelease.distributor_id,
+            genre_id: newRelease.genre_id,
             cover_image_url: updatedCoverImageUrl,
             tracks,
+            release_date: newRelease.release_date,
             price: calculateReleasePrice(tracks),
-          },
-        ])
-        .select();
+          })
+          .eq('id', newRelease.id);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      setReleases([...releases, data[0]]);
-      setNewRelease({
-        title: '',
-        description: '',
-        record_label_id: '',
-        distributor_id: '',
-        cover_image_url: '',
-        tracks: [],
-        release_date: new Date(),
-      });
-      setIsDialogOpen(false);
-      setCreationStatus(null);
+        // Update the releases state with the edited release
+        setReleases(
+          releases.map((release) =>
+            release.id === newRelease.id
+              ? {
+                  ...release,
+                  title: newRelease.title,
+                  description: newRelease.description,
+                  record_label_id: newRelease.record_label_id,
+                  distributor_id: newRelease.distributor_id,
+                  genre_id: newRelease.genre_id,
+                  cover_image_url: updatedCoverImageUrl,
+                  tracks,
+                  release_date: newRelease.release_date.toISOString(),
+                  price: calculateReleasePrice(tracks),
+                }
+              : release
+          )
+        );
 
-      toast({
-        title: 'Success',
-        description: 'Release created successfully!',
-      });
+        toast({
+          title: 'Success',
+          description: 'Release updated successfully!',
+        });
+      } else {
+        // Create new release
+        const { data, error } = await supabase
+          .from('releases')
+          .insert([
+            {
+              ...newRelease,
+              record_owner: user.id,
+              cover_image_url: updatedCoverImageUrl,
+              tracks,
+              price: calculateReleasePrice(tracks),
+            },
+          ])
+          .select();
+
+        if (error) throw error;
+
+        setReleases([...releases, data[0]]);
+
+        toast({
+          title: 'Success',
+          description: 'Release created successfully!',
+        });
+      }
+
+      handleDialogClose();
     } catch (error) {
-      console.error('Error creating release:', error);
+      console.error(
+        isEditMode ? 'Error updating release:' : 'Error creating release:',
+        error
+      );
       toast({
         title: 'Error',
-        description: 'Failed to create release. Please try again.',
+        description: isEditMode
+          ? 'Failed to update release. Please try again.'
+          : 'Failed to create release. Please try again.',
         variant: 'destructive',
       });
     } finally {
       setCreationStatus(null);
     }
+  };
+
+  const handleEditRelease = (release: Release) => {
+    setIsEditMode(true);
+
+    // Convert release date string to Date object
+    const releaseDate = new Date(release.release_date);
+
+    // Set the form data with the existing release details
+    setNewRelease({
+      id: release.id,
+      title: release.title,
+      description: release.description || '',
+      record_label_id: release.record_label_id || '',
+      distributor_id: release.distributor_id || '',
+      genre_id: release.genre_id || '',
+      cover_image_url: release.cover_image_url || '',
+      tracks: release.tracks || [],
+      release_date: releaseDate,
+    });
+
+    // Set the songs for editing
+    setReleaseSongs(release.tracks || []);
+
+    // Open the dialog
+    setIsDialogOpen(true);
   };
 
   const uploadFile = async (file: File, bucket: string, id: string) => {
@@ -387,7 +504,7 @@ export default function ReleasesManagement() {
           price: 0.99,
           preview_start: '00:30',
           release_date: new Date(),
-          genre: '',
+          genre_id: '',
         };
         setReleaseSongs([...newReleaseSongs, newSong]);
       }
@@ -419,7 +536,7 @@ export default function ReleasesManagement() {
   if (loading) {
     return <div className='p-4'>Loading releases...</div>;
   }
-  console.log('releases', releases);
+
   return (
     <div className='p-4 my-4'>
       <h1 className='text-2xl font-bold mb-4'>Releases</h1>
@@ -434,7 +551,13 @@ export default function ReleasesManagement() {
             className='pl-10 w-full'
           />
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog
+          open={isDialogOpen}
+          onOpenChange={(open) => {
+            if (!open) handleDialogClose();
+            else setIsDialogOpen(true);
+          }}
+        >
           <DialogTrigger asChild>
             <Button className='w-full sm:w-auto'>
               <Plus className='mr-2 h-4 w-4' /> Create New Release
@@ -442,7 +565,9 @@ export default function ReleasesManagement() {
           </DialogTrigger>
           <DialogContent className='max-w-3xl w-full max-h-[90vh] overflow-y-auto'>
             <DialogHeader>
-              <DialogTitle>Create New Release</DialogTitle>
+              <DialogTitle>
+                {isEditMode ? 'Edit Release' : 'Create New Release'}
+              </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleCreateRelease} className='space-y-4'>
               <Input
@@ -523,7 +648,6 @@ export default function ReleasesManagement() {
                 displayName='Genre'
                 value={newRelease.genre_id}
                 onChange={(value) => {
-                  console.log('value', value);
                   setNewRelease((prev) => ({
                     ...prev,
                     genre_id: value,
@@ -609,6 +733,7 @@ export default function ReleasesManagement() {
                                 artist={newRelease.title}
                                 coverArt={
                                   newRelease.cover_image_url ||
+                                  coverImagePreview ||
                                   '/placeholder.svg'
                                 }
                               />
@@ -732,13 +857,24 @@ export default function ReleasesManagement() {
                   </div>
                 </CardContent>
               </Card>
-              <Button
-                type='submit'
-                disabled={!!creationStatus}
-                className='w-full sm:w-auto'
-              >
-                {creationStatus || 'Create Release'}
-              </Button>
+              <div className='flex gap-2'>
+                <Button
+                  type='submit'
+                  disabled={!!creationStatus}
+                  className='w-full sm:w-auto'
+                >
+                  {creationStatus ||
+                    (isEditMode ? 'Save Changes' : 'Create Release')}
+                </Button>
+                <Button
+                  type='button'
+                  variant='outline'
+                  onClick={handleDialogClose}
+                  className='w-full sm:w-auto'
+                >
+                  Cancel
+                </Button>
+              </div>
               {creationStatus && (
                 <div className='mt-4 text-sm text-gray-500'>
                   {creationStatus}
@@ -792,14 +928,18 @@ export default function ReleasesManagement() {
                     R{calculateReleasePrice(release.tracks).toFixed(2)}
                   </TableCell>
                   <TableCell>
-                    <Button variant='outline' size='sm'>
+                    <Button
+                      variant='outline'
+                      size='sm'
+                      onClick={() => handleEditRelease(release)}
+                    >
                       <Edit className='h-4 w-4 mr-2' /> Edit
                     </Button>
                   </TableCell>
                 </TableRow>
                 {expandedReleases[release.id] && (
                   <TableRow>
-                    <TableCell colSpan={7}>
+                    <TableCell colSpan={8}>
                       <div className='overflow-x-auto'>
                         <Table>
                           <TableHeader>
