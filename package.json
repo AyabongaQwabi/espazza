@@ -66,6 +66,7 @@
     "next-seo": "^6.5.0",
     "next-sitemap": "^4.2.3",
     "next-themes": "^0.2.1",
+    "node-fetch": "^3.3.2",
     "play-dl": "^1.9.7",
     "postcss": "^8.4.35",
     "qrcode.react": "^4.2.0",

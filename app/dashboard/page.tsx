@@ -177,23 +177,23 @@ export default function DashboardPage() {
 
       const transactionId = short().toUUID(short.generate());
       const totalPrice = 100 * 100; // Convert to cents
-      const request = {
-        entityID: youtubeLink,
-        externalEntityID: youtubeLink,
-        amount: totalPrice,
-        currency: 'ZAR',
-        requesterUrl: 'https://espazza.co.za/dashboard',
-        description: `Purchase of YT Link Promotion: ${youtubeLink}}`,
-        paymentReference: `${user.id}-yt-promo-${transactionId}`,
-        mode: 'live',
-        externalTransactionID: transactionId,
-        urls: {
-          callbackUrl: 'https://espazza.co.za/api/payment/callback',
-          successPageUrl: `https://espazza.co.za/dashboard/success?transaction_id=${transactionId}`,
-          failurePageUrl: 'https://espazza.co.za/failure',
-          cancelUrl: 'https://espazza.co.za/cancel',
-        },
-      };
+      // const request = {
+      //   entityID: youtubeLink,
+      //   externalEntityID: youtubeLink,
+      //   amount: totalPrice,
+      //   currency: 'ZAR',
+      //   requesterUrl: 'https://espazza.co.za/dashboard',
+      //   description: `Purchase of YT Link Promotion: ${youtubeLink}}`,
+      //   paymentReference: `${user.id}-yt-promo-${transactionId}`,
+      //   mode: 'live',
+      //   externalTransactionID: transactionId,
+      //   urls: {
+      //     callbackUrl: 'https://espazza.co.za/api/payment/callback',
+      //     successPageUrl: `https://espazza.co.za/dashboard/success?transaction_id=${transactionId}`,
+      //     failurePageUrl: 'https://espazza.co.za/failure',
+      //     cancelUrl: 'https://espazza.co.za/cancel',
+      //   },
+      // };
 
       // const response = await axios.post('/api/payment', request);
       const { data, error } = await supabase
