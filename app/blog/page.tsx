@@ -11,11 +11,14 @@ import {
   Share2,
   BookmarkIcon,
   PlayCircle,
+  X,
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
+import { toast } from '@/hooks/use-toast';
+import { DiscussionEmbed } from 'disqus-react';
 
 const POSTS_PER_PAGE = 5;
 
@@ -24,6 +27,9 @@ export default function BlogPage() {
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
+  const [user, setUser] = useState(null);
+  const [expandedComments, setExpandedComments] = useState({});
+  const [postLikes, setPostLikes] = useState({});
   const loaderRef = useRef(null);
   const supabase = createClientComponentClient();
 
@@ -66,6 +72,13 @@ export default function BlogPage() {
 
           // Check if we've reached the end
           setHasMore(start + newPosts.length < (count || 0));
+
+          // Initialize likes for each post
+          const likesObj = {};
+          for (const post of newPosts) {
+            await fetchLikes(post.id, likesObj);
+          }
+
           return true;
         } else {
           setHasMore(false);
@@ -80,6 +93,18 @@ export default function BlogPage() {
     },
     [supabase]
   );
+
+  // Check authentication
+  useEffect(() => {
+    async function checkAuth() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+    }
+
+    checkAuth();
+  }, [supabase]);
 
   // Initial load
   useEffect(() => {
@@ -114,6 +139,115 @@ export default function BlogPage() {
     };
   }, [hasMore, loading, fetchPosts]);
 
+  // Fetch likes for a post
+  async function fetchLikes(postId, likesObj = postLikes) {
+    try {
+      const { data: likes } = await supabase
+        .from('blog_likes')
+        .select('*, profiles(username, profile_image_url)')
+        .eq('post_id', postId);
+
+      const newLikesObj = { ...likesObj };
+      newLikesObj[postId] = likes || [];
+      setPostLikes(newLikesObj);
+
+      return likes || [];
+    } catch (error) {
+      console.error('Error fetching likes:', error);
+      return [];
+    }
+  }
+
+  // Handle like button click
+  async function handleLike(postId) {
+    if (!user) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please log in to like posts',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const currentLikes = postLikes[postId] || [];
+    const existingLike = currentLikes.find((like) => like.user_id === user.id);
+
+    try {
+      if (existingLike) {
+        // Unlike the post
+        const { error } = await supabase
+          .from('blog_likes')
+          .delete()
+          .eq('id', existingLike.id);
+
+        if (!error) {
+          const updatedLikes = currentLikes.filter(
+            (like) => like.id !== existingLike.id
+          );
+          setPostLikes({
+            ...postLikes,
+            [postId]: updatedLikes,
+          });
+
+          // Update the post's likes count in the UI
+          setPosts(
+            posts.map((post) => {
+              if (post.id === postId) {
+                return {
+                  ...post,
+                  likes: [{ count: (post.likes?.[0]?.count || 1) - 1 }],
+                };
+              }
+              return post;
+            })
+          );
+        }
+      } else {
+        // Like the post
+        const { data, error } = await supabase
+          .from('blog_likes')
+          .insert([{ post_id: postId, user_id: user.id }])
+          .select('*, profiles(username, profile_image_url)')
+          .single();
+
+        if (!error && data) {
+          setPostLikes({
+            ...postLikes,
+            [postId]: [...currentLikes, data],
+          });
+
+          // Update the post's likes count in the UI
+          setPosts(
+            posts.map((post) => {
+              if (post.id === postId) {
+                return {
+                  ...post,
+                  likes: [{ count: (post.likes?.[0]?.count || 0) + 1 }],
+                };
+              }
+              return post;
+            })
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Error handling like:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to process your like. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  }
+
+  // Toggle comments section
+  function toggleComments(postId) {
+    setExpandedComments({
+      ...expandedComments,
+      [postId]: !expandedComments[postId],
+    });
+  }
+
   // Format date for display
   const formatPostDate = (dateString) => {
     try {
@@ -133,6 +267,12 @@ export default function BlogPage() {
     const match = url.match(regExp);
 
     return match && match[2].length === 11 ? match[2] : null;
+  };
+
+  // Check if the current user has liked a post
+  const hasUserLikedPost = (postId) => {
+    const likes = postLikes[postId] || [];
+    return likes.some((like) => like.user_id === user?.id);
   };
 
   if (loading && posts.length === 0) {
@@ -300,15 +440,31 @@ export default function BlogPage() {
                     <Button
                       variant='ghost'
                       size='sm'
-                      className='text-gray-600 dark:text-gray-300 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-pink-50 dark:hover:bg-gray-700 px-2 rounded-full'
+                      className={`${
+                        hasUserLikedPost(post.id)
+                          ? 'text-pink-600 dark:text-pink-400'
+                          : 'text-gray-600 dark:text-gray-300'
+                      } hover:text-pink-600 dark:hover:text-pink-400 hover:bg-pink-50 dark:hover:bg-gray-700 px-2 rounded-full`}
+                      onClick={() => handleLike(post.id)}
                     >
-                      <Heart className='h-5 w-5 mr-1' />
+                      <Heart
+                        className={`h-5 w-5 mr-1 ${
+                          hasUserLikedPost(post.id)
+                            ? 'fill-pink-600 dark:fill-pink-400'
+                            : ''
+                        }`}
+                      />
                       <span>{post.likes?.[0]?.count || 0}</span>
                     </Button>
                     <Button
                       variant='ghost'
                       size='sm'
-                      className='text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 px-2 rounded-full'
+                      className={`${
+                        expandedComments[post.id]
+                          ? 'text-blue-600 dark:text-blue-400'
+                          : 'text-gray-600 dark:text-gray-300'
+                      } hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 px-2 rounded-full`}
+                      onClick={() => toggleComments(post.id)}
                     >
                       <MessageCircle className='h-5 w-5 mr-1' />
                       <span>{post.comments?.[0]?.count || 0}</span>
@@ -339,6 +495,48 @@ export default function BlogPage() {
                   View full post →
                 </Link>
               </div>
+
+              {/* Comments Section */}
+              <AnimatePresence>
+                {expandedComments[post.id] && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className='border-t border-pink-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-4'
+                  >
+                    <div className='flex justify-between items-center mb-4'>
+                      <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
+                        Comments
+                      </h3>
+                      <Button
+                        variant='ghost'
+                        size='sm'
+                        className='text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-1'
+                        onClick={() => toggleComments(post.id)}
+                      >
+                        <X className='h-5 w-5' />
+                      </Button>
+                    </div>
+
+                    <div className='bg-white dark:bg-gray-800 rounded-lg p-4'>
+                      <DiscussionEmbed
+                        shortname='espazza'
+                        config={{
+                          url: `${
+                            typeof window !== 'undefined'
+                              ? window.location.origin
+                              : ''
+                          }/blog/${post.slug}`,
+                          identifier: post.id,
+                          title: post.title,
+                        }}
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           ))}
         </div>
