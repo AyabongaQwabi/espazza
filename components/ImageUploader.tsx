@@ -23,9 +23,11 @@ export function ImageUploader({
   maxSizeInMB = 5,
   defaultImage,
 }: ImageUploaderProps) {
-  const [uploadingImages, setUploadingImages] = useState<UploadingImage[]>([
-    { preview: defaultImage, file: new File([''], 'default.jpg') },
-  ]);
+  const [uploadingImages, setUploadingImages] = useState<UploadingImage[]>(
+    defaultImage
+      ? [{ preview: defaultImage, file: new File([''], 'default.jpg') }]
+      : []
+  );
   const [error, setError] = useState<string | null>(null);
 
   const handleFileChange = useCallback(

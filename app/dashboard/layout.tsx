@@ -170,7 +170,7 @@ export default function DashboardLayout({
 
   return (
     <SidebarProvider defaultOpen>
-      <div className='min-h-screen bg-black flex'>
+      <div className='min-h-screen bg-black flex w-full'>
         <DashboardSidebar profile={profile} pathname={pathname} />
 
         {/* Main Content */}
