@@ -63,7 +63,7 @@ export default async function MerchandiserPage({
     <div className='container mx-auto px-4 py-12'>
       <div className='max-w-5xl mx-auto'>
         <Button variant='ghost' asChild className='mb-8'>
-          <Link href='/merchandisers'>
+          <Link href='/merch'>
             <ArrowLeft className='mr-2 h-4 w-4' />
             Back to all merchandisers
           </Link>
