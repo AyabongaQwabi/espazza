@@ -2,8 +2,14 @@ import BlogPostClient from './BlogPostClient';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 
-export async function generateMetadata({ params }) {
-  const supabase = createServerComponentClient({ cookies });
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}) {
+  const cookieStore = cookies();
+  const supabase = createServerComponentClient({ cookies: () => cookieStore });
+
   const { data: post } = await supabase
     .from('blog_posts')
     .select('title, excerpt, featured_image, tags')
@@ -13,28 +19,34 @@ export async function generateMetadata({ params }) {
   if (!post) {
     return {
       title: 'Post Not Found',
-      description: 'The requested blog post could not be found.',
     };
   }
 
+  // Ensure the site URL is properly set
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://espazza.co.za';
+
   return {
-    title: post.title, // Just the post title without any suffix
+    title: post.title,
     description: post.excerpt,
     openGraph: {
       title: post.title,
       description: post.excerpt,
-      images: [{ url: post.featured_image }],
       type: 'article',
+      url: `${siteUrl}/blog/${params.slug}`,
+      images: [
+        {
+          url: post.featured_image,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title: post.title,
       description: post.excerpt,
       images: [post.featured_image],
-    },
-    keywords: post.tags?.join(', ') || '',
-    alternates: {
-      canonical: `${process.env.NEXT_PUBLIC_SITE_URL}/blog/${params.slug}`,
     },
   };
 }
