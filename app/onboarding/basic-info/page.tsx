@@ -1,10 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
-import { Button } from '@/components/ui/button';
+import type React from 'react';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import type { Database } from '@/types/supabase';
 import {
   Select,
   SelectContent,
@@ -19,9 +33,25 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { SearchableSelect } from '@/components/SearchableSelect';
+
+const formSchema = z.object({
+  first_name: z.string().min(2, {
+    message: 'First name must be at least 2 characters.',
+  }),
+  last_name: z.string().min(2, {
+    message: 'Last name must be at least 2 characters.',
+  }),
+  artist_name: z.string().min(2, {
+    message: 'Artist name must be at least 2 characters.',
+  }),
+  town_id: z.string().uuid().or(z.literal('')),
+  record_label_id: z.string().uuid().or(z.literal('')),
+  distributor_id: z.string().uuid(),
+  bio: z.string().optional(),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 const PROVINCES = [
   'Eastern Cape',
@@ -30,46 +60,48 @@ const PROVINCES = [
   'KwaZulu-Natal',
   'Limpopo',
   'Mpumalanga',
-  'Northern Cape',
   'North West',
+  'Northern Cape',
   'Western Cape',
 ];
 
 export default function BasicInfoPage() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [newLabel, setNewLabel] = useState('');
-  const [towns, setTowns] = useState<any[]>([]);
+  const [towns, setTowns] = useState<
+    Database['public']['Tables']['south_african_towns']['Row'][]
+  >([]);
+  const [recordLabels, setRecordLabels] = useState<
+    Database['public']['Tables']['record_labels']['Row'][]
+  >([]);
+  const [distributors, setDistributors] = useState<
+    Database['public']['Tables']['distributors']['Row'][]
+  >([]);
   const [newTown, setNewTown] = useState('');
   const [newTownProvince, setNewTownProvince] = useState('');
-  const [recordLabels, setRecordLabels] = useState<any[]>([]);
-  const [distributors, setDistributors] = useState<any[]>([]);
+  const [newLabel, setNewLabel] = useState('');
   const [newDistributor, setNewDistributor] = useState('');
-  const [genres, setGenres] = useState<any[]>([]);
-  const [formData, setFormData] = useState({
-    government_name: '',
-    artist_name: '',
-    date_of_birth: '',
-    sa_id_number: '',
-    phone_number: '',
-    street_address: '',
-    suburb: '',
-    town_id: '',
-    province: '',
-    record_label_id: '',
-    has_manager: false,
-    distributor_id: '',
-    samro_member: false,
-    samro_id: '',
-    cappasso_member: false,
-    cappasso_id: '',
-    risa_member: false,
-    risa_id: '',
-    sampra_member: false,
-    sampra_id: '',
-    genre: '',
+
+  const router = useRouter();
+  const supabase = createClientComponentClient<Database>();
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      first_name: '',
+      last_name: '',
+      artist_name: '',
+      town_id: '',
+      record_label_id: '',
+      distributor_id: '',
+      bio: '',
+    },
   });
+
+  const [formData, setFormData] = useState(form.getValues());
+
+  useEffect(() => {
+    setFormData(form.getValues());
+  }, [form.watch()]);
 
   useEffect(() => {
     loadData();
@@ -93,55 +125,82 @@ export default function BasicInfoPage() {
       .select('*')
       .order('name');
     setDistributors(distributorsData || []);
+
+    // Load user's current data
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (profileData) {
+        // Set default values for required fields if they're empty
+        const updatedProfileData = {
+          ...profileData,
+          town_id: profileData.town_id || '',
+          record_label_id: profileData.record_label_id || '',
+          distributor_id: profileData.distributor_id || '',
+        };
+
+        setFormData(updatedProfileData);
+      }
+    }
   }
 
   async function createTown() {
-    const { data, error } = await supabase
-      .from('south_african_towns')
-      .insert([{ name: newTown, province: newTownProvince }])
-      .select()
-      .single();
-
-    if (error) {
-      setError(error.message);
-      return;
+    setLoading(true);
+    setError('');
+    try {
+      const { data, error } = await supabase
+        .from('south_african_towns')
+        .insert([{ name: newTown, province: newTownProvince }]);
+      if (error) throw error;
+      setNewTown('');
+      setNewTownProvince('');
+      loadData();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-
-    setTowns([...towns, data]);
-    setNewTown('');
-    setNewTownProvince('');
   }
 
   async function createLabel() {
-    const { data, error } = await supabase
-      .from('record_labels')
-      .insert([{ name: newLabel }])
-      .select()
-      .single();
-
-    if (error) {
-      setError(error.message);
-      return;
+    setLoading(true);
+    setError('');
+    try {
+      const { data, error } = await supabase
+        .from('record_labels')
+        .insert([{ name: newLabel }]);
+      if (error) throw error;
+      setNewLabel('');
+      loadData();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-
-    setRecordLabels([...recordLabels, data]);
-    setNewLabel('');
   }
 
   async function createDistributor() {
-    const { data, error } = await supabase
-      .from('distributors')
-      .insert([{ name: newDistributor }])
-      .select()
-      .single();
-
-    if (error) {
-      setError(error.message);
-      return;
+    setLoading(true);
+    setError('');
+    try {
+      const { data, error } = await supabase
+        .from('distributors')
+        .insert([{ name: newDistributor }]);
+      if (error) throw error;
+      setNewDistributor('');
+      loadData();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-
-    setDistributors([...distributors, data]);
-    setNewDistributor('');
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -150,6 +209,53 @@ export default function BasicInfoPage() {
     setError('');
 
     try {
+      // Validate required UUID fields
+      if (!formData.town_id) {
+        throw new Error(
+          'Please select a town from the dropdown or add a new one'
+        );
+      }
+
+      if (!formData.record_label_id) {
+        throw new Error(
+          'Please select a record label from the dropdown or add a new one'
+        );
+      }
+
+      if (!formData.distributor_id) {
+        throw new Error(
+          'Please select a distributor from the dropdown or add a new one'
+        );
+      }
+
+      // Validate UUID format for the IDs
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+      if (
+        formData.town_id !== 'Independent' &&
+        !uuidRegex.test(formData.town_id)
+      ) {
+        throw new Error(
+          'Invalid town selection. Please select a valid town from the dropdown'
+        );
+      }
+
+      if (
+        formData.record_label_id !== 'Independent' &&
+        !uuidRegex.test(formData.record_label_id)
+      ) {
+        throw new Error(
+          'Invalid record label selection. Please select a valid record label from the dropdown'
+        );
+      }
+
+      if (!uuidRegex.test(formData.distributor_id)) {
+        throw new Error(
+          'Invalid distributor selection. Please select a valid distributor from the dropdown'
+        );
+      }
+
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -163,504 +269,310 @@ export default function BasicInfoPage() {
         })
         .eq('id', user.id);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Update error:', updateError);
+        if (
+          updateError.message.includes('invalid input syntax for type uuid')
+        ) {
+          throw new Error(
+            'One or more selections contain invalid data. Please check your town, record label, and distributor selections.'
+          );
+        }
+        throw updateError;
+      }
 
       router.push('/onboarding/media');
     } catch (err: any) {
       setError(err.message);
+      // Scroll to the error message
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     } finally {
       setLoading(false);
     }
   }
 
-  const handleNewGenreCreation = async (name: string) => {
-    const { data, error } = await supabase
-      .from('genres')
-      .insert({ name })
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error creating product category:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to create new category. Please try again.',
-        variant: 'destructive',
-      });
-      return null;
-    }
-
-    setGenres((prev) => [...prev, data]);
-    return data.id;
-  };
-
-  useEffect(() => {
-    const loadOptions = async () => {
-      const { data: genresData } = await supabase
-        .from('genres')
-        .select('id, name');
-      if (genresData) setGenres(genresData);
-    };
-    loadOptions();
-  }, []);
-
-  const getGenreNameFromId = (id: string, genres: any[]) => {
-    const genre = genres.find((genre) => genre.id === id);
-    return genre ? genre.name : '';
-  };
-
-  const getGenreIdFromName = (name: string, genres: any[]) => {
-    const genre = genres.find((genre) => genre.name === name);
-    return genre ? genre.id : '';
-  };
-
   return (
-    <div className='min-h-screen bg-zinc-900 p-8'>
-      <div className='max-w-3xl mx-auto'>
-        <h1 className='text-3xl font-bold text-white mb-8'>
-          Step 1: Basic Information
-        </h1>
-
+    <div className='container mx-auto max-w-2xl'>
+      <h1 className='text-3xl font-bold mb-4'>Basic Information</h1>
+      <Form {...form}>
         <form onSubmit={handleSubmit} className='space-y-8'>
-          {/* Personal Information */}
-          <div className='bg-zinc-900 rounded-lg p-6 space-y-4'>
-            <h2 className='text-xl font-semibold text-white mb-4'>
-              Personal Information
-            </h2>
+          <FormField
+            control={form.control}
+            name='first_name'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>First Name</FormLabel>
+                <FormControl>
+                  <Input placeholder='First Name' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='last_name'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Last Name</FormLabel>
+                <FormControl>
+                  <Input placeholder='Last Name' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='artist_name'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Artist Name</FormLabel>
+                <FormControl>
+                  <Input placeholder='Artist Name' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              <div>
-                <Label htmlFor='government_name'>Government Full Name</Label>
-                <Input
-                  id='government_name'
-                  value={formData.government_name}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      government_name: e.target.value,
-                    })
-                  }
-                  required
-                />
-              </div>
+          <div>
+            <Label htmlFor='town' className='flex items-center'>
+              Town <span className='text-red-500 ml-1'>*</span>
+            </Label>
+            <div className='flex gap-2'>
+              <Select
+                value={formData.town_id}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, town_id: value })
+                }
+                required
+              >
+                <SelectTrigger
+                  className={`flex-1 ${
+                    !formData.town_id ? 'border-red-500' : ''
+                  }`}
+                >
+                  <SelectValue placeholder='Select town' />
+                </SelectTrigger>
+                <SelectContent>
+                  {towns?.map((town) => (
+                    <SelectItem key={town.id} value={town.id}>
+                      {town.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-              <div>
-                <Label htmlFor='artist_name'>Artist Name</Label>
-                <Input
-                  id='artist_name'
-                  value={formData.artist_name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, artist_name: e.target.value })
-                  }
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor='date_of_birth'>Date of Birth</Label>
-                <Input
-                  id='date_of_birth'
-                  type='date'
-                  value={formData.date_of_birth}
-                  onChange={(e) =>
-                    setFormData({ ...formData, date_of_birth: e.target.value })
-                  }
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor='sa_id_number'>SA ID Number</Label>
-                <Input
-                  id='sa_id_number'
-                  value={formData.sa_id_number}
-                  onChange={(e) =>
-                    setFormData({ ...formData, sa_id_number: e.target.value })
-                  }
-                  required
-                  pattern='[0-9]{13}'
-                  title='Please enter a valid 13-digit South African ID number'
-                />
-              </div>
-
-              <div>
-                <Label htmlFor='phone_number'>Phone Number</Label>
-                <Input
-                  id='phone_number'
-                  type='tel'
-                  value={formData.phone_number}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone_number: e.target.value })
-                  }
-                  required
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Address Information */}
-          <div className='bg-zinc-900 rounded-lg p-6 space-y-4'>
-            <h2 className='text-xl font-semibold text-white mb-4'>
-              Address Information
-            </h2>
-
-            <div className='space-y-4'>
-              <div>
-                <Label htmlFor='street_address'>Street Address</Label>
-                <Input
-                  id='street_address'
-                  value={formData.street_address}
-                  onChange={(e) =>
-                    setFormData({ ...formData, street_address: e.target.value })
-                  }
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor='suburb'>Suburb</Label>
-                <Input
-                  id='suburb'
-                  value={formData.suburb}
-                  onChange={(e) =>
-                    setFormData({ ...formData, suburb: e.target.value })
-                  }
-                  required
-                />
-              </div>
-
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                <div>
-                  <Label htmlFor='province'>Province</Label>
-                  <Select
-                    value={formData.province}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, province: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder='Select province' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PROVINCES?.map((province) => (
-                        <SelectItem key={province} value={province}>
-                          {province}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor='town'>Town</Label>
-                  <div className='flex gap-2'>
-                    <Select
-                      value={formData.town_id}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, town_id: value })
-                      }
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant='outline'>Add Town</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add New Town</DialogTitle>
+                  </DialogHeader>
+                  <div className='space-y-4'>
+                    <div>
+                      <Label>Town Name</Label>
+                      <Input
+                        value={newTown}
+                        onChange={(e) => setNewTown(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label>Province</Label>
+                      <Select
+                        value={newTownProvince}
+                        onValueChange={setNewTownProvince}
+                        required
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder='Select province' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PROVINCES?.map((province) => (
+                            <SelectItem key={province} value={province}>
+                              {province}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button
+                      onClick={createTown}
+                      disabled={!newTown || !newTownProvince}
                     >
-                      <SelectTrigger className='flex-1'>
-                        <SelectValue placeholder='Select town' />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {towns?.map((town) => (
-                          <SelectItem key={town.id} value={town.id}>
-                            {town.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant='outline'>Add Town</Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Add New Town</DialogTitle>
-                        </DialogHeader>
-                        <div className='space-y-4'>
-                          <div>
-                            <Label>Town Name</Label>
-                            <Input
-                              value={newTown}
-                              onChange={(e) => setNewTown(e.target.value)}
-                            />
-                          </div>
-                          <div>
-                            <Label>Province</Label>
-                            <Select
-                              value={newTownProvince}
-                              onValueChange={setNewTownProvince}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder='Select province' />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {PROVINCES?.map((province) => (
-                                  <SelectItem key={province} value={province}>
-                                    {province}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <Button onClick={createTown}>Add Town</Button>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
+                      Add Town
+                    </Button>
                   </div>
-                </div>
-              </div>
+                </DialogContent>
+              </Dialog>
             </div>
+            {!formData.town_id && (
+              <p className='text-red-500 text-xs mt-1'>
+                Town selection is required
+              </p>
+            )}
           </div>
 
-          {/* Professional Information */}
-          <div className='bg-zinc-900 rounded-lg p-6 space-y-4'>
-            <h2 className='text-xl font-semibold text-white mb-4'>
-              Professional Information
-            </h2>
+          <div>
+            <Label className='flex items-center'>
+              Record Label <span className='text-red-500 ml-1'>*</span>
+            </Label>
+            <div className='flex gap-2'>
+              <Select
+                value={formData.record_label_id}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, record_label_id: value })
+                }
+                required
+              >
+                <SelectTrigger
+                  className={`flex-1 ${
+                    !formData.record_label_id ? 'border-red-500' : ''
+                  }`}
+                >
+                  <SelectValue placeholder='Select record label' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='Independent'>Independent</SelectItem>
+                  {recordLabels?.map((label) => (
+                    <SelectItem key={label.id} value={label.id}>
+                      {label.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            <div className='space-y-4'>
-              <Label htmlFor='genre'>Genre</Label>
-              <SearchableSelect
-                id='genre'
-                name='genre'
-                displayName='Genre'
-                value={getGenreIdFromName(formData.genre, genres)}
-                onChange={(value) => {
-                  console.log('setting value', value);
-                  setFormData((prev) => ({
-                    ...prev,
-                    genre: getGenreNameFromId(value, genres),
-                  }));
-                }}
-                onCreateNew={handleNewGenreCreation}
-                options={genres}
-                placeholder='Select or create a category'
-              />
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant='outline'>Add Label</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add New Record Label</DialogTitle>
+                  </DialogHeader>
+                  <div className='space-y-4'>
+                    <div>
+                      <Label>Label Name</Label>
+                      <Input
+                        value={newLabel}
+                        onChange={(e) => setNewLabel(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <Button onClick={createLabel} disabled={!newLabel}>
+                      Add Label
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
-
-            <div className='space-y-4'>
-              <div>
-                <Label>Record Label</Label>
-                <div className='flex gap-2'>
-                  <Select
-                    value={formData.record_label_id}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, record_label_id: value })
-                    }
-                  >
-                    <SelectTrigger className='flex-1'>
-                      <SelectValue placeholder='Select record label' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='Independent'>Independent</SelectItem>
-                      {recordLabels?.map((label) => (
-                        <SelectItem key={label.id} value={label.id}>
-                          {label.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant='outline'>Add Label</Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Add New Record Label</DialogTitle>
-                      </DialogHeader>
-                      <div className='space-y-4'>
-                        <div>
-                          <Label>Label Name</Label>
-                          <Input
-                            value={newLabel}
-                            onChange={(e) => setNewLabel(e.target.value)}
-                          />
-                        </div>
-                        <Button onClick={createLabel}>Add Label</Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </div>
-
-              <div className='flex items-center space-x-2'>
-                <Switch
-                  id='has_manager'
-                  checked={formData.has_manager}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, has_manager: checked })
-                  }
-                />
-                <Label htmlFor='has_manager'>I have a manager</Label>
-              </div>
-
-              <div>
-                <Label>Distributor</Label>
-                <div className='flex gap-2'>
-                  <Select
-                    value={formData.distributor_id}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, distributor_id: value })
-                    }
-                  >
-                    <SelectTrigger className='flex-1'>
-                      <SelectValue placeholder='Select distributor' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {distributors?.map((distributor) => (
-                        <SelectItem key={distributor.id} value={distributor.id}>
-                          {distributor.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant='outline'>Add Distro</Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Add New Distributor</DialogTitle>
-                      </DialogHeader>
-                      <div className='space-y-4'>
-                        <div>
-                          <Label>Distributor Name</Label>
-                          <Input
-                            value={newDistributor}
-                            onChange={(e) => setNewDistributor(e.target.value)}
-                          />
-                        </div>
-                        <Button onClick={createDistributor}>Add Distro</Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </div>
-            </div>
+            {!formData.record_label_id && (
+              <p className='text-red-500 text-xs mt-1'>
+                Record label selection is required
+              </p>
+            )}
           </div>
 
-          {/* Memberships */}
-          <div className='bg-zinc-900 rounded-lg p-6 space-y-4'>
-            <h2 className='text-xl font-semibold text-white mb-4'>
-              Organization Memberships
-            </h2>
+          <div>
+            <Label className='flex items-center'>
+              Distributor <span className='text-red-500 ml-1'>*</span>
+            </Label>
+            <div className='flex gap-2'>
+              <Select
+                value={formData.distributor_id}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, distributor_id: value })
+                }
+                required
+              >
+                <SelectTrigger
+                  className={`flex-1 ${
+                    !formData.distributor_id ? 'border-red-500' : ''
+                  }`}
+                >
+                  <SelectValue placeholder='Select distributor' />
+                </SelectTrigger>
+                <SelectContent>
+                  {distributors?.map((distributor) => (
+                    <SelectItem key={distributor.id} value={distributor.id}>
+                      {distributor.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            <div className='space-y-6'>
-              {/* SAMRO */}
-              <div className='space-y-2'>
-                <div className='flex items-center space-x-2'>
-                  <Switch
-                    id='samro_member'
-                    checked={formData.samro_member}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, samro_member: checked })
-                    }
-                  />
-                  <Label htmlFor='samro_member'>SAMRO Member</Label>
-                </div>
-                {formData.samro_member && (
-                  <Input
-                    placeholder='SAMRO Membership ID'
-                    value={formData.samro_id}
-                    onChange={(e) =>
-                      setFormData({ ...formData, samro_id: e.target.value })
-                    }
-                  />
-                )}
-              </div>
-
-              {/* CAPPASSO */}
-              <div className='space-y-2'>
-                <div className='flex items-center space-x-2'>
-                  <Switch
-                    id='cappasso_member'
-                    checked={formData.cappasso_member}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, cappasso_member: checked })
-                    }
-                  />
-                  <Label htmlFor='cappasso_member'>CAPPASSO Member</Label>
-                </div>
-                {formData.cappasso_member && (
-                  <Input
-                    placeholder='CAPPASSO Membership ID'
-                    value={formData.cappasso_id}
-                    onChange={(e) =>
-                      setFormData({ ...formData, cappasso_id: e.target.value })
-                    }
-                  />
-                )}
-              </div>
-
-              {/* RISA */}
-              <div className='space-y-2'>
-                <div className='flex items-center space-x-2'>
-                  <Switch
-                    id='risa_member'
-                    checked={formData.risa_member}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, risa_member: checked })
-                    }
-                  />
-                  <Label htmlFor='risa_member'>RISA Member</Label>
-                </div>
-                {formData.risa_member && (
-                  <Input
-                    placeholder='RISA Membership ID'
-                    value={formData.risa_id}
-                    onChange={(e) =>
-                      setFormData({ ...formData, risa_id: e.target.value })
-                    }
-                  />
-                )}
-              </div>
-
-              {/* SAMPRA */}
-              <div className='space-y-2'>
-                <div className='flex items-center space-x-2'>
-                  <Switch
-                    id='sampra_member'
-                    checked={formData.sampra_member}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, sampra_member: checked })
-                    }
-                  />
-                  <Label htmlFor='sampra_member'>SAMPRA Member</Label>
-                </div>
-                {formData.sampra_member && (
-                  <Input
-                    placeholder='SAMPRA Membership ID'
-                    value={formData.sampra_id}
-                    onChange={(e) =>
-                      setFormData({ ...formData, sampra_id: e.target.value })
-                    }
-                  />
-                )}
-              </div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant='outline'>Add Distro</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add New Distributor</DialogTitle>
+                  </DialogHeader>
+                  <div className='space-y-4'>
+                    <div>
+                      <Label>Distributor Name</Label>
+                      <Input
+                        value={newDistributor}
+                        onChange={(e) => setNewDistributor(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <Button
+                      onClick={createDistributor}
+                      disabled={!newDistributor}
+                    >
+                      Add Distro
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
+            {!formData.distributor_id && (
+              <p className='text-red-500 text-xs mt-1'>
+                Distributor selection is required
+              </p>
+            )}
           </div>
 
-          {error && (
-            <div className='bg-red-500/10 border border-red-500/50 rounded-lg p-4'>
-              <p className='text-red-500 text-sm'>{error}</p>
-            </div>
-          )}
-
-          <Button
-            type='submit'
-            className='w-full bg-red-600 hover:bg-red-700'
-            disabled={loading}
-          >
-            {loading ? 'Saving...' : 'Continue to Media Upload'}
+          <FormField
+            control={form.control}
+            name='bio'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Bio</FormLabel>
+                <FormControl>
+                  <Input placeholder='Bio' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type='submit' disabled={loading}>
+            {loading ? 'Loading...' : 'Submit'}
           </Button>
         </form>
-      </div>
+      </Form>
+      {error && (
+        <div className='bg-red-500/10 border border-red-500/50 rounded-lg p-4 animate-pulse'>
+          <p className='text-red-500 font-medium'>{error}</p>
+          {error.includes('invalid') && (
+            <ul className='text-red-400 text-sm mt-2 list-disc list-inside'>
+              <li>Make sure you've selected a valid town from the dropdown</li>
+              <li>
+                Make sure you've selected a valid record label from the dropdown
+              </li>
+              <li>
+                Make sure you've selected a valid distributor from the dropdown
+              </li>
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   );
 }
