@@ -117,7 +117,7 @@ export default function EventsPage({
       <div className='max-w-7xl mx-auto px-4'>
         <div className='text-center mb-12'>
           <h1 className='text-4xl md:text-5xl font-bold text-white mb-4'>
-            Iziganeko
+            Events
           </h1>
           <p className='text-zinc-400 text-lg'>Discover Upcoming Events</p>
         </div>

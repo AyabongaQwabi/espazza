@@ -32,10 +32,10 @@ const Navigation = ({ className = '' }: { className?: string }) => {
         Abaculi
       </Link>
       <Link href='/events' className='hover:text-red-500 transition-colors'>
-        Iziganeko
+        Events
       </Link>
       <Link href='/contact' className='hover:text-red-500 transition-colors'>
-        Qhagamshelana
+        Contact
       </Link>
     </nav>
   );
@@ -155,9 +155,8 @@ export default function Home({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              Discover and connect with amazing artists across Xhosa Trap, Xhosa
-              Drill, Xhosa RnB, Xhosa Hip Hop, Amapiano, Gospel, Gqom, and
-              Sijokojoko.{' '}
+              Discover and connect with amazing artists across Trap, Xhosa
+              Drill, RnB, Hip Hop, Amapiano, Gospel, Gqom, and Sijokojoko.{' '}
             </motion.p>
             <div className='space-x-4'>
               <Button asChild size='lg' className='bg-red-600 hover:bg-red-700'>
@@ -189,8 +188,7 @@ export default function Home({
               Welcome to the Spaza Shop
             </h2>
             <p className='text-zinc-400 max-w-2xl mx-auto'>
-              Your one-stop platform for Xhosa Hip Hop music, events, and
-              culture.
+              Your one-stop platform for Hip Hop music, events, and culture.
             </p>
           </motion.div>
           <div className='flex flex-wrap -mx-4'>
@@ -228,15 +226,15 @@ export default function Home({
               Iindidi Zomculo Ezamkelekileyo
             </h2>
             <p className='text-zinc-400 max-w-2xl mx-auto'>
-              eSpazza welcomes artists from all Xhosa music genres
+              eSpazza welcomes artists from all music genres
             </p>
           </motion.div>
           <div className='flex flex-wrap justify-center gap-4'>
             {[
-              'Xhosa Trap',
-              'Xhosa Drill',
-              'Xhosa RnB',
-              'Xhosa Hip Hop',
+              'Trap',
+              'Drill',
+              'RnB',
+              'Hip Hop',
               'Amapiano',
               'Gospel',
               'Gqom',
@@ -268,7 +266,7 @@ export default function Home({
               Abaculi Abaphambili
             </h2>
             <p className='text-zinc-400 max-w-2xl mx-auto'>
-              Discover the rising stars of Xhosa Hip Hop
+              Discover the rising stars of Hip Hop
             </p>
           </motion.div>
           <motion.div
@@ -284,11 +282,7 @@ export default function Home({
               genre='Hip Hop'
             />
             <ArtistCard name='K Keed' image='/kkeed.jpg' genre='Hip Hop' />
-            <ArtistCard
-              name='Flash Ikumkani'
-              image='/flash.jpg'
-              genre='Xhosa Trap'
-            />
+            <ArtistCard name='Flash Ikumkani' image='/flash.jpg' genre='Trap' />
             <ArtistCard name='Driemanskap' image='/ndlu.jpg' genre='Hip Hop' />
           </motion.div>
         </div>

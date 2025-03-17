@@ -1,82 +1,9 @@
 'use client';
-
-import { useState } from 'react';
-import { MailIcon, PhoneIcon, MapPinIcon } from 'lucide-react';
+import { MailIcon, PhoneIcon, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { toast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 
 export default function ContactPage() {
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    message: '',
-  });
-
-  const supabase = createClientComponentClient();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      // Validate form data
-      if (
-        !formData.name.trim() ||
-        !formData.email.trim() ||
-        !formData.message.trim()
-      ) {
-        throw new Error('Please fill in all required fields');
-      }
-
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email)) {
-        throw new Error('Please enter a valid email address');
-      }
-
-      const { error } = await supabase.from('contacts').insert([
-        {
-          name: formData.name.trim(),
-          email: formData.email.trim(),
-          phone: formData.phone.trim(),
-          message: formData.message.trim(),
-        },
-      ]);
-
-      if (error) throw error;
-
-      toast({
-        title: 'Message Sent',
-        description:
-          'Thank you for your message. We will get back to you soon.',
-      });
-
-      // Reset form
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        message: '',
-      });
-    } catch (error: any) {
-      console.error('Error sending message:', error);
-      toast({
-        title: 'Error',
-        description:
-          error.message || 'Failed to send message. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className='min-h-screen bg-zinc-900 pt-16'>
       {/* Hero Section */}
@@ -97,7 +24,7 @@ export default function ContactPage() {
             transition={{ duration: 0.5 }}
             className='text-4xl md:text-6xl font-bold text-white mb-4'
           >
-            Qhagamshelana
+            Contact
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -110,127 +37,118 @@ export default function ContactPage() {
         </div>
       </div>
 
-      {/* Contact Form Section */}
+      {/* Contact Section */}
       <div className='max-w-7xl mx-auto px-4 py-20'>
         <div className='grid md:grid-cols-2 gap-12'>
-          {/* Contact Information */}
+          {/* About Us */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
             <h2 className='text-3xl font-bold text-white mb-8'>
-              Nxibelelana Nathi
+              About eSpazza
             </h2>
-            <div className='space-y-6'>
-              <div className='flex items-start'>
-                <MailIcon className='h-6 w-6 text-red-600 mt-1 mr-4' />
-                <div>
-                  <h3 className='text-white font-semibold mb-1'>Email</h3>
-                  <p className='text-zinc-400'>info@espazza.co.za</p>
-                </div>
-              </div>
-              <div className='flex items-start'>
-                <PhoneIcon className='h-6 w-6 text-red-600 mt-1 mr-4' />
-                <div>
-                  <h3 className='text-white font-semibold mb-1'>Phone</h3>
-                  <p className='text-zinc-400'>+27 (0) 60 311 6777</p>
-                </div>
-              </div>
-              <div className='flex items-start'>
-                <MapPinIcon className='h-6 w-6 text-red-600 mt-1 mr-4' />
-                <div>
-                  <h3 className='text-white font-semibold mb-1'>Address</h3>
-                  <p className='text-zinc-400'>
-                    123 Long Street
-                    <br />
-                    Cape Town
-                    <br />
-                    8001
-                    <br />
-                    South Africa
-                  </p>
-                </div>
-              </div>
+            <div className='prose prose-invert max-w-none'>
+              <p className='text-zinc-300 mb-6'>
+                eSpazza is a positive impact hip hop music platform dedicated to
+                providing valuable information about the hip hop industry in
+                South Africa. We aim to connect artists, producers, and fans
+                while promoting the rich culture and talent within the South
+                African hip hop scene.
+              </p>
+              <p className='text-zinc-300 mb-6'>
+                Our mission is to elevate Xhosa hip hop and create opportunities
+                for emerging artists. We provide resources, connections, and
+                exposure to help artists navigate the industry and reach their
+                full potential.
+              </p>
+              <p className='text-zinc-300'>
+                Whether you're an artist looking for collaboration, a fan
+                seeking new music, or an industry professional interested in
+                partnerships, we're here to connect and support the growth of
+                hip hop culture in South Africa.
+              </p>
             </div>
           </motion.div>
 
-          {/* Contact Form */}
+          {/* Contact Buttons */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
             className='bg-zinc-800 p-8 rounded-lg'
           >
-            <h2 className='text-2xl font-bold text-white mb-6'>
-              Thumela Umyalezo
-            </h2>
-            <form onSubmit={handleSubmit} className='space-y-6'>
-              <div>
-                <label className='block text-sm font-medium text-zinc-400 mb-1'>
-                  Igama (Name) <span className='text-red-500'>*</span>
-                </label>
-                <Input
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  required
-                  className='w-full'
-                  placeholder='Enter your name'
-                />
+            <h2 className='text-2xl font-bold text-white mb-8'>Get In Touch</h2>
+
+            <div className='space-y-8'>
+              {/* Call Button */}
+              <div className='bg-zinc-700/50 p-6 rounded-lg'>
+                <div className='flex items-center mb-4'>
+                  <PhoneIcon className='h-8 w-8 text-red-600 mr-4' />
+                  <div>
+                    <h3 className='text-white font-semibold text-lg'>
+                      Call Us
+                    </h3>
+                    <p className='text-zinc-400'>
+                      Available Monday-Friday, 9am-5pm
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  className='w-full bg-red-600 hover:bg-red-700 h-12 text-base'
+                  onClick={() => (window.location.href = 'tel:0672023083')}
+                >
+                  Call 067 202 3083
+                </Button>
               </div>
-              <div>
-                <label className='block text-sm font-medium text-zinc-400 mb-1'>
-                  I-imeyile (Email) <span className='text-red-500'>*</span>
-                </label>
-                <Input
-                  type='email'
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
+
+              {/* WhatsApp Button */}
+              <div className='bg-zinc-700/50 p-6 rounded-lg'>
+                <div className='flex items-center mb-4'>
+                  <MessageSquare className='h-8 w-8 text-green-500 mr-4' />
+                  <div>
+                    <h3 className='text-white font-semibold text-lg'>
+                      WhatsApp
+                    </h3>
+                    <p className='text-zinc-400'>
+                      Quick responses via WhatsApp
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  className='w-full bg-green-600 hover:bg-green-700 h-12 text-base'
+                  onClick={() =>
+                    window.open('https://wa.me/27603116777', '_blank')
                   }
-                  required
-                  className='w-full'
-                  placeholder='Enter your email'
-                />
+                >
+                  WhatsApp 060 311 6777
+                </Button>
               </div>
-              <div>
-                <label className='block text-sm font-medium text-zinc-400 mb-1'>
-                  Umxeba (Phone)
-                </label>
-                <Input
-                  type='tel'
-                  value={formData.phone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
+
+              {/* Email Button */}
+              <div className='bg-zinc-700/50 p-6 rounded-lg'>
+                <div className='flex items-center mb-4'>
+                  <MailIcon className='h-8 w-8 text-blue-500 mr-4' />
+                  <div>
+                    <h3 className='text-white font-semibold text-lg'>Email</h3>
+                    <p className='text-zinc-400'>Send us a detailed message</p>
+                  </div>
+                </div>
+                <Button
+                  className='w-full bg-blue-600 hover:bg-blue-700 h-12 text-base'
+                  onClick={() =>
+                    (window.location.href = 'mailto:info@espazza.co.za')
                   }
-                  className='w-full'
-                  placeholder='Enter your phone number'
-                />
+                >
+                  Email info@espazza.co.za
+                </Button>
               </div>
-              <div>
-                <label className='block text-sm font-medium text-zinc-400 mb-1'>
-                  Umyalezo (Message) <span className='text-red-500'>*</span>
-                </label>
-                <Textarea
-                  value={formData.message}
-                  onChange={(e) =>
-                    setFormData({ ...formData, message: e.target.value })
-                  }
-                  required
-                  className='w-full h-32'
-                  placeholder='Enter your message'
-                />
-              </div>
-              <Button
-                type='submit'
-                className='w-full bg-red-600 hover:bg-red-700'
-                disabled={loading}
-              >
-                {loading ? 'Sending...' : 'Thumela (Send)'}
-              </Button>
-            </form>
+            </div>
+
+            <div className='mt-8 text-center text-zinc-400 text-sm'>
+              <p>We aim to respond to all inquiries within 24-48 hours.</p>
+            </div>
           </motion.div>
         </div>
       </div>

@@ -141,10 +141,10 @@ const mainNavItems = [
   { href: '/', icon: HomeIcon, label: 'Ikhaya (Home)' },
   { href: '/about', icon: InfoIcon, label: 'Malunga Nathi (About Us)' },
   { href: '/artists', icon: UsersIcon, label: 'Abaculi (Artists)' },
-  { href: '/events', icon: CalendarIcon, label: 'Iziganeko (Events)' },
+  { href: '/events', icon: CalendarIcon, label: 'Events (Events)' },
   { href: '/merch', icon: ShoppingBagIcon, label: 'Merchandise' },
   { href: '/blog', icon: BookOpenIcon, label: 'Amabali (Blog)' },
-  { href: '/contact', icon: MailIcon, label: 'Qhagamshelana (Contact)' },
+  { href: '/contact', icon: MailIcon, label: 'Contact (Contact)' },
 ];
 
 export default function DashboardLayout({

@@ -34,49 +34,56 @@ function Navigation({ className = '' }: { className?: string }) {
           className='hover:text-red-500 transition-colors flex items-center gap-2'
         >
           <HoverIcon Icon={InfoIcon} size={16} />
-          <span>Malunga Nathi</span>
+          <span>About us</span>
         </Link>
         <Link
           href='/blog'
           className='hover:text-red-500 transition-colors flex items-center gap-2'
         >
           <HoverIcon Icon={BookOpenIcon} size={16} />
-          <span>iiPosts</span>
+          <span>Posts</span>
         </Link>
         <Link
           href='/artists'
           className='hover:text-red-500 transition-colors flex items-center gap-2'
         >
           <HoverIcon Icon={UsersIcon} size={16} />
-          <span>iiMCs</span>
+          <span>MCs</span>
         </Link>
         <Link
-          href='/merch'
+          href='/merchandisers'
           className='hover:text-red-500 transition-colors flex items-center gap-2'
         >
           <HoverIcon Icon={ShoppingBagIcon} size={16} />
-          <span>iMerch</span>
+          <span>Merchants</span>
+        </Link>
+        <Link
+          href='/producers'
+          className='hover:text-red-500 transition-colors flex items-center gap-2'
+        >
+          <HoverIcon Icon={ShoppingBagIcon} size={16} />
+          <span>Producers</span>
         </Link>
         <Link
           href='/releases'
           className='hover:text-red-500 transition-colors flex items-center gap-2'
         >
           <HoverIcon Icon={ShoppingBagIcon} size={16} />
-          <span>iiTracks</span>
+          <span>Tracks</span>
         </Link>
         <Link
           href='/events'
           className='hover:text-red-500 transition-colors flex items-center gap-2'
         >
           <HoverIcon Icon={CalendarIcon} size={16} />
-          <span>Iziganeko</span>
+          <span>Events</span>
         </Link>
         <Link
           href='/contact'
           className='hover:text-red-500 transition-colors flex items-center gap-2'
         >
           <HoverIcon Icon={MailIcon} size={16} />
-          <span>Qhagamshelana</span>
+          <span>Contact</span>
         </Link>
       </div>
     </nav>
@@ -163,49 +170,56 @@ export function SiteHeader() {
                     className='hover:text-red-500 transition-colors flex items-center gap-2'
                   >
                     <HoverIcon Icon={InfoIcon} size={16} />
-                    <span>Malunga Nathi</span>
+                    <span>About us</span>
                   </Link>
                   <Link
                     href='/blog'
                     className='hover:text-red-500 transition-colors flex items-center gap-2'
                   >
                     <HoverIcon Icon={BookOpenIcon} size={16} />
-                    <span>iiPosts</span>
+                    <span>Posts</span>
                   </Link>
                   <Link
                     href='/artists'
                     className='hover:text-red-500 transition-colors flex items-center gap-2'
                   >
                     <HoverIcon Icon={UsersIcon} size={16} />
-                    <span>iiMCs</span>
+                    <span>MCs</span>
                   </Link>
                   <Link
                     href='/merch'
                     className='hover:text-red-500 transition-colors flex items-center gap-2'
                   >
                     <HoverIcon Icon={ShoppingBagIcon} size={16} />
-                    <span>iMerch</span>
+                    <span>Merchants</span>
+                  </Link>
+                  <Link
+                    href='/producers'
+                    className='hover:text-red-500 transition-colors flex items-center gap-2'
+                  >
+                    <HoverIcon Icon={ShoppingBagIcon} size={16} />
+                    <span>Producers</span>
                   </Link>
                   <Link
                     href='/releases'
                     className='hover:text-red-500 transition-colors flex items-center gap-2'
                   >
                     <HoverIcon Icon={ShoppingBagIcon} size={16} />
-                    <span>iiTracks</span>
+                    <span>Tracks</span>
                   </Link>
                   <Link
                     href='/events'
                     className='hover:text-red-500 transition-colors flex items-center gap-2'
                   >
                     <HoverIcon Icon={CalendarIcon} size={16} />
-                    <span>Iziganeko</span>
+                    <span>Events</span>
                   </Link>
                   <Link
                     href='/contact'
                     className='hover:text-red-500 transition-colors flex items-center gap-2'
                   >
                     <HoverIcon Icon={MailIcon} size={16} />
-                    <span>Qhagamshelana</span>
+                    <span>Contact</span>
                   </Link>
                 </div>
 
