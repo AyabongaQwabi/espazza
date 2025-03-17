@@ -1,7 +1,6 @@
 'use client';
 
 import type React from 'react';
-
 import { useState, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import ReactMarkdown from 'react-markdown';
@@ -47,17 +46,26 @@ export default function BlogPostClient({
   const [newComment, setNewComment] = useState('');
   const [user, setUser] = useState<any>(null);
   const [showSignupPopup, setShowSignupPopup] = useState(false);
+  const [currentUrl, setCurrentUrl] = useState('');
   const supabase = createClientComponentClient();
 
   useEffect(() => {
     fetchLikes(post.id);
     fetchComments(post.id);
     checkAuth();
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    setCurrentUrl(
+      window?.location?.href || `https://espazza.co.za/blog/${post.slug}`
+    );
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('scroll', handleScroll);
+      return () => window.removeEventListener('scroll', handleScroll);
+    }
   }, [post.id]);
 
   const handleScroll = () => {
+    if (typeof window === 'undefined') return;
+
     const scrollPercentage =
       (window.scrollY /
         (document.documentElement.scrollHeight - window.innerHeight)) *
@@ -163,11 +171,21 @@ export default function BlogPostClient({
   };
 
   const copyLinkToClipboard = () => {
-    navigator.clipboard.writeText(window.location.href);
+    if (typeof window === 'undefined') return;
+
+    navigator.clipboard.writeText(currentUrl);
     toast({
       title: 'Link Copied',
       description: 'The link has been copied to your clipboard.',
     });
+  };
+
+  const handleEmailShare = () => {
+    if (typeof window === 'undefined') return;
+
+    window.location.href = `mailto:?subject=${encodeURIComponent(
+      post.title
+    )}&body=${encodeURIComponent(currentUrl)}`;
   };
 
   if (!post) {
@@ -249,27 +267,19 @@ export default function BlogPostClient({
           </div>
 
           <div className='flex justify-center space-x-4'>
-            <FacebookShareButton url={window.location.href} quote={post.title}>
+            <FacebookShareButton url={currentUrl} quote={post.title}>
               <FacebookIcon size={32} round />
             </FacebookShareButton>
-            <TwitterShareButton url={window.location.href} title={post.title}>
+            <TwitterShareButton url={currentUrl} title={post.title}>
               <TwitterIcon size={32} round />
             </TwitterShareButton>
-            <LinkedinShareButton url={window.location.href}>
+            <LinkedinShareButton url={currentUrl}>
               <LinkedinIcon size={32} round />
             </LinkedinShareButton>
             <Button onClick={copyLinkToClipboard} variant='outline' size='icon'>
               <Share2 className='h-4 w-4' />
             </Button>
-            <Button
-              onClick={() =>
-                (window.location.href = `mailto:?subject=${encodeURIComponent(
-                  post.title
-                )}&body=${encodeURIComponent(window.location.href)}`)
-              }
-              variant='outline'
-              size='icon'
-            >
+            <Button onClick={handleEmailShare} variant='outline' size='icon'>
               <Mail className='h-4 w-4' />
             </Button>
           </div>
@@ -407,14 +417,16 @@ export default function BlogPostClient({
           </div>
 
           {/* Disqus Comments */}
-          <DiscussionEmbed
-            shortname='espazza'
-            config={{
-              url: window.location.href,
-              identifier: post.id,
-              title: post.title,
-            }}
-          />
+          {typeof window !== 'undefined' && (
+            <DiscussionEmbed
+              shortname='espazza'
+              config={{
+                url: currentUrl,
+                identifier: post.id,
+                title: post.title,
+              }}
+            />
+          )}
         </div>
       </article>
 
