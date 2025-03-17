@@ -40,6 +40,10 @@ export default function ProducersPage() {
   const [user, setUser] = useState<any>(null)
   const supabase = createClientComponentClient()
 
+  // Add edit functionality to the producers page
+  // First, add a state for the edit dialog and selected item
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+
   useEffect(() => {
     // Check authentication
     async function checkAuth() {
@@ -215,6 +219,128 @@ export default function ProducersPage() {
 
   const viewProducer = (producer: any) => {
     setSelectedProducer(producer)
+  }
+
+  // Add this function to handle edit button click
+  const editProducer = (producer: any) => {
+    setSelectedProducer(producer)
+    setFormData({
+      name: producer.name,
+      bio: producer.bio || "",
+      facebook_link: producer.facebook_link || "",
+      youtube_link: producer.youtube_link || "",
+      contact_number: producer.contact_number || "",
+      email: producer.email || "",
+      booking_rate: producer.booking_rate || "",
+      genres: producer.genres ? producer.genres.join(", ") : "",
+    })
+    setImage(null)
+    setImageUrl(producer.image_url || "")
+    setEditDialogOpen(true)
+  }
+
+  // Add this function to handle update
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    try {
+      setSubmitting(true)
+
+      // Get current user
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to update a producer",
+          variant: "destructive",
+        })
+        return
+      }
+
+      if (!selectedProducer) {
+        toast({
+          title: "Error",
+          description: "No producer selected for update",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Parse genres from comma-separated string to array
+      const genresArray = formData.genres
+        .split(",")
+        .map((genre) => genre.trim())
+        .filter((genre) => genre !== "")
+
+      // Update producer data
+      const { error } = await supabase
+        .from("music_producers")
+        .update({
+          name: formData.name,
+          bio: formData.bio,
+          facebook_link: formData.facebook_link,
+          youtube_link: formData.youtube_link,
+          contact_number: formData.contact_number,
+          email: formData.email,
+          booking_rate: formData.booking_rate,
+          genres: genresArray,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", selectedProducer.id)
+
+      if (error) throw error
+
+      // Upload new image if there is one
+      if (image) {
+        const producerId = selectedProducer.id
+        const fileExt = image.name.split(".").pop()
+        const fileName = `profile.${fileExt}`
+        const filePath = `${producerId}/${fileName}`
+
+        // Update progress
+        setUploadProgress(50)
+
+        const { error: uploadError } = await supabase.storage.from("producer-images").upload(filePath, image, {
+          upsert: true,
+        })
+
+        if (uploadError) throw uploadError
+
+        setUploadProgress(100)
+      }
+
+      // Reset form
+      setFormData({
+        name: "",
+        bio: "",
+        facebook_link: "",
+        youtube_link: "",
+        contact_number: "",
+        email: "",
+        booking_rate: "",
+        genres: "",
+      })
+      setImage(null)
+      setImageUrl("")
+      setUploadProgress(0)
+      setEditDialogOpen(false)
+
+      // Reload producers
+      loadProducers()
+
+      toast({
+        title: "Success",
+        description: "Producer updated successfully",
+      })
+    } catch (error) {
+      console.error("Error updating producer:", error)
+      toast({
+        title: "Error",
+        description: "Failed to update producer",
+        variant: "destructive",
+      })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -401,6 +527,170 @@ export default function ProducersPage() {
             </form>
           </DialogContent>
         </Dialog>
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent className="sm:max-w-[90vw] max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogHeader>
+              <DialogTitle>Edit Producer</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleUpdate} className="flex flex-col h-full">
+              <div className="overflow-y-auto flex-1 pr-1">
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-name">Producer Name</Label>
+                      <Input
+                        id="edit-name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        placeholder="Enter producer name"
+                        required
+                      />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-contact_number">Contact Number</Label>
+                      <Input
+                        id="edit-contact_number"
+                        name="contact_number"
+                        value={formData.contact_number}
+                        onChange={handleInputChange}
+                        placeholder="Enter contact number"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-email">Email Address</Label>
+                      <Input
+                        id="edit-email"
+                        name="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        placeholder="email@example.com"
+                      />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-booking_rate">Booking Rate</Label>
+                      <Input
+                        id="edit-booking_rate"
+                        name="booking_rate"
+                        value={formData.booking_rate}
+                        onChange={handleInputChange}
+                        placeholder="e.g. R500/hour or Negotiable"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-facebook_link">Facebook Link</Label>
+                      <Input
+                        id="edit-facebook_link"
+                        name="facebook_link"
+                        value={formData.facebook_link}
+                        onChange={handleInputChange}
+                        placeholder="https://facebook.com/profile"
+                      />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-youtube_link">YouTube Link</Label>
+                      <Input
+                        id="edit-youtube_link"
+                        name="youtube_link"
+                        value={formData.youtube_link}
+                        onChange={handleInputChange}
+                        placeholder="https://youtube.com/channel"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-genres">Genres</Label>
+                    <Input
+                      id="edit-genres"
+                      name="genres"
+                      value={formData.genres}
+                      onChange={handleInputChange}
+                      placeholder="Hip Hop, Trap, Afrobeats (comma separated)"
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-bio">Bio</Label>
+                    <Textarea
+                      id="edit-bio"
+                      name="bio"
+                      value={formData.bio}
+                      onChange={handleInputChange}
+                      placeholder="Enter producer bio and experience"
+                      rows={4}
+                      required
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-image">Profile Image</Label>
+                    <div className="border border-zinc-700 rounded-md p-4">
+                      <Input
+                        id="edit-image"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="mb-4"
+                      />
+
+                      {(imageUrl || image) && (
+                        <div className="relative group">
+                          <div className="aspect-square w-40 h-40 relative rounded-md overflow-hidden mx-auto">
+                            <Image
+                              src={image ? URL.createObjectURL(image) : imageUrl || "/placeholder.svg"}
+                              alt="Producer preview"
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={removeImage}
+                            className="absolute top-1 right-1 bg-red-600 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Trash2Icon className="h-4 w-4 text-white" />
+                          </button>
+                        </div>
+                      )}
+
+                      {!imageUrl && !image && (
+                        <div className="flex flex-col items-center justify-center text-zinc-400 py-8">
+                          <ImageIcon className="h-12 w-12 mb-2" />
+                          <p>No image selected</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <DialogFooter className="sticky bottom-0 bg-background pt-2">
+                <Button type="submit" disabled={submitting}>
+                  {submitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {uploadProgress > 0 ? `Uploading... ${uploadProgress}%` : "Saving..."}
+                    </>
+                  ) : (
+                    "Update Producer"
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </motion.div>
 
       {/* Producers List */}
@@ -499,102 +789,108 @@ export default function ProducersPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="outline" size="sm" onClick={() => viewProducer(producer)}>
-                                View Details
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[700px]">
-                              <DialogHeader>
-                                <DialogTitle>{producer.name}</DialogTitle>
-                              </DialogHeader>
-                              <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-3 gap-4">
-                                  <div className="col-span-1">
-                                    <div className="aspect-square rounded-md overflow-hidden bg-zinc-800 relative">
-                                      {producer.image_url ? (
-                                        <Image
-                                          src={producer.image_url || "/placeholder.svg"}
-                                          alt={producer.name}
-                                          fill
-                                          className="object-cover"
-                                        />
-                                      ) : (
-                                        <div className="flex items-center justify-center h-full w-full text-zinc-500">
-                                          <ImageIcon className="h-10 w-10" />
-                                        </div>
-                                      )}
-                                    </div>
-
-                                    <div className="mt-4 space-y-2">
-                                      <h3 className="font-medium mb-2">Contact Information</h3>
-                                      <p className="text-sm mb-1">
-                                        <span className="text-zinc-400">Phone:</span> {producer.contact_number}
-                                      </p>
-                                      {producer.email && (
-                                        <p className="text-sm mb-1">
-                                          <span className="text-zinc-400">Email:</span> {producer.email}
-                                        </p>
-                                      )}
-                                      {producer.booking_rate && (
-                                        <p className="text-sm">
-                                          <span className="text-zinc-400">Rate:</span> {producer.booking_rate}
-                                        </p>
-                                      )}
-                                    </div>
-
-                                    <div className="mt-4">
-                                      <h3 className="font-medium mb-2">Links</h3>
-                                      <div className="space-y-2">
-                                        {producer.facebook_link && (
-                                          <a
-                                            href={producer.facebook_link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center text-blue-400 hover:text-blue-300"
-                                          >
-                                            <FacebookIcon className="h-4 w-4 mr-2" />
-                                            Facebook
-                                          </a>
-                                        )}
-                                        {producer.youtube_link && (
-                                          <a
-                                            href={producer.youtube_link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center text-red-400 hover:text-red-300"
-                                          >
-                                            <YoutubeIcon className="h-4 w-4 mr-2" />
-                                            YouTube
-                                          </a>
+                          <div className="flex space-x-2">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="outline" size="sm" onClick={() => viewProducer(producer)}>
+                                  View Details
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+                                <DialogHeader>
+                                  <DialogTitle>{producer.name}</DialogTitle>
+                                </DialogHeader>
+                                <div className="grid gap-4 py-4">
+                                  <div className="grid grid-cols-3 gap-4">
+                                    <div className="col-span-1">
+                                      <div className="aspect-square rounded-md overflow-hidden bg-zinc-800 relative">
+                                        {producer.image_url ? (
+                                          <Image
+                                            src={producer.image_url || "/placeholder.svg"}
+                                            alt={producer.name}
+                                            fill
+                                            className="object-cover"
+                                          />
+                                        ) : (
+                                          <div className="flex items-center justify-center h-full w-full text-zinc-500">
+                                            <ImageIcon className="h-10 w-10" />
+                                          </div>
                                         )}
                                       </div>
-                                    </div>
-                                  </div>
 
-                                  <div className="col-span-2">
-                                    <div>
-                                      <h3 className="font-medium mb-2">Bio</h3>
-                                      <p className="text-sm whitespace-pre-line">{producer.bio}</p>
+                                      <div className="mt-4 space-y-2">
+                                        <h3 className="font-medium mb-2">Contact Information</h3>
+                                        <p className="text-sm mb-1">
+                                          <span className="text-zinc-400">Phone:</span> {producer.contact_number}
+                                        </p>
+                                        {producer.email && (
+                                          <p className="text-sm mb-1">
+                                            <span className="text-zinc-400">Email:</span> {producer.email}
+                                          </p>
+                                        )}
+                                        {producer.booking_rate && (
+                                          <p className="text-sm">
+                                            <span className="text-zinc-400">Rate:</span> {producer.booking_rate}
+                                          </p>
+                                        )}
+                                      </div>
+
+                                      <div className="mt-4">
+                                        <h3 className="font-medium mb-2">Links</h3>
+                                        <div className="space-y-2">
+                                          {producer.facebook_link && (
+                                            <a
+                                              href={producer.facebook_link}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="flex items-center text-blue-400 hover:text-blue-300"
+                                            >
+                                              <FacebookIcon className="h-4 w-4 mr-2" />
+                                              Facebook
+                                            </a>
+                                          )}
+                                          {producer.youtube_link && (
+                                            <a
+                                              href={producer.youtube_link}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="flex items-center text-red-400 hover:text-red-300"
+                                            >
+                                              <YoutubeIcon className="h-4 w-4 mr-2" />
+                                              YouTube
+                                            </a>
+                                          )}
+                                        </div>
+                                      </div>
                                     </div>
 
-                                    <div className="mt-4">
-                                      <h3 className="font-medium mb-2">Genres</h3>
-                                      <div className="flex flex-wrap gap-1">
-                                        {producer.genres &&
-                                          producer.genres.map((genre: string, index: number) => (
-                                            <Badge key={index} className="bg-zinc-800 text-zinc-300">
-                                              {genre}
-                                            </Badge>
-                                          ))}
+                                    <div className="col-span-2">
+                                      <div>
+                                        <h3 className="font-medium mb-2">Bio</h3>
+                                        <p className="text-sm whitespace-pre-line">{producer.bio}</p>
+                                      </div>
+
+                                      <div className="mt-4">
+                                        <h3 className="font-medium mb-2">Genres</h3>
+                                        <div className="flex flex-wrap gap-1">
+                                          {producer.genres &&
+                                            producer.genres.map((genre: string, index: number) => (
+                                              <Badge key={index} className="bg-zinc-800 text-zinc-300">
+                                                {genre}
+                                              </Badge>
+                                            ))}
+                                        </div>
                                       </div>
                                     </div>
                                   </div>
                                 </div>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
+                              </DialogContent>
+                            </Dialog>
+
+                            <Button variant="secondary" size="sm" onClick={() => editProducer(producer)}>
+                              Edit
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}

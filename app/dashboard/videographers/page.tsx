@@ -23,6 +23,7 @@ export default function VideographersPage() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [selectedVideographer, setSelectedVideographer] = useState<any>(null)
   const [formData, setFormData] = useState({
     name: "",
@@ -221,6 +222,132 @@ export default function VideographersPage() {
 
   const viewVideographer = (videographer: any) => {
     setSelectedVideographer(videographer)
+  }
+
+  const editVideographer = (videographer: any) => {
+    setSelectedVideographer(videographer)
+    setFormData({
+      name: videographer.name,
+      bio: videographer.bio || "",
+      facebook_link: videographer.facebook_link || "",
+      youtube_link: videographer.youtube_link || "",
+      instagram_link: videographer.instagram_link || "",
+      contact_number: videographer.contact_number || "",
+      email: videographer.email || "",
+      booking_rate: videographer.booking_rate || "",
+      specialties: videographer.specialties ? videographer.specialties.join(", ") : "",
+      equipment: videographer.equipment || "",
+    })
+    setImage(null)
+    setImageUrl(videographer.image_url || "")
+    setEditDialogOpen(true)
+  }
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    try {
+      setSubmitting(true)
+
+      // Get current user
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to update a videographer",
+          variant: "destructive",
+        })
+        return
+      }
+
+      if (!selectedVideographer) {
+        toast({
+          title: "Error",
+          description: "No videographer selected for update",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Parse specialties from comma-separated string to array
+      const specialtiesArray = formData.specialties
+        .split(",")
+        .map((specialty) => specialty.trim())
+        .filter((specialty) => specialty !== "")
+
+      // Update videographer data
+      const { error } = await supabase
+        .from("videographers")
+        .update({
+          name: formData.name,
+          bio: formData.bio,
+          facebook_link: formData.facebook_link,
+          youtube_link: formData.youtube_link,
+          instagram_link: formData.instagram_link,
+          contact_number: formData.contact_number,
+          email: formData.email,
+          booking_rate: formData.booking_rate,
+          specialties: specialtiesArray,
+          equipment: formData.equipment,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", selectedVideographer.id)
+
+      if (error) throw error
+
+      // Upload new image if there is one
+      if (image) {
+        const videographerId = selectedVideographer.id
+        const fileExt = image.name.split(".").pop()
+        const fileName = `profile.${fileExt}`
+        const filePath = `${videographerId}/${fileName}`
+
+        // Update progress
+        setUploadProgress(50)
+
+        const { error: uploadError } = await supabase.storage.from("videographer-images").upload(filePath, image, {
+          upsert: true,
+        })
+
+        if (uploadError) throw uploadError
+
+        setUploadProgress(100)
+      }
+
+      // Reset form
+      setFormData({
+        name: "",
+        bio: "",
+        facebook_link: "",
+        youtube_link: "",
+        instagram_link: "",
+        contact_number: "",
+        email: "",
+        booking_rate: "",
+        specialties: "",
+        equipment: "",
+      })
+      setImage(null)
+      setImageUrl("")
+      setUploadProgress(0)
+      setEditDialogOpen(false)
+
+      // Reload videographers
+      loadVideographers()
+
+      toast({
+        title: "Success",
+        description: "Videographer updated successfully",
+      })
+    } catch (error) {
+      console.error("Error updating videographer:", error)
+      toast({
+        title: "Error",
+        description: "Failed to update videographer",
+        variant: "destructive",
+      })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -430,6 +557,193 @@ export default function VideographersPage() {
             </form>
           </DialogContent>
         </Dialog>
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent className="sm:max-w-[90vw] max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogHeader>
+              <DialogTitle>Edit Videographer</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleUpdate} className="flex flex-col h-full">
+              <div className="overflow-y-auto flex-1 pr-1">
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-name">Videographer Name</Label>
+                      <Input
+                        id="edit-name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        placeholder="Enter videographer name"
+                        required
+                      />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-contact_number">Contact Number</Label>
+                      <Input
+                        id="edit-contact_number"
+                        name="contact_number"
+                        value={formData.contact_number}
+                        onChange={handleInputChange}
+                        placeholder="Enter contact number"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-email">Email Address</Label>
+                      <Input
+                        id="edit-email"
+                        name="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        placeholder="email@example.com"
+                      />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-booking_rate">Booking Rate</Label>
+                      <Input
+                        id="edit-booking_rate"
+                        name="booking_rate"
+                        value={formData.booking_rate}
+                        onChange={handleInputChange}
+                        placeholder="e.g. R500/hour or Negotiable"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-facebook_link">Facebook Link</Label>
+                      <Input
+                        id="edit-facebook_link"
+                        name="facebook_link"
+                        value={formData.facebook_link}
+                        onChange={handleInputChange}
+                        placeholder="https://facebook.com/profile"
+                      />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-youtube_link">YouTube Link</Label>
+                      <Input
+                        id="edit-youtube_link"
+                        name="youtube_link"
+                        value={formData.youtube_link}
+                        onChange={handleInputChange}
+                        placeholder="https://youtube.com/channel"
+                      />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-instagram_link">Instagram Link</Label>
+                      <Input
+                        id="edit-instagram_link"
+                        name="instagram_link"
+                        value={formData.instagram_link}
+                        onChange={handleInputChange}
+                        placeholder="https://instagram.com/username"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-specialties">Specialties</Label>
+                    <Input
+                      id="edit-specialties"
+                      name="specialties"
+                      value={formData.specialties}
+                      onChange={handleInputChange}
+                      placeholder="Music Videos, Documentaries, Weddings (comma separated)"
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-equipment">Equipment</Label>
+                    <Textarea
+                      id="edit-equipment"
+                      name="equipment"
+                      value={formData.equipment}
+                      onChange={handleInputChange}
+                      placeholder="List of equipment (cameras, drones, etc.)"
+                      rows={2}
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-bio">Bio</Label>
+                    <Textarea
+                      id="edit-bio"
+                      name="bio"
+                      value={formData.bio}
+                      onChange={handleInputChange}
+                      placeholder="Enter videographer bio and experience"
+                      rows={4}
+                      required
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-image">Profile Image</Label>
+                    <div className="border border-zinc-700 rounded-md p-4">
+                      <Input
+                        id="edit-image"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="mb-4"
+                      />
+
+                      {(imageUrl || image) && (
+                        <div className="relative group">
+                          <div className="aspect-square w-40 h-40 relative rounded-md overflow-hidden mx-auto">
+                            <Image
+                              src={image ? URL.createObjectURL(image) : imageUrl || "/placeholder.svg"}
+                              alt="Videographer preview"
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={removeImage}
+                            className="absolute top-1 right-1 bg-red-600 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Trash2Icon className="h-4 w-4 text-white" />
+                          </button>
+                        </div>
+                      )}
+
+                      {!imageUrl && !image && (
+                        <div className="flex flex-col items-center justify-center text-zinc-400 py-8">
+                          <ImageIcon className="h-12 w-12 mb-2" />
+                          <p>No image selected</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <DialogFooter className="sticky bottom-0 bg-background pt-2">
+                <Button type="submit" disabled={submitting}>
+                  {submitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {uploadProgress > 0 ? `Uploading... ${uploadProgress}%` : "Saving..."}
+                    </>
+                  ) : (
+                    "Update Videographer"
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </motion.div>
 
       {/* Videographers List */}
@@ -538,120 +852,126 @@ export default function VideographersPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="outline" size="sm" onClick={() => viewVideographer(videographer)}>
-                                View Details
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[700px]">
-                              <DialogHeader>
-                                <DialogTitle>{videographer.name}</DialogTitle>
-                              </DialogHeader>
-                              <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-3 gap-4">
-                                  <div className="col-span-1">
-                                    <div className="aspect-square rounded-md overflow-hidden bg-zinc-800 relative">
-                                      {videographer.image_url ? (
-                                        <Image
-                                          src={videographer.image_url || "/placeholder.svg"}
-                                          alt={videographer.name}
-                                          fill
-                                          className="object-cover"
-                                        />
-                                      ) : (
-                                        <div className="flex items-center justify-center h-full w-full text-zinc-500">
-                                          <ImageIcon className="h-10 w-10" />
+                          <div className="flex space-x-2">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="outline" size="sm" onClick={() => viewVideographer(videographer)}>
+                                  View Details
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+                                <DialogHeader>
+                                  <DialogTitle>{videographer.name}</DialogTitle>
+                                </DialogHeader>
+                                <div className="grid gap-4 py-4">
+                                  <div className="grid grid-cols-3 gap-4">
+                                    <div className="col-span-1">
+                                      <div className="aspect-square rounded-md overflow-hidden bg-zinc-800 relative">
+                                        {videographer.image_url ? (
+                                          <Image
+                                            src={videographer.image_url || "/placeholder.svg"}
+                                            alt={videographer.name}
+                                            fill
+                                            className="object-cover"
+                                          />
+                                        ) : (
+                                          <div className="flex items-center justify-center h-full w-full text-zinc-500">
+                                            <ImageIcon className="h-10 w-10" />
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      <div className="mt-4 space-y-2">
+                                        <h3 className="font-medium mb-2">Contact Information</h3>
+                                        <p className="text-sm mb-1">
+                                          <span className="text-zinc-400">Phone:</span> {videographer.contact_number}
+                                        </p>
+                                        {videographer.email && (
+                                          <p className="text-sm mb-1">
+                                            <span className="text-zinc-400">Email:</span> {videographer.email}
+                                          </p>
+                                        )}
+                                        {videographer.booking_rate && (
+                                          <p className="text-sm">
+                                            <span className="text-zinc-400">Rate:</span> {videographer.booking_rate}
+                                          </p>
+                                        )}
+                                      </div>
+
+                                      <div className="mt-4">
+                                        <h3 className="font-medium mb-2">Links</h3>
+                                        <div className="space-y-2">
+                                          {videographer.facebook_link && (
+                                            <a
+                                              href={videographer.facebook_link}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="flex items-center text-blue-400 hover:text-blue-300"
+                                            >
+                                              <FacebookIcon className="h-4 w-4 mr-2" />
+                                              Facebook
+                                            </a>
+                                          )}
+                                          {videographer.youtube_link && (
+                                            <a
+                                              href={videographer.youtube_link}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="flex items-center text-red-400 hover:text-red-300"
+                                            >
+                                              <YoutubeIcon className="h-4 w-4 mr-2" />
+                                              YouTube
+                                            </a>
+                                          )}
+                                          {videographer.instagram_link && (
+                                            <a
+                                              href={videographer.instagram_link}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="flex items-center text-pink-400 hover:text-pink-300"
+                                            >
+                                              <InstagramIcon className="h-4 w-4 mr-2" />
+                                              Instagram
+                                            </a>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <div className="col-span-2">
+                                      <div>
+                                        <h3 className="font-medium mb-2">Bio</h3>
+                                        <p className="text-sm whitespace-pre-line">{videographer.bio}</p>
+                                      </div>
+
+                                      <div className="mt-4">
+                                        <h3 className="font-medium mb-2">Specialties</h3>
+                                        <div className="flex flex-wrap gap-1">
+                                          {videographer.specialties &&
+                                            videographer.specialties.map((specialty: string, index: number) => (
+                                              <Badge key={index} className="bg-zinc-800 text-zinc-300">
+                                                {specialty}
+                                              </Badge>
+                                            ))}
+                                        </div>
+                                      </div>
+
+                                      {videographer.equipment && (
+                                        <div className="mt-4">
+                                          <h3 className="font-medium mb-2">Equipment</h3>
+                                          <p className="text-sm whitespace-pre-line">{videographer.equipment}</p>
                                         </div>
                                       )}
                                     </div>
-
-                                    <div className="mt-4 space-y-2">
-                                      <h3 className="font-medium mb-2">Contact Information</h3>
-                                      <p className="text-sm mb-1">
-                                        <span className="text-zinc-400">Phone:</span> {videographer.contact_number}
-                                      </p>
-                                      {videographer.email && (
-                                        <p className="text-sm mb-1">
-                                          <span className="text-zinc-400">Email:</span> {videographer.email}
-                                        </p>
-                                      )}
-                                      {videographer.booking_rate && (
-                                        <p className="text-sm">
-                                          <span className="text-zinc-400">Rate:</span> {videographer.booking_rate}
-                                        </p>
-                                      )}
-                                    </div>
-
-                                    <div className="mt-4">
-                                      <h3 className="font-medium mb-2">Links</h3>
-                                      <div className="space-y-2">
-                                        {videographer.facebook_link && (
-                                          <a
-                                            href={videographer.facebook_link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center text-blue-400 hover:text-blue-300"
-                                          >
-                                            <FacebookIcon className="h-4 w-4 mr-2" />
-                                            Facebook
-                                          </a>
-                                        )}
-                                        {videographer.youtube_link && (
-                                          <a
-                                            href={videographer.youtube_link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center text-red-400 hover:text-red-300"
-                                          >
-                                            <YoutubeIcon className="h-4 w-4 mr-2" />
-                                            YouTube
-                                          </a>
-                                        )}
-                                        {videographer.instagram_link && (
-                                          <a
-                                            href={videographer.instagram_link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center text-pink-400 hover:text-pink-300"
-                                          >
-                                            <InstagramIcon className="h-4 w-4 mr-2" />
-                                            Instagram
-                                          </a>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  <div className="col-span-2">
-                                    <div>
-                                      <h3 className="font-medium mb-2">Bio</h3>
-                                      <p className="text-sm whitespace-pre-line">{videographer.bio}</p>
-                                    </div>
-
-                                    <div className="mt-4">
-                                      <h3 className="font-medium mb-2">Specialties</h3>
-                                      <div className="flex flex-wrap gap-1">
-                                        {videographer.specialties &&
-                                          videographer.specialties.map((specialty: string, index: number) => (
-                                            <Badge key={index} className="bg-zinc-800 text-zinc-300">
-                                              {specialty}
-                                            </Badge>
-                                          ))}
-                                      </div>
-                                    </div>
-
-                                    {videographer.equipment && (
-                                      <div className="mt-4">
-                                        <h3 className="font-medium mb-2">Equipment</h3>
-                                        <p className="text-sm whitespace-pre-line">{videographer.equipment}</p>
-                                      </div>
-                                    )}
                                   </div>
                                 </div>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
+                              </DialogContent>
+                            </Dialog>
+
+                            <Button variant="secondary" size="sm" onClick={() => editVideographer(videographer)}>
+                              Edit
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}

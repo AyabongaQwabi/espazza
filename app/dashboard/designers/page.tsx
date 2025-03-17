@@ -42,6 +42,10 @@ export default function DesignersPage() {
   const [user, setUser] = useState<any>(null)
   const supabase = createClientComponentClient()
 
+  // Add edit functionality to the designers page
+  // First, add a state for the edit dialog and selected item
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+
   useEffect(() => {
     // Check authentication
     async function checkAuth() {
@@ -217,6 +221,139 @@ export default function DesignersPage() {
       toast({
         title: "Error",
         description: "Failed to add graphic designer",
+        variant: "destructive",
+      })
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  // Add this function to handle edit button click
+  const editDesigner = (designer: any) => {
+    setSelectedDesigner(designer)
+    setFormData({
+      name: designer.name,
+      bio: designer.bio || "",
+      facebook_link: designer.facebook_link || "",
+      instagram_link: designer.instagram_link || "",
+      portfolio_link: designer.portfolio_link || "",
+      contact_number: designer.contact_number || "",
+      email: designer.email || "",
+      booking_rate: designer.booking_rate || "",
+      specialties: designer.specialties ? designer.specialties.join(", ") : "",
+      software_skills: designer.software_skills ? designer.software_skills.join(", ") : "",
+    })
+    setImage(null)
+    setImageUrl(designer.image_url || "")
+    setEditDialogOpen(true)
+  }
+
+  // Add this function to handle update
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    try {
+      setSubmitting(true)
+
+      // Get current user
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to update a graphic designer",
+          variant: "destructive",
+        })
+        return
+      }
+
+      if (!selectedDesigner) {
+        toast({
+          title: "Error",
+          description: "No designer selected for update",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Parse specialties and software skills from comma-separated string to array
+      const specialtiesArray = formData.specialties
+        .split(",")
+        .map((specialty) => specialty.trim())
+        .filter((specialty) => specialty !== "")
+
+      const softwareSkillsArray = formData.software_skills
+        .split(",")
+        .map((skill) => skill.trim())
+        .filter((skill) => skill !== "")
+
+      // Update designer data
+      const { error } = await supabase
+        .from("graphic_designers")
+        .update({
+          name: formData.name,
+          bio: formData.bio,
+          facebook_link: formData.facebook_link,
+          instagram_link: formData.instagram_link,
+          portfolio_link: formData.portfolio_link,
+          contact_number: formData.contact_number,
+          email: formData.email,
+          booking_rate: formData.booking_rate,
+          specialties: specialtiesArray,
+          software_skills: softwareSkillsArray,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", selectedDesigner.id)
+
+      if (error) throw error
+
+      // Upload new image if there is one
+      if (image) {
+        const designerId = selectedDesigner.id
+        const fileExt = image.name.split(".").pop()
+        const fileName = `profile.${fileExt}`
+        const filePath = `${designerId}/${fileName}`
+
+        // Update progress
+        setUploadProgress(50)
+
+        const { error: uploadError } = await supabase.storage.from("designer-images").upload(filePath, image, {
+          upsert: true,
+        })
+
+        if (uploadError) throw uploadError
+
+        setUploadProgress(100)
+      }
+
+      // Reset form
+      setFormData({
+        name: "",
+        bio: "",
+        facebook_link: "",
+        instagram_link: "",
+        portfolio_link: "",
+        contact_number: "",
+        email: "",
+        booking_rate: "",
+        specialties: "",
+        software_skills: "",
+      })
+      setImage(null)
+      setImageUrl("")
+      setUploadProgress(0)
+      setEditDialogOpen(false)
+
+      // Reload designers
+      loadDesigners()
+
+      toast({
+        title: "Success",
+        description: "Graphic designer updated successfully",
+      })
+    } catch (error) {
+      console.error("Error updating graphic designer:", error)
+      toast({
+        title: "Error",
+        description: "Failed to update graphic designer",
         variant: "destructive",
       })
     } finally {
@@ -434,6 +571,193 @@ export default function DesignersPage() {
             </form>
           </DialogContent>
         </Dialog>
+
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent className="sm:max-w-[90vw] max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogHeader>
+              <DialogTitle>Edit Graphic Designer</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleUpdate} className="flex flex-col h-full">
+              <div className="overflow-y-auto flex-1 pr-1">
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-name">Designer Name</Label>
+                      <Input
+                        id="edit-name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        placeholder="Enter designer name"
+                        required
+                      />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-contact_number">Contact Number</Label>
+                      <Input
+                        id="edit-contact_number"
+                        name="contact_number"
+                        value={formData.contact_number}
+                        onChange={handleInputChange}
+                        placeholder="Enter contact number"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-email">Email Address</Label>
+                      <Input
+                        id="edit-email"
+                        name="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        placeholder="email@example.com"
+                      />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-booking_rate">Booking Rate</Label>
+                      <Input
+                        id="edit-booking_rate"
+                        name="booking_rate"
+                        value={formData.booking_rate}
+                        onChange={handleInputChange}
+                        placeholder="e.g. R500/design or Negotiable"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-facebook_link">Facebook Link</Label>
+                      <Input
+                        id="edit-facebook_link"
+                        name="facebook_link"
+                        value={formData.facebook_link}
+                        onChange={handleInputChange}
+                        placeholder="https://facebook.com/profile"
+                      />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-instagram_link">Instagram Link</Label>
+                      <Input
+                        id="edit-instagram_link"
+                        name="instagram_link"
+                        value={formData.instagram_link}
+                        onChange={handleInputChange}
+                        placeholder="https://instagram.com/username"
+                      />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-portfolio_link">Portfolio Link</Label>
+                      <Input
+                        id="edit-portfolio_link"
+                        name="portfolio_link"
+                        value={formData.portfolio_link}
+                        onChange={handleInputChange}
+                        placeholder="https://behance.net/username"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-specialties">Specialties</Label>
+                    <Input
+                      id="edit-specialties"
+                      name="specialties"
+                      value={formData.specialties}
+                      onChange={handleInputChange}
+                      placeholder="Logo Design, Album Covers, Posters (comma separated)"
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-software_skills">Software Skills</Label>
+                    <Input
+                      id="edit-software_skills"
+                      name="software_skills"
+                      value={formData.software_skills}
+                      onChange={handleInputChange}
+                      placeholder="Photoshop, Illustrator, After Effects (comma separated)"
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-bio">Bio</Label>
+                    <Textarea
+                      id="edit-bio"
+                      name="bio"
+                      value={formData.bio}
+                      onChange={handleInputChange}
+                      placeholder="Enter designer bio and experience"
+                      rows={4}
+                      required
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-image">Profile Image</Label>
+                    <div className="border border-zinc-700 rounded-md p-4">
+                      <Input
+                        id="edit-image"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="mb-4"
+                      />
+
+                      {(imageUrl || image) && (
+                        <div className="relative group">
+                          <div className="aspect-square w-40 h-40 relative rounded-md overflow-hidden mx-auto">
+                            <Image
+                              src={image ? URL.createObjectURL(image) : imageUrl || "/placeholder.svg"}
+                              alt="Designer preview"
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={removeImage}
+                            className="absolute top-1 right-1 bg-red-600 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Trash2Icon className="h-4 w-4 text-white" />
+                          </button>
+                        </div>
+                      )}
+
+                      {!imageUrl && !image && (
+                        <div className="flex flex-col items-center justify-center text-zinc-400 py-8">
+                          <ImageIcon className="h-12 w-12 mb-2" />
+                          <p>No image selected</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <DialogFooter className="sticky bottom-0 bg-background pt-2">
+                <Button type="submit" disabled={submitting}>
+                  {submitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {uploadProgress > 0 ? `Uploading... ${uploadProgress}%` : "Saving..."}
+                    </>
+                  ) : (
+                    "Update Designer"
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </motion.div>
 
       {/* Designers List */}
@@ -542,126 +866,136 @@ export default function DesignersPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="outline" size="sm" onClick={() => viewDesigner(designer)}>
-                                View Details
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[700px]">
-                              <DialogHeader>
-                                <DialogTitle>{designer.name}</DialogTitle>
-                              </DialogHeader>
-                              <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-3 gap-4">
-                                  <div className="col-span-1">
-                                    <div className="aspect-square rounded-md overflow-hidden bg-zinc-800 relative">
-                                      {designer.image_url ? (
-                                        <Image
-                                          src={designer.image_url || "/placeholder.svg"}
-                                          alt={designer.name}
-                                          fill
-                                          className="object-cover"
-                                        />
-                                      ) : (
-                                        <div className="flex items-center justify-center h-full w-full text-zinc-500">
-                                          <ImageIcon className="h-10 w-10" />
-                                        </div>
-                                      )}
-                                    </div>
+                          <div className="flex space-x-2">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="outline" size="sm" onClick={() => viewDesigner(designer)}>
+                                  View Details
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+                                <DialogHeader>
+                                  <DialogTitle>{designer.name}</DialogTitle>
+                                </DialogHeader>
+                                <div className="grid gap-4 py-4">
+                                  <div className="grid grid-cols-3 gap-4">
+                                    <div className="col-span-1">
+                                      <div className="aspect-square rounded-md overflow-hidden bg-zinc-800 relative">
+                                        {designer.image_url ? (
+                                          <Image
+                                            src={designer.image_url || "/placeholder.svg"}
+                                            alt={designer.name}
+                                            fill
+                                            className="object-cover"
+                                          />
+                                        ) : (
+                                          <div className="flex items-center justify-center h-full w-full text-zinc-500">
+                                            <ImageIcon className="h-10 w-10" />
+                                          </div>
+                                        )}
+                                      </div>
 
-                                    <div className="mt-4 space-y-2">
-                                      <h3 className="font-medium mb-2">Contact Information</h3>
-                                      <p className="text-sm mb-1">
-                                        <span className="text-zinc-400">Phone:</span> {designer.contact_number}
-                                      </p>
-                                      {designer.email && (
+                                      <div className="mt-4 space-y-2">
+                                        <h3 className="font-medium mb-2">Contact Information</h3>
                                         <p className="text-sm mb-1">
-                                          <span className="text-zinc-400">Email:</span> {designer.email}
+                                          <span className="text-zinc-400">Phone:</span> {designer.contact_number}
                                         </p>
-                                      )}
-                                      {designer.booking_rate && (
-                                        <p className="text-sm">
-                                          <span className="text-zinc-400">Rate:</span> {designer.booking_rate}
-                                        </p>
-                                      )}
-                                    </div>
-
-                                    <div className="mt-4">
-                                      <h3 className="font-medium mb-2">Links</h3>
-                                      <div className="space-y-2">
-                                        {designer.facebook_link && (
-                                          <a
-                                            href={designer.facebook_link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center text-blue-400 hover:text-blue-300"
-                                          >
-                                            <FacebookIcon className="h-4 w-4 mr-2" />
-                                            Facebook
-                                          </a>
+                                        {designer.email && (
+                                          <p className="text-sm mb-1">
+                                            <span className="text-zinc-400">Email:</span> {designer.email}
+                                          </p>
                                         )}
-                                        {designer.instagram_link && (
-                                          <a
-                                            href={designer.instagram_link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center text-pink-400 hover:text-pink-300"
-                                          >
-                                            <InstagramIcon className="h-4 w-4 mr-2" />
-                                            Instagram
-                                          </a>
-                                        )}
-                                        {designer.portfolio_link && (
-                                          <a
-                                            href={designer.portfolio_link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center text-green-400 hover:text-green-300"
-                                          >
-                                            <LinkIcon className="h-4 w-4 mr-2" />
-                                            Portfolio
-                                          </a>
+                                        {designer.booking_rate && (
+                                          <p className="text-sm">
+                                            <span className="text-zinc-400">Rate:</span> {designer.booking_rate}
+                                          </p>
                                         )}
                                       </div>
-                                    </div>
-                                  </div>
 
-                                  <div className="col-span-2">
-                                    <div>
-                                      <h3 className="font-medium mb-2">Bio</h3>
-                                      <p className="text-sm whitespace-pre-line">{designer.bio}</p>
-                                    </div>
-
-                                    <div className="mt-4">
-                                      <h3 className="font-medium mb-2">Specialties</h3>
-                                      <div className="flex flex-wrap gap-1">
-                                        {designer.specialties &&
-                                          designer.specialties.map((specialty: string, index: number) => (
-                                            <Badge key={index} className="bg-zinc-800 text-zinc-300">
-                                              {specialty}
-                                            </Badge>
-                                          ))}
-                                      </div>
-                                    </div>
-
-                                    {designer.software_skills && designer.software_skills.length > 0 && (
                                       <div className="mt-4">
-                                        <h3 className="font-medium mb-2">Software Skills</h3>
-                                        <div className="flex flex-wrap gap-1">
-                                          {designer.software_skills.map((skill: string, index: number) => (
-                                            <Badge key={index} variant="outline" className="bg-zinc-800 text-zinc-300">
-                                              {skill}
-                                            </Badge>
-                                          ))}
+                                        <h3 className="font-medium mb-2">Links</h3>
+                                        <div className="space-y-2">
+                                          {designer.facebook_link && (
+                                            <a
+                                              href={designer.facebook_link}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="flex items-center text-blue-400 hover:text-blue-300"
+                                            >
+                                              <FacebookIcon className="h-4 w-4 mr-2" />
+                                              Facebook
+                                            </a>
+                                          )}
+                                          {designer.instagram_link && (
+                                            <a
+                                              href={designer.instagram_link}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="flex items-center text-pink-400 hover:text-pink-300"
+                                            >
+                                              <InstagramIcon className="h-4 w-4 mr-2" />
+                                              Instagram
+                                            </a>
+                                          )}
+                                          {designer.portfolio_link && (
+                                            <a
+                                              href={designer.portfolio_link}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="flex items-center text-green-400 hover:text-green-300"
+                                            >
+                                              <LinkIcon className="h-4 w-4 mr-2" />
+                                              Portfolio
+                                            </a>
+                                          )}
                                         </div>
                                       </div>
-                                    )}
+                                    </div>
+
+                                    <div className="col-span-2">
+                                      <div>
+                                        <h3 className="font-medium mb-2">Bio</h3>
+                                        <p className="text-sm whitespace-pre-line">{designer.bio}</p>
+                                      </div>
+
+                                      <div className="mt-4">
+                                        <h3 className="font-medium mb-2">Specialties</h3>
+                                        <div className="flex flex-wrap gap-1">
+                                          {designer.specialties &&
+                                            designer.specialties.map((specialty: string, index: number) => (
+                                              <Badge key={index} className="bg-zinc-800 text-zinc-300">
+                                                {specialty}
+                                              </Badge>
+                                            ))}
+                                        </div>
+                                      </div>
+
+                                      {designer.software_skills && designer.software_skills.length > 0 && (
+                                        <div className="mt-4">
+                                          <h3 className="font-medium mb-2">Software Skills</h3>
+                                          <div className="flex flex-wrap gap-1">
+                                            {designer.software_skills.map((skill: string, index: number) => (
+                                              <Badge
+                                                key={index}
+                                                variant="outline"
+                                                className="bg-zinc-800 text-zinc-300"
+                                              >
+                                                {skill}
+                                              </Badge>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
+                              </DialogContent>
+                            </Dialog>
+
+                            <Button variant="secondary" size="sm" onClick={() => editDesigner(designer)}>
+                              Edit
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
