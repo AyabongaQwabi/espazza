@@ -99,6 +99,11 @@ export default function RootLayout({
   return (
     <html lang='xh' className='dark'>
       <head>
+        <script
+          async
+          src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8294995671791919'
+          crossOrigin='anonymous'
+        ></script>
         <meta
           name='google-adsense-account'
           content='ca-pub-8294995671791919'
