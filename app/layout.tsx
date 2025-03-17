@@ -100,20 +100,6 @@ export default function RootLayout({
     <html lang='xh' className='dark'>
       <head>
         <Script
-          src='https://grookilteepsou.net/act/files/tag.min.js?z=8981487'
-          data-cfasync='false'
-          async
-          strategy='afterInteractive'
-        />
-        <Script
-          src='//pertawee.net/ntfc.php?p=8981487'
-          data-cfasync='false'
-          async
-          onError={() => window._iwmcsx?.()}
-          onLoad={() => window._gxzriweb?.()}
-          strategy='afterInteractive'
-        />
-        <Script
           id='structured-data'
           type='application/ld+json'
           dangerouslySetInnerHTML={{
