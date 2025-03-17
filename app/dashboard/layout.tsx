@@ -27,6 +27,8 @@ import {
   ShoppingCart,
   Settings,
   ChevronDown,
+  Video,
+  Paintbrush,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -75,6 +77,31 @@ const navGroups = [
         href: '/dashboard/promotion',
         icon: MusicIcon,
         label: 'iiTracks Zakho',
+      },
+    ],
+  },
+  {
+    label: 'Creatives',
+    items: [
+      {
+        href: '/dashboard/producers',
+        icon: MusicIcon,
+        label: 'Music Producers',
+      },
+      {
+        href: '/dashboard/videographers',
+        icon: Video,
+        label: 'Videographers',
+      },
+      {
+        href: '/dashboard/designers',
+        icon: Paintbrush,
+        label: 'Graphic Designers',
+      },
+      {
+        href: '/dashboard/people/merchandisers',
+        icon: Paintbrush,
+        label: 'Merchants',
       },
     ],
   },
