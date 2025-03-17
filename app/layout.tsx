@@ -99,6 +99,10 @@ export default function RootLayout({
   return (
     <html lang='xh' className='dark'>
       <head>
+        <meta
+          name='google-adsense-account'
+          content='ca-pub-8294995671791919'
+        ></meta>
         <Script
           id='structured-data'
           type='application/ld+json'
