@@ -22,7 +22,7 @@ export async function generateMetadata({
 
     const { data: post, error } = await supabase
       .from('blog_posts')
-      .select('title, excerpt, featured_image, tags, created_at')
+      .select('title, excerpt, featured_image, created_at')
       .eq('slug', params.slug)
       .single();
 
@@ -61,7 +61,7 @@ export async function generateMetadata({
         ],
         publishedTime: post.created_at,
         authors: ['Espazza'],
-        tags: post.tags,
+        tags: ['hip-hop', 'music', 'news'],
       },
       twitter: {
         card: 'summary_large_image',
