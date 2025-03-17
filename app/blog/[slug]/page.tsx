@@ -1,12 +1,18 @@
 import BlogPostClient from './BlogPostClient';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
+import { Metadata } from 'next';
 
+// This makes the page dynamic
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+// Define the generateMetadata function with proper typing
 export async function generateMetadata({
   params,
 }: {
   params: { slug: string };
-}) {
+}): Promise<Metadata> {
   const cookieStore = cookies();
   const supabase = createServerComponentClient({ cookies: () => cookieStore });
 
@@ -22,9 +28,6 @@ export async function generateMetadata({
     };
   }
 
-  // Ensure the site URL is properly set
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://espazza.co.za';
-
   return {
     title: post.title,
     description: post.excerpt,
@@ -32,7 +35,7 @@ export async function generateMetadata({
       title: post.title,
       description: post.excerpt,
       type: 'article',
-      url: `${siteUrl}/blog/${params.slug}`,
+      url: `/blog/${params.slug}`,
       images: [
         {
           url: post.featured_image,
@@ -41,6 +44,10 @@ export async function generateMetadata({
           alt: post.title,
         },
       ],
+      // Add these additional OpenGraph properties for better Facebook sharing
+      publishedTime: post.created_at,
+      authors: ['Espazza'], // Replace with actual author
+      tags: post.tags,
     },
     twitter: {
       card: 'summary_large_image',
@@ -48,11 +55,24 @@ export async function generateMetadata({
       description: post.excerpt,
       images: [post.featured_image],
     },
+    // Add Facebook-specific metadata
+    alternates: {
+      canonical: `/blog/${params.slug}`,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
   };
 }
 
 export default async function BlogPost({ params }) {
-  const supabase = createServerComponentClient({ cookies });
+  const cookieStore = cookies();
+  const supabase = createServerComponentClient({ cookies: () => cookieStore });
+
   const { data: post } = await supabase
     .from('blog_posts')
     .select(
