@@ -18,12 +18,24 @@ export async function generateMetadata({ params }) {
   }
 
   return {
-    title: `${post.title} | Your Blog Name`,
+    title: post.title, // Just the post title without any suffix
     description: post.excerpt,
     openGraph: {
+      title: post.title,
+      description: post.excerpt,
       images: [{ url: post.featured_image }],
+      type: 'article',
     },
-    keywords: post.tags.join(', '),
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.excerpt,
+      images: [post.featured_image],
+    },
+    keywords: post.tags?.join(', ') || '',
+    alternates: {
+      canonical: `${process.env.NEXT_PUBLIC_SITE_URL}/blog/${params.slug}`,
+    },
   };
 }
 
