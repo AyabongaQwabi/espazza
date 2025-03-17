@@ -167,7 +167,6 @@ export default function BloggerOnboarding() {
                     government_name: e.target.value,
                   })
                 }
-                required
               />
             </div>
 
@@ -179,7 +178,6 @@ export default function BloggerOnboarding() {
                 onChange={(e) =>
                   setFormData({ ...formData, artist_name: e.target.value })
                 }
-                required
               />
             </div>
 
@@ -192,7 +190,6 @@ export default function BloggerOnboarding() {
                 onChange={(e) =>
                   setFormData({ ...formData, date_of_birth: e.target.value })
                 }
-                required
               />
             </div>
 
@@ -204,7 +201,6 @@ export default function BloggerOnboarding() {
                 onChange={(e) =>
                   setFormData({ ...formData, sa_id_number: e.target.value })
                 }
-                required
                 pattern='[0-9]{13}'
                 title='Please enter a valid 13-digit South African ID number'
               />
@@ -219,7 +215,6 @@ export default function BloggerOnboarding() {
                 onChange={(e) =>
                   setFormData({ ...formData, phone_number: e.target.value })
                 }
-                required
               />
             </div>
           </div>
@@ -240,7 +235,6 @@ export default function BloggerOnboarding() {
                 onChange={(e) =>
                   setFormData({ ...formData, street_address: e.target.value })
                 }
-                required
               />
             </div>
 
@@ -252,7 +246,6 @@ export default function BloggerOnboarding() {
                 onChange={(e) =>
                   setFormData({ ...formData, suburb: e.target.value })
                 }
-                required
               />
             </div>
 
@@ -351,7 +344,6 @@ export default function BloggerOnboarding() {
               onChange={(e) =>
                 setFormData({ ...formData, blog_name: e.target.value })
               }
-              required
             />
           </div>
           <div>
@@ -363,7 +355,6 @@ export default function BloggerOnboarding() {
               onChange={(e) =>
                 setFormData({ ...formData, blog_url: e.target.value })
               }
-              required
             />
           </div>
           <div>
@@ -374,7 +365,6 @@ export default function BloggerOnboarding() {
               onChange={(e) =>
                 setFormData({ ...formData, artist_bio: e.target.value })
               }
-              required
             />
           </div>
         </div>
