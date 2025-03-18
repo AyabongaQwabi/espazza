@@ -3,27 +3,36 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
-import { toast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import axios from 'axios';
 import short from 'short-uuid';
+import Link from 'next/link';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
+import { toast } from '@/hooks/use-toast';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+
 import {
   Play,
   Pause,
@@ -39,16 +48,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Share2,
+  Filter,
+  MoreHorizontal,
+  Sparkles,
+  Flame,
 } from 'lucide-react';
-import Link from 'next/link';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { postToURL } from '@/lib/payfast';
+import { useMusicPlayer } from '@/hooks/use-music-player';
 
 const SURCHARGE = 2;
 const ITEMS_PER_PAGE = 10;
@@ -68,6 +74,15 @@ interface Release {
   record_owner: {
     artist_name: string;
     username: string;
+    payment_credentials: {
+      ikhoka: any;
+      payfast: any;
+      paypal: any;
+    };
+  };
+  genre: {
+    id: string;
+    name: string;
   };
 }
 
@@ -101,12 +116,14 @@ export default function ReleasesPage() {
   const [purchaseLoading, setPurchaseLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const [selectedRelease, setSelectedRelease] = useState<Release | null>(null);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
 
   const router = useRouter();
   const supabase = createClientComponentClient();
+  const { playTrack } = useMusicPlayer();
 
   const fetchReleases = useCallback(async () => {
     setLoading(true);
@@ -155,7 +172,6 @@ export default function ReleasesPage() {
     if (error) {
       console.error('Error fetching releases:', error);
     } else {
-      console.log(data);
       // Process the data to structure payment_credentials correctly
       const processedData = data?.map((release) => ({
         ...release,
@@ -168,7 +184,6 @@ export default function ReleasesPage() {
           },
         },
       }));
-      console.log('processed data', processedData);
       setReleases(processedData || []);
       setTotalPages(Math.ceil((count || 0) / ITEMS_PER_PAGE));
     }
@@ -249,7 +264,6 @@ export default function ReleasesPage() {
     totalPrice: number,
     transactionId: string
   ) {
-    console.log('iKhoka payment:', release, totalPrice, transactionId);
     try {
       const request = {
         entityID: release.id,
@@ -296,7 +310,6 @@ export default function ReleasesPage() {
     totalPrice: number,
     transactionId: string
   ) {
-    console.log('PayPal payment:', release, totalPrice, transactionId);
     try {
       const { paypal } = release.record_owner.payment_credentials;
 
@@ -344,7 +357,6 @@ export default function ReleasesPage() {
     totalPrice: number,
     transactionId: string
   ) {
-    console.log('PayFast payment:', release, totalPrice, transactionId);
     try {
       const { merchant_id, merchant_key } =
         release.record_owner.payment_credentials.payfast!;
@@ -376,13 +388,14 @@ export default function ReleasesPage() {
       });
     }
   }
+
   const parseTimeString = (timeString) => {
     const [minutes, seconds] = timeString.split(':').map(Number);
     return minutes * 60 + seconds;
   };
 
-  function handlePreview(trackUrl: string, previewStart: number) {
-    if (currentlyPlaying === trackUrl) {
+  function handlePreview(track: Track, release: Release) {
+    if (currentlyPlaying === track.url) {
       // Stop playing
       setCurrentlyPlaying(null);
       if (audioRef.current) {
@@ -390,25 +403,22 @@ export default function ReleasesPage() {
         audioRef.current.currentTime = 0;
       }
     } else {
-      setCurrentlyPlaying(trackUrl);
-      if (audioRef.current) {
-        console.log('Playing', trackUrl);
-        console.log('Preview start', previewStart);
-        const startTime = parseTimeString(previewStart); // Convert "00:30" to 30
+      setCurrentlyPlaying(track.url);
 
-        audioRef.current.src = trackUrl;
-        audioRef.current.currentTime = startTime;
-        audioRef.current.play();
+      // Create a track object for the music player
+      const playerTrack = {
+        id: track.id,
+        title: track.title,
+        artist:
+          release.record_owner.artist_name || release.record_owner.username,
+        artistId: release.record_owner.username,
+        cover_image_url: track.cover_image_url || release.cover_image_url,
+        url: track.url,
+        release_id: release.id,
+      };
 
-        // Limit preview to 30 seconds
-        setTimeout(() => {
-          if (audioRef.current && audioRef.current.src === trackUrl) {
-            audioRef.current.pause();
-            audioRef.current.currentTime = 0;
-            setCurrentlyPlaying(null);
-          }
-        }, 50000);
-      }
+      // Play the track in the music player
+      playTrack(playerTrack);
     }
   }
 
@@ -474,54 +484,68 @@ export default function ReleasesPage() {
   }
 
   return (
-    <div className='flex flex-col min-h-screen'>
+    <div className='flex flex-col min-h-screen bg-gray-900 text-white'>
       <Dialog open={paymentModalOpen} onOpenChange={setPaymentModalOpen}>
-        <DialogContent>
+        <DialogContent className='bg-gray-800 border-red-500 text-white'>
           <DialogHeader>
-            <DialogTitle>Select Payment Method</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className='text-xl font-bold'>
+              Select Payment Method
+            </DialogTitle>
+            <DialogDescription className='text-gray-300'>
               Choose how you'd like to pay for this release
             </DialogDescription>
           </DialogHeader>
-          <div className='flex flex-col space-y-4'>
+          <div className='flex flex-col space-y-4 mt-4'>
             {selectedRelease?.record_owner.payment_credentials.ikhoka && (
-              <Button onClick={() => handlePaymentMethodSelection('ikhoka')}>
+              <Button
+                onClick={() => handlePaymentMethodSelection('ikhoka')}
+                className='bg-red-500 hover:bg-red-600 text-white'
+              >
                 Pay with iKhoka
               </Button>
             )}
             {selectedRelease?.record_owner.payment_credentials.paypal && (
-              <Button onClick={() => handlePaymentMethodSelection('paypal')}>
+              <Button
+                onClick={() => handlePaymentMethodSelection('paypal')}
+                className='bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold'
+              >
                 Pay with PayPal
               </Button>
             )}
             {selectedRelease?.record_owner.payment_credentials.payfast && (
-              <Button onClick={() => handlePaymentMethodSelection('payfast')}>
+              <Button
+                onClick={() => handlePaymentMethodSelection('payfast')}
+                className='bg-white hover:bg-gray-200 text-gray-900'
+              >
                 Pay with PayFast
               </Button>
             )}
           </div>
         </DialogContent>
       </Dialog>
-      <div className='relative h-[50vh] overflow-hidden'>
+
+      {/* Hero Section */}
+      <div className='relative h-[40vh] overflow-hidden'>
+        <div className='absolute inset-0 bg-gradient-to-b from-transparent to-gray-900 z-10'></div>
         <Image
           src='/ndlu.jpg'
           alt='Music Hero'
           layout='fill'
           objectFit='cover'
-          className='animate-ken-burns'
+          className='opacity-70'
         />
-        <div className='absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center'>
-          <div className='text-center text-white'>
-            <h1 className='text-5xl font-bold mb-4 animate-fade-in-up'>
+        <div className='absolute inset-0 flex items-center justify-center z-20'>
+          <div className='text-center'>
+            <h1 className='text-5xl font-bold mb-4 text-white drop-shadow-lg'>
               Discover New Music
             </h1>
-            <p className='text-xl mb-8 animate-fade-in-up animation-delay-300'>
+            <p className='text-xl mb-8 text-white drop-shadow-lg max-w-2xl mx-auto'>
               Purchase and preview the latest releases from your favorite
               artists
             </p>
             <Button
               size='lg'
-              className='animate-fade-in-up animation-delay-600'
+              className='bg-red-500 hover:bg-red-600 text-white'
               onClick={() =>
                 document
                   .getElementById('releases')
@@ -533,226 +557,457 @@ export default function ReleasesPage() {
           </div>
         </div>
       </div>
-      <main className='flex-grow bg-gray-100 dark:bg-gray-900' id='releases'>
-        <div className='container mx-auto px-4 py-12'>
-          <h2 className='text-3xl font-bold mb-8 text-center'>
-            Latest Music Releases
-          </h2>
 
-          <div className='flex flex-col md:flex-row gap-4 mb-8'>
-            <div className='relative md:w-1/3'>
+      {/* Main Content */}
+      <main className='flex-grow' id='releases'>
+        <div className='container mx-auto px-4 py-8'>
+          {/* Search and Filter Bar */}
+          <div className='flex items-center justify-between mb-8 sticky top-0 z-30 bg-gray-900 py-4 border-b border-gray-800'>
+            <div className='relative flex-grow max-w-md'>
               <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400' />
               <Input
                 type='text'
                 placeholder='Search releases...'
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className='pl-10'
+                className='pl-10 bg-gray-800 border-gray-700 text-white focus:ring-red-500 focus:border-red-500'
               />
             </div>
-            <Select value={genreFilter} onValueChange={setGenreFilter}>
-              <SelectTrigger className='md:w-1/4'>
-                <SelectValue placeholder='Filter by genre' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='all'>All Genres</SelectItem>
-                {genres.map((genre) => (
-                  <SelectItem key={genre.id} value={genre.id}>
-                    {genre.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <div className='flex flex-col md:w-1/4'>
-              <span className='text-sm mb-2 flex items-center'>
-                <DollarSign className='mr-1 h-4 w-4' />
-                Price Range: R{priceRange[0]} - R{priceRange[1]}
-              </span>
-              <Slider
-                min={0}
-                max={1000}
-                step={10}
-                value={priceRange}
-                onValueChange={setPriceRange}
-              />
+
+            <div className='flex items-center gap-2'>
+              <Button
+                variant='outline'
+                className='border-gray-700 text-white hover:bg-gray-800'
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <Filter className='h-4 w-4 mr-2' />
+                Filters
+              </Button>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant='outline'
+                    className='border-gray-700 text-white hover:bg-gray-800'
+                  >
+                    <TrendingUp className='w-4 h-4 mr-2' />
+                    Sort
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className='bg-gray-800 border-gray-700 text-white'>
+                  <DropdownMenuRadioGroup
+                    value={sortOption}
+                    onValueChange={setSortOption}
+                  >
+                    <DropdownMenuRadioItem
+                      value='newest'
+                      className='focus:bg-gray-700'
+                    >
+                      <Calendar className='mr-2 h-4 w-4' /> Newest First
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value='oldest'
+                      className='focus:bg-gray-700'
+                    >
+                      <Calendar className='mr-2 h-4 w-4' /> Oldest First
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value='popular'
+                      className='focus:bg-gray-700'
+                    >
+                      <Flame className='mr-2 h-4 w-4' /> Most Popular
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value='rating'
+                      className='focus:bg-gray-700'
+                    >
+                      <Star className='mr-2 h-4 w-4' /> Highest Rated
+                    </DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
-            <Select value={sortOption} onValueChange={setSortOption}>
-              <SelectTrigger className='md:w-1/4'>
-                <SelectValue placeholder='Sort by' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='newest'>
-                  <div className='flex items-center'>
-                    <Calendar className='mr-2 h-4 w-4' /> Newest First
-                  </div>
-                </SelectItem>
-                <SelectItem value='oldest'>
-                  <div className='flex items-center'>
-                    <Calendar className='mr-2 h-4 w-4' /> Oldest First
-                  </div>
-                </SelectItem>
-                <SelectItem value='popular'>
-                  <div className='flex items-center'>
-                    <TrendingUp className='mr-2 h-4 w-4' /> Most Popular
-                  </div>
-                </SelectItem>
-                <SelectItem value='rating'>
-                  <div className='flex items-center'>
-                    <Star className='mr-2 h-4 w-4' /> Highest Rated
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
-          {loading ? (
-            <div className='text-center'>
-              <Headphones className='animate-spin h-10 w-10 mx-auto mb-4' />
-              Loading releases...
-            </div>
-          ) : releases.length === 0 ? (
-            <div className='text-center'>No releases found.</div>
-          ) : (
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-              {releases.map((release) => (
-                <Card
-                  key={release.id}
-                  className='flex flex-col hover:shadow-lg transition-shadow duration-300'
-                >
-                  <CardHeader>
-                    <Image
-                      src={release.cover_image_url || '/placeholder.svg'}
-                      alt={release.title}
-                      width={300}
-                      height={300}
-                      className='w-full h-64 object-cover rounded-t-lg'
-                    />
-                  </CardHeader>
-                  <CardContent className='flex-grow'>
-                    <CardTitle className='text-xl mb-2'>
-                      <Link
-                        href={`/release/${release.id}`}
-                        className='hover:underline'
+          {/* Expanded Filters */}
+          {showFilters && (
+            <div className='mb-8 p-4 bg-gray-800 rounded-lg border border-gray-700 animate-in slide-in-from-top'>
+              <h3 className='text-lg font-semibold mb-4'>Refine Your Search</h3>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                <div>
+                  <h4 className='text-sm font-medium mb-2 flex items-center'>
+                    <Tag className='mr-2 h-4 w-4' /> Genre
+                  </h4>
+                  <div className='flex flex-wrap gap-2'>
+                    <Badge
+                      className={`cursor-pointer ${
+                        genreFilter === 'all'
+                          ? 'bg-red-500'
+                          : 'bg-gray-700 hover:bg-gray-600'
+                      }`}
+                      onClick={() => setGenreFilter('all')}
+                    >
+                      All Genres
+                    </Badge>
+                    {genres.map((genre) => (
+                      <Badge
+                        key={genre.id}
+                        className={`cursor-pointer ${
+                          genreFilter === genre.id
+                            ? 'bg-red-500'
+                            : 'bg-gray-700 hover:bg-gray-600'
+                        }`}
+                        onClick={() => setGenreFilter(genre.id)}
                       >
-                        {release.title}
-                      </Link>
-                    </CardTitle>
-                    <div className='flex items-center text-sm text-gray-500 mb-2'>
-                      <User className='w-4 h-4 mr-1' />
-                      <Link
-                        href={`/artists/${release.record_owner.username}`}
-                        className='hover:underline'
-                      >
-                        {release.record_owner.artist_name ||
-                          release.record_owner.username}
-                      </Link>
-                    </div>
-                    <div className='flex items-center text-sm text-gray-500 mb-2'>
-                      <Calendar className='w-4 h-4 mr-1' />
-                      {new Date(release.release_date).toLocaleDateString()}
-                    </div>
-                    <div className='flex items-center text-sm text-gray-500 mb-4'>
-                      <Tag className='w-4 h-4 mr-1' />
-                      {release.genre.name}
-                    </div>
-                    <p className='text-sm text-gray-600 mb-4 line-clamp-3'>
-                      {release.description}
-                    </p>
-                    <div className='space-y-2 bg-gray-800 p-4 rounded-lg'>
-                      <h3 className='font-semibold mb-2 flex items-center text-white'>
-                        <Music className='w-4 h-4 mr-2' />
-                        Tracks
-                      </h3>
-                      {release.tracks.slice(0, 3).map((track) => (
-                        <div
-                          key={track.id}
-                          className='flex justify-between items-center'
-                        >
-                          <span className='text-sm text-white'>
-                            {track.title}
-                          </span>
-                          <Button
-                            variant='outline'
-                            size='sm'
-                            onClick={() =>
-                              handlePreview(track.url, track.preview_start)
-                            }
-                            className='flex items-center'
-                          >
-                            {currentlyPlaying === track.url ? (
-                              <Pause className='w-4 h-4 mr-1' />
-                            ) : (
-                              <Play className='w-4 h-4 mr-1' />
-                            )}
-                            {currentlyPlaying === track.url
-                              ? 'Stop'
-                              : 'Preview'}
-                          </Button>
-                        </div>
-                      ))}
-                      {release.tracks.length > 3 && (
-                        <p className='text-sm text-gray-400 text-center mt-2'>
-                          +{release.tracks.length - 3} more tracks
-                        </p>
-                      )}
-                    </div>
-                  </CardContent>
-                  <CardFooter className='flex justify-between mt-auto'>
-                    <span className='text-lg font-bold'>
-                      R{calculateReleasePrice(release.tracks).toFixed(2)}
-                    </span>
-                    <div className='flex space-x-2'>
-                      <Button
-                        variant='outline'
-                        size='sm'
-                        onClick={() => handleShare(release)}
-                      >
-                        <Share2 className='h-4 w-4 mr-2' />
-                        Share
-                      </Button>
-                      <Button
-                        onClick={() => handlePurchase(release)}
-                        disabled={purchaseLoading}
-                      >
-                        {purchaseLoading ? 'Processing...' : 'Buy Now'}
-                      </Button>
-                    </div>
-                  </CardFooter>
-                </Card>
-              ))}
+                        {genre.name}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h4 className='text-sm font-medium mb-2 flex items-center'>
+                    <DollarSign className='mr-2 h-4 w-4' /> Price Range: R
+                    {priceRange[0]} - R{priceRange[1]}
+                  </h4>
+                  <Slider
+                    min={0}
+                    max={1000}
+                    step={10}
+                    value={priceRange}
+                    onValueChange={setPriceRange}
+                    className='py-4'
+                  />
+                </div>
+              </div>
             </div>
           )}
 
-          {/* Pagination */}
-          <div className='flex justify-center mt-8'>
-            <div className='flex items-center space-x-2'>
-              <Button
-                variant='outline'
-                size='sm'
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className='h-4 w-4' />
-                Previous
-              </Button>
-              <span className='text-sm'>
-                Page {currentPage} of {totalPages}
-              </span>
-              <Button
-                variant='outline'
-                size='sm'
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                Next
-                <ChevronRight className='h-4 w-4' />
-              </Button>
+          {/* Content Tabs */}
+          <Tabs defaultValue='grid' className='mb-6'>
+            <div className='flex items-center justify-between mb-4'>
+              <h2 className='text-2xl font-bold'>
+                <Sparkles className='inline-block mr-2 text-yellow-400' />
+                Latest Music Releases
+              </h2>
+              <TabsList className='bg-gray-800'>
+                <TabsTrigger
+                  value='grid'
+                  className='data-[state=active]:bg-red-500 data-[state=active]:text-white'
+                >
+                  Grid View
+                </TabsTrigger>
+                <TabsTrigger
+                  value='list'
+                  className='data-[state=active]:bg-red-500 data-[state=active]:text-white'
+                >
+                  List View
+                </TabsTrigger>
+              </TabsList>
             </div>
-          </div>
 
-          <audio ref={audioRef} className='hidden' />
+            {/* Loading State */}
+            {loading ? (
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+                {[...Array(6)].map((_, i) => (
+                  <div
+                    key={i}
+                    className='bg-gray-800 rounded-lg overflow-hidden'
+                  >
+                    <Skeleton className='h-64 w-full bg-gray-700' />
+                    <div className='p-4'>
+                      <Skeleton className='h-6 w-3/4 mb-2 bg-gray-700' />
+                      <Skeleton className='h-4 w-1/2 mb-4 bg-gray-700' />
+                      <Skeleton className='h-20 w-full mb-4 bg-gray-700' />
+                      <div className='flex justify-between'>
+                        <Skeleton className='h-8 w-20 bg-gray-700' />
+                        <Skeleton className='h-8 w-24 bg-gray-700' />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : releases.length === 0 ? (
+              <div className='text-center py-12 bg-gray-800 rounded-lg'>
+                <Music className='h-16 w-16 mx-auto mb-4 text-gray-600' />
+                <h3 className='text-xl font-semibold mb-2'>
+                  No releases found
+                </h3>
+                <p className='text-gray-400'>
+                  Try adjusting your filters or search terms
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* Grid View */}
+                <TabsContent value='grid' className='mt-0'>
+                  <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4'>
+                    {releases.map((release) => (
+                      <div
+                        key={release.id}
+                        className='bg-gray-800 rounded-lg overflow-hidden hover:shadow-lg hover:shadow-red-500/10 transition-all duration-300 group'
+                      >
+                        <div className='relative aspect-square overflow-hidden'>
+                          <Image
+                            src={release.cover_image_url || '/placeholder.svg'}
+                            alt={release.title}
+                            width={200}
+                            height={200}
+                            className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110'
+                          />
+                          <div className='absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-between p-3'>
+                            <Button
+                              size='icon'
+                              className='bg-red-500 hover:bg-red-600 rounded-full h-10 w-10 shadow-lg transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300'
+                              onClick={() =>
+                                handlePreview(release.tracks[0], release)
+                              }
+                            >
+                              {currentlyPlaying === release.tracks[0]?.url ? (
+                                <Pause className='h-5 w-5' />
+                              ) : (
+                                <Play className='h-5 w-5' />
+                              )}
+                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  size='icon'
+                                  variant='ghost'
+                                  className='text-white hover:bg-white/20 rounded-full transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300'
+                                >
+                                  <MoreHorizontal className='h-4 w-4' />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent className='bg-gray-800 border-gray-700 text-white'>
+                                <DropdownMenuItem
+                                  className='cursor-pointer hover:bg-gray-700'
+                                  onClick={() => handleShare(release)}
+                                >
+                                  <Share2 className='mr-2 h-4 w-4' />
+                                  Share
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className='cursor-pointer hover:bg-gray-700'
+                                  onClick={() =>
+                                    router.push(`/release/${release.id}`)
+                                  }
+                                >
+                                  <Music className='mr-2 h-4 w-4' />
+                                  View Details
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator className='bg-gray-700' />
+                                <DropdownMenuItem
+                                  className='cursor-pointer hover:bg-gray-700 text-red-400'
+                                  onClick={() => handlePurchase(release)}
+                                >
+                                  <DollarSign className='mr-2 h-4 w-4' />
+                                  Buy Now
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
+                        <div className='p-3'>
+                          <Link
+                            href={`/release/${release.id}`}
+                            className='block'
+                          >
+                            <h3 className='font-bold text-sm mb-1 line-clamp-1 hover:text-red-500 transition-colors'>
+                              {release.title}
+                            </h3>
+                          </Link>
+                          <Link
+                            href={`/artists/${release.record_owner.username}`}
+                            className='text-xs text-gray-400 hover:text-white transition-colors mb-1 flex items-center'
+                          >
+                            <User className='w-3 h-3 mr-1' />
+                            {release.record_owner.artist_name ||
+                              release.record_owner.username}
+                          </Link>
+                          <div className='flex items-center justify-between mt-2 mb-1'>
+                            <Badge className='bg-gray-700 text-xs px-1.5 py-0.5 text-[10px]'>
+                              {release.genre.name}
+                            </Badge>
+                            <span className='text-xs text-gray-400'>
+                              {new Date(
+                                release.release_date
+                              ).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <div className='mt-2 pt-2 border-t border-gray-700 flex justify-between items-center'>
+                            <span className='font-bold text-yellow-400 text-xs'>
+                              R
+                              {calculateReleasePrice(release.tracks).toFixed(2)}
+                            </span>
+                            <Button
+                              size='sm'
+                              className='bg-red-500 hover:bg-red-600 text-white h-7 text-xs px-2'
+                              onClick={() => handlePurchase(release)}
+                            >
+                              Buy Now
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </TabsContent>
+
+                {/* List View */}
+                <TabsContent value='list' className='mt-0'>
+                  <div className='bg-gray-800 rounded-lg overflow-hidden'>
+                    <div className='grid grid-cols-12 p-3 text-sm font-medium text-gray-400 border-b border-gray-700'>
+                      <div className='col-span-5 flex items-center'>TITLE</div>
+                      <div className='col-span-3 flex items-center'>ARTIST</div>
+                      <div className='col-span-2 flex items-center'>GENRE</div>
+                      <div className='col-span-2 flex items-center justify-end'>
+                        PRICE
+                      </div>
+                    </div>
+                    <ScrollArea className='h-[600px]'>
+                      {releases.map((release, index) => (
+                        <div
+                          key={release.id}
+                          className={`grid grid-cols-12 p-3 items-center hover:bg-gray-700 group ${
+                            index % 2 === 0 ? 'bg-gray-800' : 'bg-gray-850'
+                          }`}
+                        >
+                          <div className='col-span-5 flex items-center gap-3'>
+                            <div className='relative flex-shrink-0'>
+                              <Image
+                                src={
+                                  release.cover_image_url || '/placeholder.svg'
+                                }
+                                alt={release.title}
+                                width={50}
+                                height={50}
+                                className='rounded object-cover w-12 h-12'
+                              />
+                              <Button
+                                size='icon'
+                                className='absolute inset-0 m-auto bg-red-500/80 hover:bg-red-500 rounded-full h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity'
+                                onClick={() =>
+                                  handlePreview(release.tracks[0], release)
+                                }
+                              >
+                                {currentlyPlaying === release.tracks[0]?.url ? (
+                                  <Pause className='h-4 w-4' />
+                                ) : (
+                                  <Play className='h-4 w-4' />
+                                )}
+                              </Button>
+                            </div>
+                            <div>
+                              <Link
+                                href={`/release/${release.id}`}
+                                className='font-medium hover:text-red-500 transition-colors line-clamp-1'
+                              >
+                                {release.title}
+                              </Link>
+                              <p className='text-xs text-gray-400 line-clamp-1'>
+                                {release.tracks.length} tracks
+                              </p>
+                            </div>
+                          </div>
+                          <div className='col-span-3'>
+                            <Link
+                              href={`/artists/${release.record_owner.username}`}
+                              className='text-sm hover:text-red-500 transition-colors line-clamp-1'
+                            >
+                              {release.record_owner.artist_name ||
+                                release.record_owner.username}
+                            </Link>
+                          </div>
+                          <div className='col-span-2'>
+                            <Badge className='bg-gray-700 text-xs'>
+                              {release.genre.name}
+                            </Badge>
+                          </div>
+                          <div className='col-span-2 flex items-center justify-end gap-2'>
+                            <span className='font-medium text-yellow-400'>
+                              R
+                              {calculateReleasePrice(release.tracks).toFixed(2)}
+                            </span>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  size='icon'
+                                  variant='ghost'
+                                  className='h-8 w-8 text-gray-400'
+                                >
+                                  <MoreHorizontal className='h-4 w-4' />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent className='bg-gray-800 border-gray-700 text-white'>
+                                <DropdownMenuItem
+                                  className='cursor-pointer hover:bg-gray-700'
+                                  onClick={() =>
+                                    router.push(`/release/${release.id}`)
+                                  }
+                                >
+                                  <Music className='mr-2 h-4 w-4' />
+                                  View Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className='cursor-pointer hover:bg-gray-700'
+                                  onClick={() => handleShare(release)}
+                                >
+                                  <Share2 className='mr-2 h-4 w-4' />
+                                  Share
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator className='bg-gray-700' />
+                                <DropdownMenuItem
+                                  className='cursor-pointer hover:bg-gray-700 text-red-400'
+                                  onClick={() => handlePurchase(release)}
+                                >
+                                  <DollarSign className='mr-2 h-4 w-4' />
+                                  Buy Now
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
+                      ))}
+                    </ScrollArea>
+                  </div>
+                </TabsContent>
+              </>
+            )}
+
+            {/* Pagination */}
+            {!loading && releases.length > 0 && (
+              <div className='flex justify-center mt-8'>
+                <div className='flex items-center space-x-2 bg-gray-800 p-2 rounded-lg'>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className='border-gray-700 text-white hover:bg-gray-700 disabled:opacity-50'
+                  >
+                    <ChevronLeft className='h-4 w-4 mr-1' />
+                    Prev
+                  </Button>
+                  <span className='text-sm px-3 py-1 bg-gray-700 rounded-md'>
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className='border-gray-700 text-white hover:bg-gray-700 disabled:opacity-50'
+                  >
+                    Next
+                    <ChevronRight className='h-4 w-4 ml-1' />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </Tabs>
         </div>
       </main>
+      <audio ref={audioRef} className='hidden' />
     </div>
   );
 }

@@ -280,7 +280,7 @@ export default function EventClient({ eventId }: { eventId: string }) {
         requesterUrl: 'https://espazza.co.za/events',
         description: `Ticket for ${event.name} (includes R${SURCHARGE} service fee)`,
         paymentReference: event.id,
-        mode: 'sandbox',
+        mode: 'live',
         externalTransactionID: transactionId,
         urls: {
           callbackUrl: 'https://espazza.co.za/api/payment/callback',

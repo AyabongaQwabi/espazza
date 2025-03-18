@@ -102,7 +102,7 @@ export default function TicketsPage() {
         requesterUrl: 'https://espazza.co.za/tickets',
         description: `Payment for ticket to ${ticket.events.name}`,
         paymentReference: `${ticket.buyer_id}-${ticket.id}`,
-        mode: 'sandbox',
+        mode: 'live',
         externalTransactionID: transactionId,
         urls: {
           callbackUrl: 'https://espazza.co.za/api/payment/callback',

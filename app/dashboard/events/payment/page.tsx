@@ -91,7 +91,7 @@ export default function EventPaymentPage() {
         requesterUrl: 'https://espazza.co.za/dashboard/events',
         description: `Event creation fee for ${event.name}`,
         paymentReference: `${event.organizer_id}-${event.id}`,
-        mode: 'sandbox',
+        mode: 'live',
         externalTransactionID: newTransactionId,
         urls: {
           callbackUrl: 'https://espazza.co.za/api/payment/callback',

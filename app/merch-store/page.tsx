@@ -212,7 +212,7 @@ export default function MerchPage() {
         requesterUrl: 'https://espazza.co.za/merch',
         description: `Purchase of ${orderDetails.quantity}x ${selectedProduct.name}`,
         paymentReference: `${currentUser.id}-${selectedProduct.id}`,
-        mode: 'sandbox',
+        mode: 'live',
         externalTransactionID: transactionId,
         urls: {
           callbackUrl: 'https://espazza.co.za/api/payment/callback',

@@ -1,3 +1,4 @@
+import type React from 'react';
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
@@ -5,6 +6,9 @@ import { Toaster } from '@/components/ui/toaster';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { SupabaseProvider } from '@/components/providers/supabase-provider';
+import { MusicPlayerProvider } from '@/contexts/music-player-context';
+import { MusicPlayer } from '@/components/music-player/music-player';
+import { MiniPlayer } from '@/components/music-player/mini-player';
 import AnimationWrapper from '@/components/AnimationWrapper';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import Script from 'next/script';
@@ -160,15 +164,19 @@ export default function RootLayout({
             Skip to main content
           </a>
           <SupabaseProvider>
-            <div className='flex flex-col min-h-screen bg-gradient-to-br from-zinc-900 to-zinc-800'>
-              <SiteHeader />
-              <main id='main-content' className='flex-1'>
-                <AnimationWrapper>{children}</AnimationWrapper>
-                <Analytics />
-              </main>
-              <SiteFooter />
-            </div>
-            <Toaster />
+            <MusicPlayerProvider>
+              <div className='flex flex-col min-h-screen bg-gradient-to-br from-zinc-900 to-zinc-800'>
+                <SiteHeader />
+                <main id='main-content' className='flex-1 pb-16'>
+                  <AnimationWrapper>{children}</AnimationWrapper>
+                  <Analytics />
+                </main>
+                <SiteFooter />
+                <MusicPlayer />
+                <MiniPlayer />
+              </div>
+              <Toaster />
+            </MusicPlayerProvider>
           </SupabaseProvider>
         </ErrorBoundary>
       </body>
