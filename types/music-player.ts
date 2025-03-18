@@ -1,3 +1,16 @@
+export interface PlaylistTrack {
+  id: string;
+  playlist_id: string;
+  track_id: string;
+  track_title: string;
+  artist_name?: string;
+  artist_id?: string;
+  cover_image_url?: string;
+  url: string;
+  added_at: string;
+  position: number;
+}
+
 export interface Track {
   id: string;
   title: string;
@@ -12,9 +25,13 @@ export interface Track {
 export interface Playlist {
   id: string;
   name: string;
+  description?: string;
+  cover_image_url?: string;
   tracks: Track[];
-  createdAt: Date;
-  userId?: string;
+  created_at?: string;
+  updated_at?: string;
+  user_id?: string;
+  is_public?: boolean;
 }
 
 export type RepeatMode = 'off' | 'one' | 'all';
@@ -31,6 +48,8 @@ export interface MusicPlayerState {
   queue: Track[];
   currentPlaylist: Playlist | null;
   playlists: Playlist[];
+  userPlaylists: string[];
+  loadingPlaylists: boolean;
 }
 
 export type MusicPlayerAction =
@@ -51,7 +70,11 @@ export type MusicPlayerAction =
   | { type: 'REMOVE_FROM_QUEUE'; payload: string }
   | { type: 'CLEAR_QUEUE' }
   | { type: 'SET_PLAYLIST'; payload: Playlist }
+  | { type: 'SET_PLAYLISTS'; payload: Playlist[] }
+  | { type: 'SET_USER_PLAYLISTS'; payload: string[] }
+  | { type: 'SET_LOADING_PLAYLISTS'; payload: boolean }
   | { type: 'ADD_PLAYLIST'; payload: Playlist }
+  | { type: 'UPDATE_PLAYLIST'; payload: Playlist }
   | { type: 'REMOVE_PLAYLIST'; payload: string }
   | { type: 'ADD_TO_PLAYLIST'; payload: { playlistId: string; track: Track } }
   | {

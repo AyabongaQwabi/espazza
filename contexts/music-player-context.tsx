@@ -8,6 +8,7 @@ import {
   useEffect,
   useRef,
 } from 'react';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import type {
   MusicPlayerState,
   MusicPlayerAction,
@@ -15,6 +16,7 @@ import type {
   Playlist,
   RepeatMode,
 } from '@/types/music-player';
+import { toast } from '@/hooks/use-toast';
 
 const initialState: MusicPlayerState = {
   currentTrack: null,
@@ -28,6 +30,8 @@ const initialState: MusicPlayerState = {
   queue: [],
   currentPlaylist: null,
   playlists: [],
+  userPlaylists: [],
+  loadingPlaylists: true,
 };
 
 function musicPlayerReducer(
@@ -269,11 +273,48 @@ function musicPlayerReducer(
         currentTime: 0,
       };
     }
+    case 'SET_PLAYLISTS':
+      return {
+        ...state,
+        playlists: action.payload,
+        loadingPlaylists: false,
+      };
+    case 'SET_USER_PLAYLISTS':
+      return {
+        ...state,
+        userPlaylists: action.payload,
+      };
+    case 'SET_LOADING_PLAYLISTS':
+      return {
+        ...state,
+        loadingPlaylists: action.payload,
+      };
     case 'ADD_PLAYLIST':
       return {
         ...state,
         playlists: [...state.playlists, action.payload],
       };
+    case 'UPDATE_PLAYLIST': {
+      const updatedPlaylists = state.playlists.map((playlist) =>
+        playlist.id === action.payload.id ? action.payload : playlist
+      );
+
+      // If this is the current playlist, update it and the queue
+      let updatedCurrentPlaylist = state.currentPlaylist;
+      let updatedQueue = state.queue;
+
+      if (state.currentPlaylist?.id === action.payload.id) {
+        updatedCurrentPlaylist = action.payload;
+        updatedQueue = action.payload.tracks;
+      }
+
+      return {
+        ...state,
+        playlists: updatedPlaylists,
+        currentPlaylist: updatedCurrentPlaylist,
+        queue: updatedQueue,
+      };
+    }
     case 'REMOVE_PLAYLIST': {
       const newPlaylists = state.playlists.filter(
         (playlist) => playlist.id !== action.payload
@@ -394,8 +435,20 @@ type MusicPlayerContextType = {
   audioRef: React.RefObject<HTMLAudioElement>;
   playTrack: (track: Track) => void;
   playPlaylist: (playlist: Playlist) => void;
-  addToPlaylist: (playlistId: string, track: Track) => void;
-  createPlaylist: (name: string, tracks?: Track[]) => void;
+  addToPlaylist: (playlistId: string, track: Track) => Promise<void>;
+  createPlaylist: (
+    name: string,
+    description?: string,
+    tracks?: Track[],
+    isPublic?: boolean
+  ) => Promise<string | null>;
+  updatePlaylist: (
+    playlistId: string,
+    updates: Partial<Playlist>
+  ) => Promise<void>;
+  deletePlaylist: (playlistId: string) => Promise<void>;
+  savePlaylist: (playlistId: string) => Promise<void>;
+  unsavePlaylist: (playlistId: string) => Promise<void>;
   togglePlay: () => void;
   nextTrack: () => void;
   prevTrack: () => void;
@@ -405,6 +458,8 @@ type MusicPlayerContextType = {
   toggleRepeat: () => void;
   toggleShuffle: () => void;
   formatTime: (time: number) => string;
+  refreshPlaylists: () => Promise<void>;
+  isPlaylistSaved: (playlistId: string) => boolean;
 };
 
 const MusicPlayerContext = createContext<MusicPlayerContextType | undefined>(
@@ -418,30 +473,12 @@ export function MusicPlayerProvider({
 }) {
   const [state, dispatch] = useReducer(musicPlayerReducer, initialState);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const supabase = createClientComponentClient();
 
-  // Load playlists from localStorage on mount
+  // Load playlists from Supabase on mount
   useEffect(() => {
-    try {
-      const savedPlaylists = localStorage.getItem('music-playlists');
-      if (savedPlaylists) {
-        const playlists = JSON.parse(savedPlaylists) as Playlist[];
-        playlists.forEach((playlist) => {
-          dispatch({ type: 'ADD_PLAYLIST', payload: playlist });
-        });
-      }
-    } catch (error) {
-      console.error('Failed to load playlists from localStorage:', error);
-    }
+    fetchPlaylists();
   }, []);
-
-  // Save playlists to localStorage when they change
-  useEffect(() => {
-    try {
-      localStorage.setItem('music-playlists', JSON.stringify(state.playlists));
-    } catch (error) {
-      console.error('Failed to save playlists to localStorage:', error);
-    }
-  }, [state.playlists]);
 
   // Handle audio events
   useEffect(() => {
@@ -515,6 +552,200 @@ export function MusicPlayerProvider({
     }
   }, [state.currentTrack]);
 
+  // Fetch playlists from Supabase
+  const fetchPlaylists = async () => {
+    dispatch({ type: 'SET_LOADING_PLAYLISTS', payload: true });
+
+    try {
+      // Get user session
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+
+      if (userId) {
+        // Fetch playlists created by the user
+        const { data: userCreatedPlaylists, error: userPlaylistsError } =
+          await supabase
+            .from('playlists')
+            .select(
+              `
+            id,
+            name,
+            description,
+            cover_image_url,
+            created_at,
+            updated_at,
+            user_id,
+            is_public
+          `
+            )
+            .eq('user_id', userId);
+
+        if (userPlaylistsError) throw userPlaylistsError;
+
+        // Fetch public playlists
+        const { data: publicPlaylists, error: publicPlaylistsError } =
+          await supabase
+            .from('playlists')
+            .select(
+              `
+            id,
+            name,
+            description,
+            cover_image_url,
+            created_at,
+            updated_at,
+            user_id,
+            is_public
+          `
+            )
+            .eq('is_public', true)
+            .neq('user_id', userId);
+
+        if (publicPlaylistsError) throw publicPlaylistsError;
+
+        // Fetch user's saved playlists
+        const { data: savedPlaylists, error: savedPlaylistsError } =
+          await supabase
+            .from('user_playlists')
+            .select(
+              `
+            playlist_id
+          `
+            )
+            .eq('user_id', userId);
+
+        if (savedPlaylistsError) throw savedPlaylistsError;
+
+        // Combine all playlists
+        const allPlaylistsData = [...userCreatedPlaylists, ...publicPlaylists];
+        const savedPlaylistIds = savedPlaylists.map((sp) => sp.playlist_id);
+
+        // Fetch tracks for each playlist
+        const playlistsWithTracks = await Promise.all(
+          allPlaylistsData.map(async (playlist) => {
+            const { data: tracks, error: tracksError } = await supabase
+              .from('playlist_tracks')
+              .select(
+                `
+                id,
+                track_id,
+                track_title,
+                artist_name,
+                artist_id,
+                cover_image_url,
+                url,
+                added_at,
+                position
+              `
+              )
+              .eq('playlist_id', playlist.id)
+              .order('position');
+
+            if (tracksError) {
+              console.error('Error fetching tracks for playlist:', tracksError);
+              return {
+                ...playlist,
+                tracks: [],
+              };
+            }
+
+            return {
+              ...playlist,
+              tracks: tracks.map((track) => ({
+                id: track.track_id,
+                title: track.track_title,
+                artist: track.artist_name || '',
+                artistId: track.artist_id,
+                cover_image_url: track.cover_image_url || '',
+                url: track.url,
+              })),
+            };
+          })
+        );
+
+        dispatch({ type: 'SET_PLAYLISTS', payload: playlistsWithTracks });
+        dispatch({ type: 'SET_USER_PLAYLISTS', payload: savedPlaylistIds });
+      } else {
+        // Fetch only public playlists for non-logged in users
+        const { data: publicPlaylists, error: publicPlaylistsError } =
+          await supabase
+            .from('playlists')
+            .select(
+              `
+            id,
+            name,
+            description,
+            cover_image_url,
+            created_at,
+            updated_at,
+            user_id,
+            is_public
+          `
+            )
+            .eq('is_public', true);
+
+        if (publicPlaylistsError) throw publicPlaylistsError;
+
+        // Fetch tracks for each playlist
+        const playlistsWithTracks = await Promise.all(
+          publicPlaylists.map(async (playlist) => {
+            const { data: tracks, error: tracksError } = await supabase
+              .from('playlist_tracks')
+              .select(
+                `
+                id,
+                track_id,
+                track_title,
+                artist_name,
+                artist_id,
+                cover_image_url,
+                url,
+                added_at,
+                position
+              `
+              )
+              .eq('playlist_id', playlist.id)
+              .order('position');
+
+            if (tracksError) {
+              console.error('Error fetching tracks for playlist:', tracksError);
+              return {
+                ...playlist,
+                tracks: [],
+              };
+            }
+
+            return {
+              ...playlist,
+              tracks: tracks.map((track) => ({
+                id: track.track_id,
+                title: track.track_title,
+                artist: track.artist_name || '',
+                artistId: track.artist_id,
+                cover_image_url: track.cover_image_url || '',
+                url: track.url,
+              })),
+            };
+          })
+        );
+
+        dispatch({ type: 'SET_PLAYLISTS', payload: playlistsWithTracks });
+        dispatch({ type: 'SET_USER_PLAYLISTS', payload: [] });
+      }
+    } catch (error) {
+      console.error('Error fetching playlists:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load playlists. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      dispatch({ type: 'SET_LOADING_PLAYLISTS', payload: false });
+    }
+  };
+
   // Helper functions
   const playTrack = (track: Track) => {
     dispatch({ type: 'SET_TRACK', payload: track });
@@ -525,22 +756,370 @@ export function MusicPlayerProvider({
     dispatch({ type: 'SET_PLAYLIST', payload: playlist });
   };
 
-  const addToPlaylist = (playlistId: string, track: Track) => {
-    dispatch({
-      type: 'ADD_TO_PLAYLIST',
-      payload: { playlistId, track },
-    });
+  const addToPlaylist = async (playlistId: string, track: Track) => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+
+      if (!userId) {
+        toast({
+          title: 'Authentication Required',
+          description: 'Please log in to add tracks to playlists',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Check if track already exists in playlist
+      const { data: existingTrack, error: checkError } = await supabase
+        .from('playlist_tracks')
+        .select('id')
+        .eq('playlist_id', playlistId)
+        .eq('track_id', track.id)
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        throw checkError;
+      }
+
+      if (existingTrack) {
+        toast({
+          title: 'Track Already Exists',
+          description: 'This track is already in the playlist',
+          variant: 'default',
+        });
+        return;
+      }
+
+      // Get the highest position in the playlist
+      const { data: positionData, error: positionError } = await supabase
+        .from('playlist_tracks')
+        .select('position')
+        .eq('playlist_id', playlistId)
+        .order('position', { ascending: false })
+        .limit(1);
+
+      if (positionError) throw positionError;
+
+      const nextPosition =
+        positionData.length > 0 ? positionData[0].position + 1 : 0;
+
+      // Add track to playlist
+      const { error: insertError } = await supabase
+        .from('playlist_tracks')
+        .insert({
+          playlist_id: playlistId,
+          track_id: track.id,
+          track_title: track.title,
+          artist_name: track.artist,
+          artist_id: track.artistId,
+          cover_image_url: track.cover_image_url,
+          url: track.url,
+          added_by: userId,
+          position: nextPosition,
+        });
+
+      if (insertError) throw insertError;
+
+      // Update the playlist in state
+      dispatch({
+        type: 'ADD_TO_PLAYLIST',
+        payload: { playlistId, track },
+      });
+
+      toast({
+        title: 'Track Added',
+        description: 'Track added to playlist successfully',
+        variant: 'default',
+      });
+    } catch (error) {
+      console.error('Error adding track to playlist:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to add track to playlist. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
-  const createPlaylist = (name: string, tracks: Track[] = []) => {
-    const newPlaylist: Playlist = {
-      id: `playlist-${Date.now()}`,
-      name,
-      tracks,
-      createdAt: new Date(),
-    };
+  const createPlaylist = async (
+    name: string,
+    description = '',
+    tracks: Track[] = [],
+    isPublic = false
+  ) => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
 
-    dispatch({ type: 'ADD_PLAYLIST', payload: newPlaylist });
+      if (!userId) {
+        toast({
+          title: 'Authentication Required',
+          description: 'Please log in to create playlists',
+          variant: 'destructive',
+        });
+        return null;
+      }
+
+      // Create the playlist
+      const { data: playlist, error: playlistError } = await supabase
+        .from('playlists')
+        .insert({
+          name,
+          description,
+          user_id: userId,
+          is_public: isPublic,
+        })
+        .select()
+        .single();
+
+      if (playlistError) throw playlistError;
+
+      // Add tracks to the playlist if any
+      if (tracks.length > 0) {
+        const trackInserts = tracks.map((track, index) => ({
+          playlist_id: playlist.id,
+          track_id: track.id,
+          track_title: track.title,
+          artist_name: track.artist,
+          artist_id: track.artistId,
+          cover_image_url: track.cover_image_url,
+          url: track.url,
+          added_by: userId,
+          position: index,
+        }));
+
+        const { error: tracksError } = await supabase
+          .from('playlist_tracks')
+          .insert(trackInserts);
+
+        if (tracksError) throw tracksError;
+      }
+
+      // Add the playlist to state
+      const newPlaylist = {
+        ...playlist,
+        tracks,
+      };
+
+      dispatch({ type: 'ADD_PLAYLIST', payload: newPlaylist });
+
+      toast({
+        title: 'Playlist Created',
+        description: 'Your playlist has been created successfully',
+        variant: 'default',
+      });
+
+      return playlist.id;
+    } catch (error) {
+      console.error('Error creating playlist:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to create playlist. Please try again.',
+        variant: 'destructive',
+      });
+      return null;
+    }
+  };
+
+  const updatePlaylist = async (
+    playlistId: string,
+    updates: Partial<Playlist>
+  ) => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+
+      if (!userId) {
+        toast({
+          title: 'Authentication Required',
+          description: 'Please log in to update playlists',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Update the playlist
+      const { error: updateError } = await supabase
+        .from('playlists')
+        .update({
+          name: updates.name,
+          description: updates.description,
+          is_public: updates.is_public,
+          cover_image_url: updates.cover_image_url,
+        })
+        .eq('id', playlistId)
+        .eq('user_id', userId);
+
+      if (updateError) throw updateError;
+
+      // Find the playlist in state
+      const playlist = state.playlists.find((p) => p.id === playlistId);
+      if (!playlist) return;
+
+      // Update the playlist in state
+      const updatedPlaylist = {
+        ...playlist,
+        ...updates,
+      };
+
+      dispatch({ type: 'UPDATE_PLAYLIST', payload: updatedPlaylist });
+
+      toast({
+        title: 'Playlist Updated',
+        description: 'Your playlist has been updated successfully',
+        variant: 'default',
+      });
+    } catch (error) {
+      console.error('Error updating playlist:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update playlist. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const deletePlaylist = async (playlistId: string) => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+
+      if (!userId) {
+        toast({
+          title: 'Authentication Required',
+          description: 'Please log in to delete playlists',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Delete the playlist
+      const { error: deleteError } = await supabase
+        .from('playlists')
+        .delete()
+        .eq('id', playlistId)
+        .eq('user_id', userId);
+
+      if (deleteError) throw deleteError;
+
+      // Remove the playlist from state
+      dispatch({ type: 'REMOVE_PLAYLIST', payload: playlistId });
+
+      toast({
+        title: 'Playlist Deleted',
+        description: 'Your playlist has been deleted successfully',
+        variant: 'default',
+      });
+    } catch (error) {
+      console.error('Error deleting playlist:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete playlist. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const savePlaylist = async (playlistId: string) => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+
+      if (!userId) {
+        toast({
+          title: 'Authentication Required',
+          description: 'Please log in to save playlists',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Save the playlist
+      const { error: saveError } = await supabase
+        .from('user_playlists')
+        .insert({
+          user_id: userId,
+          playlist_id: playlistId,
+        });
+
+      if (saveError) throw saveError;
+
+      // Update user playlists in state
+      dispatch({
+        type: 'SET_USER_PLAYLISTS',
+        payload: [...state.userPlaylists, playlistId],
+      });
+
+      toast({
+        title: 'Playlist Saved',
+        description: 'Playlist has been saved to your library',
+        variant: 'default',
+      });
+    } catch (error) {
+      console.error('Error saving playlist:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save playlist. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const unsavePlaylist = async (playlistId: string) => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+
+      if (!userId) {
+        toast({
+          title: 'Authentication Required',
+          description: 'Please log in to unsave playlists',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Unsave the playlist
+      const { error: unsaveError } = await supabase
+        .from('user_playlists')
+        .delete()
+        .eq('user_id', userId)
+        .eq('playlist_id', playlistId);
+
+      if (unsaveError) throw unsaveError;
+
+      // Update user playlists in state
+      dispatch({
+        type: 'SET_USER_PLAYLISTS',
+        payload: state.userPlaylists.filter((id) => id !== playlistId),
+      });
+
+      toast({
+        title: 'Playlist Removed',
+        description: 'Playlist has been removed from your library',
+        variant: 'default',
+      });
+    } catch (error) {
+      console.error('Error unsaving playlist:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to remove playlist. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const togglePlay = () => {
@@ -584,6 +1163,14 @@ export function MusicPlayerProvider({
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 
+  const refreshPlaylists = async () => {
+    await fetchPlaylists();
+  };
+
+  const isPlaylistSaved = (playlistId: string) => {
+    return state.userPlaylists.includes(playlistId);
+  };
+
   return (
     <MusicPlayerContext.Provider
       value={{
@@ -594,6 +1181,10 @@ export function MusicPlayerProvider({
         playPlaylist,
         addToPlaylist,
         createPlaylist,
+        updatePlaylist,
+        deletePlaylist,
+        savePlaylist,
+        unsavePlaylist,
         togglePlay,
         nextTrack,
         prevTrack,
@@ -603,6 +1194,8 @@ export function MusicPlayerProvider({
         toggleRepeat,
         toggleShuffle,
         formatTime,
+        refreshPlaylists,
+        isPlaylistSaved,
       }}
     >
       {children}

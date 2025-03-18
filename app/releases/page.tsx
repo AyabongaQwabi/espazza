@@ -52,6 +52,8 @@ import {
   MoreHorizontal,
   Sparkles,
   Flame,
+  ListMusic,
+  Plus,
 } from 'lucide-react';
 import { postToURL } from '@/lib/payfast';
 import { useMusicPlayer } from '@/hooks/use-music-player';
@@ -120,10 +122,13 @@ export default function ReleasesPage() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [selectedRelease, setSelectedRelease] = useState<Release | null>(null);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [addToPlaylistDialogOpen, setAddToPlaylistDialogOpen] = useState(false);
+  const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
 
   const router = useRouter();
   const supabase = createClientComponentClient();
   const { playTrack } = useMusicPlayer();
+  const { state, addToPlaylist } = useMusicPlayer();
 
   const fetchReleases = useCallback(async () => {
     setLoading(true);
@@ -483,6 +488,18 @@ export default function ReleasesPage() {
     if (purchaseError) throw purchaseError;
   }
 
+  const handleAddToPlaylist = async (playlistId: string) => {
+    if (!selectedTrack) return;
+
+    try {
+      await addToPlaylist(playlistId, selectedTrack);
+      setAddToPlaylistDialogOpen(false);
+      setSelectedTrack(null);
+    } catch (error) {
+      console.error('Error adding to playlist:', error);
+    }
+  };
+
   return (
     <div className='flex flex-col min-h-screen bg-gray-900 text-white'>
       <Dialog open={paymentModalOpen} onOpenChange={setPaymentModalOpen}>
@@ -803,6 +820,16 @@ export default function ReleasesPage() {
                                   <DollarSign className='mr-2 h-4 w-4' />
                                   Buy Now
                                 </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className='cursor-pointer hover:bg-gray-700'
+                                  onClick={() => {
+                                    setSelectedTrack(release.tracks[0]);
+                                    setAddToPlaylistDialogOpen(true);
+                                  }}
+                                >
+                                  <ListMusic className='mr-2 h-4 w-4' />
+                                  Add to Playlist
+                                </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
@@ -1008,6 +1035,60 @@ export default function ReleasesPage() {
         </div>
       </main>
       <audio ref={audioRef} className='hidden' />
+      {/* Add to Playlist Dialog */}
+      <Dialog
+        open={addToPlaylistDialogOpen}
+        onOpenChange={setAddToPlaylistDialogOpen}
+      >
+        <DialogContent className='bg-gray-800 border-gray-700 text-white'>
+          <DialogHeader>
+            <DialogTitle>Add to Playlist</DialogTitle>
+          </DialogHeader>
+          <div className='py-4'>
+            {state.playlists.length === 0 ? (
+              <div className='flex flex-col items-center justify-center h-40 text-gray-500'>
+                <ListMusic className='h-12 w-12 mb-2 opacity-50' />
+                <p>You don't have any playlists yet</p>
+                <Button
+                  variant='link'
+                  className='text-red-500 mt-2'
+                  onClick={() => {
+                    setAddToPlaylistDialogOpen(false);
+                    router.push('/playlists');
+                  }}
+                >
+                  Create your first playlist
+                </Button>
+              </div>
+            ) : (
+              <div className='space-y-2 max-h-60 overflow-y-auto pr-2'>
+                {state.playlists
+                  .filter(
+                    (playlist) =>
+                      currentUser && playlist.user_id === currentUser.id
+                  )
+                  .map((playlist) => (
+                    <div
+                      key={playlist.id}
+                      className='flex items-center justify-between p-2 rounded-md hover:bg-gray-700 cursor-pointer'
+                      onClick={() => handleAddToPlaylist(playlist.id)}
+                    >
+                      <div>
+                        <p className='font-medium text-white'>
+                          {playlist.name}
+                        </p>
+                        <p className='text-xs text-gray-400'>
+                          {playlist.tracks.length} tracks
+                        </p>
+                      </div>
+                      <Plus className='h-4 w-4 text-gray-400' />
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
