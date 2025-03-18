@@ -9,6 +9,7 @@ import type { Track } from '@/types/music-player';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+import { useRouter } from 'next/navigation';
 import {
   Play,
   Pause,
@@ -65,6 +66,7 @@ export function MusicPlayer() {
     createPlaylist,
     playPlaylist,
     addToPlaylist,
+    audioRef,
   } = useMusicPlayer();
 
   const [isExpanded, setIsExpanded] = useState(false);
@@ -74,6 +76,8 @@ export function MusicPlayer() {
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   const [addToPlaylistDialogOpen, setAddToPlaylistDialogOpen] = useState(false);
   const progressBarRef = useRef<HTMLDivElement>(null);
+
+  const router = useRouter();
 
   const {
     currentTrack,
@@ -256,6 +260,7 @@ export function MusicPlayer() {
 
                 {/* Progress Bar */}
                 <div className='mb-4'>
+                  <div className='h-2 mb-2 bg-gray-800/50 rounded-md overflow-hidden'></div>
                   <div
                     className='h-1 bg-gray-800 rounded-full cursor-pointer mb-2'
                     ref={progressBarRef}
@@ -481,15 +486,26 @@ export function MusicPlayer() {
                     <h3 className='text-lg font-semibold text-white'>
                       Your Playlists
                     </h3>
-                    <Button
-                      size='sm'
-                      variant='outline'
-                      className='border-gray-700 text-white hover:bg-gray-800'
-                      onClick={() => setShowCreatePlaylist(true)}
-                    >
-                      <Plus size={16} className='mr-1' />
-                      New Playlist
-                    </Button>
+                    <div className='flex space-x-2'>
+                      <Button
+                        size='sm'
+                        variant='outline'
+                        className='border-gray-700 text-white hover:bg-gray-800'
+                        onClick={() => router.push('/playlists')}
+                      >
+                        <ListMusic size={16} className='mr-1' />
+                        View All
+                      </Button>
+                      <Button
+                        size='sm'
+                        variant='outline'
+                        className='border-gray-700 text-white hover:bg-gray-800'
+                        onClick={() => setShowCreatePlaylist(true)}
+                      >
+                        <Plus size={16} className='mr-1' />
+                        New Playlist
+                      </Button>
+                    </div>
                   </div>
 
                   <ScrollArea className='h-full pr-4'>
@@ -497,13 +513,22 @@ export function MusicPlayer() {
                       <div className='flex flex-col items-center justify-center h-40 text-gray-500'>
                         <ListMusic size={40} className='mb-2 opacity-50' />
                         <p>You don't have any playlists yet</p>
-                        <Button
-                          variant='link'
-                          className='text-red-500 mt-2'
-                          onClick={() => setShowCreatePlaylist(true)}
-                        >
-                          Create your first playlist
-                        </Button>
+                        <div className='flex flex-col space-y-2 mt-2'>
+                          <Button
+                            variant='link'
+                            className='text-red-500'
+                            onClick={() => setShowCreatePlaylist(true)}
+                          >
+                            Create your first playlist
+                          </Button>
+                          <Button
+                            variant='link'
+                            className='text-gray-400 hover:text-white'
+                            onClick={() => router.push('/playlists')}
+                          >
+                            Browse all playlists
+                          </Button>
+                        </div>
                       </div>
                     ) : (
                       <div className='space-y-3'>
