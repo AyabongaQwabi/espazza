@@ -32,6 +32,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 import {
   Play,
@@ -54,6 +60,7 @@ import {
   Flame,
   ListMusic,
   Plus,
+  ChevronDown,
 } from 'lucide-react';
 import { postToURL } from '@/lib/payfast';
 import { useMusicPlayer } from '@/hooks/use-music-player';
@@ -124,6 +131,7 @@ export default function ReleasesPage() {
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [addToPlaylistDialogOpen, setAddToPlaylistDialogOpen] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
+  const [expandedReleases, setExpandedReleases] = useState<string[]>([]);
 
   const router = useRouter();
   const supabase = createClientComponentClient();
@@ -492,11 +500,50 @@ export default function ReleasesPage() {
     if (!selectedTrack) return;
 
     try {
-      await addToPlaylist(playlistId, selectedTrack);
+      // Find the release that contains this track
+      const release = releases.find((r) =>
+        r.tracks.some((t) => t.id === selectedTrack.id)
+      );
+
+      if (!release) return;
+
+      // Create a properly formatted track object with all required properties
+      const formattedTrack = {
+        id: selectedTrack.id,
+        title: selectedTrack.title,
+        artist:
+          release.record_owner.artist_name || release.record_owner.username,
+        artistId: release.record_owner.username,
+        cover_image_url:
+          selectedTrack.cover_image_url || release.cover_image_url,
+        url: selectedTrack.url,
+        release_id: release.id,
+      };
+
+      await addToPlaylist(playlistId, formattedTrack);
       setAddToPlaylistDialogOpen(false);
       setSelectedTrack(null);
+
+      toast({
+        title: 'Success',
+        description: 'Track added to playlist',
+        variant: 'default',
+      });
     } catch (error) {
       console.error('Error adding to playlist:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to add track to playlist',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const toggleExpandRelease = (releaseId: string) => {
+    if (expandedReleases.includes(releaseId)) {
+      setExpandedReleases(expandedReleases.filter((id) => id !== releaseId));
+    } else {
+      setExpandedReleases([...expandedReleases, releaseId]);
     }
   };
 
@@ -822,13 +869,12 @@ export default function ReleasesPage() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   className='cursor-pointer hover:bg-gray-700'
-                                  onClick={() => {
-                                    setSelectedTrack(release.tracks[0]);
-                                    setAddToPlaylistDialogOpen(true);
-                                  }}
+                                  onClick={() =>
+                                    toggleExpandRelease(release.id)
+                                  }
                                 >
                                   <ListMusic className='mr-2 h-4 w-4' />
-                                  Add to Playlist
+                                  View Tracks
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -861,6 +907,82 @@ export default function ReleasesPage() {
                               ).toLocaleDateString()}
                             </span>
                           </div>
+
+                          {/* Track count and expand button */}
+                          <div className='flex items-center justify-between mt-2 text-xs text-gray-400'>
+                            <span>
+                              {release.tracks.length}{' '}
+                              {release.tracks.length === 1 ? 'track' : 'tracks'}
+                            </span>
+                            <Button
+                              variant='ghost'
+                              size='sm'
+                              className='p-0 h-6 text-gray-400 hover:text-white'
+                              onClick={() => toggleExpandRelease(release.id)}
+                            >
+                              {expandedReleases.includes(release.id)
+                                ? 'Hide tracks'
+                                : 'Show tracks'}
+                              <ChevronDown
+                                className={`ml-1 h-3 w-3 transition-transform ${
+                                  expandedReleases.includes(release.id)
+                                    ? 'rotate-180'
+                                    : ''
+                                }`}
+                              />
+                            </Button>
+                          </div>
+
+                          {/* Expanded tracks list */}
+                          {expandedReleases.includes(release.id) && (
+                            <div className='mt-2 pt-2 border-t border-gray-700'>
+                              <ul className='space-y-2 max-h-40 overflow-y-auto pr-1'>
+                                {release.tracks.map((track, index) => (
+                                  <li
+                                    key={track.id}
+                                    className='flex items-center justify-between text-xs'
+                                  >
+                                    <div className='flex items-center flex-1 min-w-0'>
+                                      <span className='text-gray-500 w-4'>
+                                        {index + 1}.
+                                      </span>
+                                      <span className='ml-1 truncate'>
+                                        {track.title}
+                                      </span>
+                                    </div>
+                                    <div className='flex items-center space-x-1'>
+                                      <Button
+                                        size='icon'
+                                        variant='ghost'
+                                        className='h-6 w-6 text-gray-400 hover:text-white'
+                                        onClick={() =>
+                                          handlePreview(track, release)
+                                        }
+                                      >
+                                        {currentlyPlaying === track.url ? (
+                                          <Pause className='h-3 w-3' />
+                                        ) : (
+                                          <Play className='h-3 w-3' />
+                                        )}
+                                      </Button>
+                                      <Button
+                                        size='icon'
+                                        variant='ghost'
+                                        className='h-6 w-6 text-gray-400 hover:text-white'
+                                        onClick={() => {
+                                          setSelectedTrack(track);
+                                          setAddToPlaylistDialogOpen(true);
+                                        }}
+                                      >
+                                        <Plus className='h-3 w-3' />
+                                      </Button>
+                                    </div>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
                           <div className='mt-2 pt-2 border-t border-gray-700 flex justify-between items-center'>
                             <span className='font-bold text-yellow-400 text-xs'>
                               R
@@ -893,107 +1015,174 @@ export default function ReleasesPage() {
                     </div>
                     <ScrollArea className='h-[600px]'>
                       {releases.map((release, index) => (
-                        <div
+                        <Accordion
                           key={release.id}
-                          className={`grid grid-cols-12 p-3 items-center hover:bg-gray-700 group ${
+                          type='single'
+                          collapsible
+                          className={`${
                             index % 2 === 0 ? 'bg-gray-800' : 'bg-gray-850'
                           }`}
                         >
-                          <div className='col-span-5 flex items-center gap-3'>
-                            <div className='relative flex-shrink-0'>
-                              <Image
-                                src={
-                                  release.cover_image_url || '/placeholder.svg'
-                                }
-                                alt={release.title}
-                                width={50}
-                                height={50}
-                                className='rounded object-cover w-12 h-12'
-                              />
-                              <Button
-                                size='icon'
-                                className='absolute inset-0 m-auto bg-red-500/80 hover:bg-red-500 rounded-full h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity'
-                                onClick={() =>
-                                  handlePreview(release.tracks[0], release)
-                                }
-                              >
-                                {currentlyPlaying === release.tracks[0]?.url ? (
-                                  <Pause className='h-4 w-4' />
-                                ) : (
-                                  <Play className='h-4 w-4' />
-                                )}
-                              </Button>
+                          <AccordionItem
+                            value={release.id}
+                            className='border-b border-gray-700'
+                          >
+                            <div className='grid grid-cols-12 p-3 items-center hover:bg-gray-700 group'>
+                              <div className='col-span-5 flex items-center gap-3'>
+                                <div className='relative flex-shrink-0'>
+                                  <Image
+                                    src={
+                                      release.cover_image_url ||
+                                      '/placeholder.svg'
+                                    }
+                                    alt={release.title}
+                                    width={50}
+                                    height={50}
+                                    className='rounded object-cover w-12 h-12'
+                                  />
+                                  <Button
+                                    size='icon'
+                                    className='absolute inset-0 m-auto bg-red-500/80 hover:bg-red-500 rounded-full h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity'
+                                    onClick={() =>
+                                      handlePreview(release.tracks[0], release)
+                                    }
+                                  >
+                                    {currentlyPlaying ===
+                                    release.tracks[0]?.url ? (
+                                      <Pause className='h-4 w-4' />
+                                    ) : (
+                                      <Play className='h-4 w-4' />
+                                    )}
+                                  </Button>
+                                </div>
+                                <div>
+                                  <Link
+                                    href={`/release/${release.id}`}
+                                    className='font-medium hover:text-red-500 transition-colors line-clamp-1'
+                                  >
+                                    {release.title}
+                                  </Link>
+                                  <p className='text-xs text-gray-400 line-clamp-1'>
+                                    {release.tracks.length} tracks
+                                  </p>
+                                </div>
+                              </div>
+                              <div className='col-span-3'>
+                                <Link
+                                  href={`/artists/${release.record_owner.username}`}
+                                  className='text-sm hover:text-red-500 transition-colors line-clamp-1'
+                                >
+                                  {release.record_owner.artist_name ||
+                                    release.record_owner.username}
+                                </Link>
+                              </div>
+                              <div className='col-span-2'>
+                                <Badge className='bg-gray-700 text-xs'>
+                                  {release.genre.name}
+                                </Badge>
+                              </div>
+                              <div className='col-span-2 flex items-center justify-end gap-2'>
+                                <span className='font-medium text-yellow-400'>
+                                  R
+                                  {calculateReleasePrice(
+                                    release.tracks
+                                  ).toFixed(2)}
+                                </span>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      size='icon'
+                                      variant='ghost'
+                                      className='h-8 w-8 text-gray-400'
+                                    >
+                                      <MoreHorizontal className='h-4 w-4' />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent className='bg-gray-800 border-gray-700 text-white'>
+                                    <DropdownMenuItem
+                                      className='cursor-pointer hover:bg-gray-700'
+                                      onClick={() =>
+                                        router.push(`/release/${release.id}`)
+                                      }
+                                    >
+                                      <Music className='mr-2 h-4 w-4' />
+                                      View Details
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      className='cursor-pointer hover:bg-gray-700'
+                                      onClick={() => handleShare(release)}
+                                    >
+                                      <Share2 className='mr-2 h-4 w-4' />
+                                      Share
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator className='bg-gray-700' />
+                                    <DropdownMenuItem
+                                      className='cursor-pointer hover:bg-gray-700 text-red-400'
+                                      onClick={() => handlePurchase(release)}
+                                    >
+                                      <DollarSign className='mr-2 h-4 w-4' />
+                                      Buy Now
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
                             </div>
-                            <div>
-                              <Link
-                                href={`/release/${release.id}`}
-                                className='font-medium hover:text-red-500 transition-colors line-clamp-1'
-                              >
-                                {release.title}
-                              </Link>
-                              <p className='text-xs text-gray-400 line-clamp-1'>
-                                {release.tracks.length} tracks
-                              </p>
-                            </div>
-                          </div>
-                          <div className='col-span-3'>
-                            <Link
-                              href={`/artists/${release.record_owner.username}`}
-                              className='text-sm hover:text-red-500 transition-colors line-clamp-1'
-                            >
-                              {release.record_owner.artist_name ||
-                                release.record_owner.username}
-                            </Link>
-                          </div>
-                          <div className='col-span-2'>
-                            <Badge className='bg-gray-700 text-xs'>
-                              {release.genre.name}
-                            </Badge>
-                          </div>
-                          <div className='col-span-2 flex items-center justify-end gap-2'>
-                            <span className='font-medium text-yellow-400'>
-                              R
-                              {calculateReleasePrice(release.tracks).toFixed(2)}
-                            </span>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  size='icon'
-                                  variant='ghost'
-                                  className='h-8 w-8 text-gray-400'
-                                >
-                                  <MoreHorizontal className='h-4 w-4' />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent className='bg-gray-800 border-gray-700 text-white'>
-                                <DropdownMenuItem
-                                  className='cursor-pointer hover:bg-gray-700'
-                                  onClick={() =>
-                                    router.push(`/release/${release.id}`)
-                                  }
-                                >
-                                  <Music className='mr-2 h-4 w-4' />
-                                  View Details
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className='cursor-pointer hover:bg-gray-700'
-                                  onClick={() => handleShare(release)}
-                                >
-                                  <Share2 className='mr-2 h-4 w-4' />
-                                  Share
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator className='bg-gray-700' />
-                                <DropdownMenuItem
-                                  className='cursor-pointer hover:bg-gray-700 text-red-400'
-                                  onClick={() => handlePurchase(release)}
-                                >
-                                  <DollarSign className='mr-2 h-4 w-4' />
-                                  Buy Now
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </div>
+                            <AccordionTrigger className='py-2 px-3 hover:no-underline'>
+                              <span className='text-sm text-gray-400'>
+                                View Tracks
+                              </span>
+                            </AccordionTrigger>
+                            <AccordionContent className='px-3 pb-3'>
+                              <div className='space-y-2 pl-16'>
+                                {release.tracks.map((track, trackIndex) => (
+                                  <div
+                                    key={track.id}
+                                    className='flex items-center justify-between py-1 px-2 rounded hover:bg-gray-700'
+                                  >
+                                    <div className='flex items-center flex-1 min-w-0'>
+                                      <span className='text-gray-500 w-6 text-xs'>
+                                        {trackIndex + 1}.
+                                      </span>
+                                      <span className='truncate text-sm'>
+                                        {track.title}
+                                      </span>
+                                    </div>
+                                    <div className='flex items-center space-x-2'>
+                                      <Button
+                                        size='icon'
+                                        variant='ghost'
+                                        className='h-7 w-7 text-gray-400 hover:text-white'
+                                        onClick={() =>
+                                          handlePreview(track, release)
+                                        }
+                                      >
+                                        {currentlyPlaying === track.url ? (
+                                          <Pause className='h-4 w-4' />
+                                        ) : (
+                                          <Play className='h-4 w-4' />
+                                        )}
+                                      </Button>
+                                      <Button
+                                        size='icon'
+                                        variant='ghost'
+                                        className='h-7 w-7 text-gray-400 hover:text-white'
+                                        onClick={() => {
+                                          setSelectedTrack(track);
+                                          setAddToPlaylistDialogOpen(true);
+                                        }}
+                                      >
+                                        <Plus className='h-4 w-4' />
+                                      </Button>
+                                      <span className='text-yellow-400 text-xs font-medium'>
+                                        R{track.price.toFixed(2)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        </Accordion>
                       ))}
                     </ScrollArea>
                   </div>

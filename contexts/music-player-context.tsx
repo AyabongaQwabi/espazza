@@ -815,7 +815,7 @@ export function MusicPlayerProvider({
           track_title: track.title,
           artist_name: track.artist,
           artist_id: track.artistId,
-          cover_image_url: track.cover_image_url,
+          cover_image_url: track.cover_image_url || '',
           url: track.url,
           added_by: userId,
           position: nextPosition,

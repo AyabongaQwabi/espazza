@@ -368,16 +368,41 @@ export default function ReleasePage({ params }: { params: { id: string } }) {
     }
   };
 
-  // Add this function to the component
+  // Find the handleAddToPlaylist function and replace it with this updated version:
+
   const handleAddToPlaylist = async (playlistId: string) => {
-    if (!selectedTrack) return;
+    if (!selectedTrack || !release) return;
 
     try {
-      await addToPlaylist(playlistId, selectedTrack);
+      // Create a properly formatted track object with all required properties
+      const formattedTrack = {
+        id: selectedTrack.id,
+        title: selectedTrack.title,
+        artist:
+          release.record_owner.artist_name || release.record_owner.username,
+        artistId: release.record_owner.username,
+        cover_image_url:
+          selectedTrack.cover_image_url || release.cover_image_url,
+        url: selectedTrack.url,
+        release_id: release.id,
+      };
+
+      await addToPlaylist(playlistId, formattedTrack);
       setAddToPlaylistDialogOpen(false);
       setSelectedTrack(null);
+
+      toast({
+        title: 'Success',
+        description: 'Track added to playlist',
+        variant: 'default',
+      });
     } catch (error) {
       console.error('Error adding to playlist:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to add track to playlist',
+        variant: 'destructive',
+      });
     }
   };
 
