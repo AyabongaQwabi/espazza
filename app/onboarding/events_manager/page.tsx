@@ -44,8 +44,8 @@ export default function EventsManagerOnboarding() {
   const [error, setError] = useState('');
   const [newLabel, setNewLabel] = useState('');
   const [formData, setFormData] = useState({
-    company_name: '',
-    experience: '',
+    company_name: 'I dont have a company',
+    experience: 'No experience',
     artist_bio: '',
     artist_name: '',
     date_of_birth: '',

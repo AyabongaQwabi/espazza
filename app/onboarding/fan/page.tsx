@@ -44,8 +44,8 @@ export default function FanOnboarding() {
   const [error, setError] = useState('');
   const [newLabel, setNewLabel] = useState('');
   const [formData, setFormData] = useState({
-    favorite_genres: '',
-    favorite_artists: '',
+    favorite_genres: 'Hip Hop, Trap',
+    favorite_artists: 'Bravo Le Roux, Dee Koala, Holy Alpha',
     artist_bio: '',
     artist_name: '',
     date_of_birth: '',

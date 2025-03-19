@@ -44,8 +44,8 @@ export default function MerchandiserOnboarding() {
   const [error, setError] = useState('');
   const [newLabel, setNewLabel] = useState('');
   const [formData, setFormData] = useState({
-    store_name: '',
-    product_types: '',
+    store_name: 'I dont have a store',
+    product_types: 'Hoodies',
     artist_bio: '',
     artist_name: '',
     date_of_birth: '',
