@@ -24,12 +24,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { supabase } from '@/lib/supabase';
-import { Plus, Edit, Trash, X } from 'lucide-react';
+import { Plus, Edit, Trash, X, Upload } from 'lucide-react';
 import Image from 'next/image';
 import { Label } from '@/components/ui/label';
-import { ImageUploader } from '@/components/ImageUploader';
 import { toast } from '@/hooks/use-toast';
 import ShortUniqueId from 'short-unique-id';
+import { Progress } from '@/components/ui/progress';
 
 export default function MerchandiseManagement() {
   const [products, setProducts] = useState([]);
@@ -45,6 +45,10 @@ export default function MerchandiseManagement() {
     images: [] as string[],
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{
+    [key: string]: number;
+  }>({});
+  const [isUploading, setIsUploading] = useState(false);
   const router = useRouter();
   const uid = new ShortUniqueId({ length: 11 });
 
@@ -178,11 +182,89 @@ export default function MerchandiseManagement() {
     }
   }
 
-  const handleImageUpload = (urls: string[]) => {
-    setNewProduct((prev) => ({
-      ...prev,
-      images: [...prev.images, ...urls],
-    }));
+  const uploadToCloudinary = async (file: File) => {
+    const fileId = uid.rnd();
+    setUploadProgress((prev) => ({ ...prev, [fileId]: 0 }));
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'espazza_images'); // Replace with your unsigned upload preset
+
+    try {
+      const xhr = new XMLHttpRequest();
+
+      xhr.upload.addEventListener('progress', (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = Math.round(
+            (event.loaded / event.total) * 100
+          );
+          setUploadProgress((prev) => ({ ...prev, [fileId]: percentComplete }));
+        }
+      });
+
+      return new Promise((resolve, reject) => {
+        xhr.open(
+          'POST',
+          'https://api.cloudinary.com/v1_1/espazza/image/upload'
+        );
+
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            setUploadProgress((prev) => {
+              const newProgress = { ...prev };
+              delete newProgress[fileId];
+              return newProgress;
+            });
+            resolve(response.secure_url);
+          } else {
+            reject(new Error('Upload failed'));
+          }
+        };
+
+        xhr.onerror = () => {
+          reject(new Error('Upload failed'));
+        };
+
+        xhr.send(formData);
+      });
+    } catch (error) {
+      console.error('Error uploading to Cloudinary:', error);
+      setUploadProgress((prev) => {
+        const newProgress = { ...prev };
+        delete newProgress[fileId];
+        return newProgress;
+      });
+      throw error;
+    }
+  };
+
+  const handleImageUpload = async (files: FileList) => {
+    setIsUploading(true);
+    const uploadPromises = Array.from(files).map((file) =>
+      uploadToCloudinary(file)
+    );
+
+    try {
+      const uploadedUrls = await Promise.all(uploadPromises);
+      setNewProduct((prev) => ({
+        ...prev,
+        images: [...prev.images, ...uploadedUrls],
+      }));
+      toast({
+        title: 'Success',
+        description: 'Images uploaded successfully!',
+      });
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to upload one or more images. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleRemoveImage = (index: number) => {
@@ -216,13 +298,12 @@ export default function MerchandiseManagement() {
   const handleEditProduct = (product) => {
     setNewProduct({
       id: product.id,
-      code: ShortUniqueId(),
       name: product.name,
       description: product.description,
       price: product.price,
       product_category_id: product.product_category_id,
       stock: product.stock,
-      images: product.images,
+      images: product.images || [],
     });
     setIsDialogOpen(true);
   };
@@ -358,12 +439,51 @@ export default function MerchandiseManagement() {
                     </div>
                   ))}
                 </div>
-                <ImageUploader
-                  onUploadComplete={handleImageUpload}
-                  maxSizeInMB={5}
-                />
+
+                {/* Cloudinary Image Upload */}
+                <div className='mb-4'>
+                  <div className='flex items-center gap-2'>
+                    <Input
+                      type='file'
+                      id='image-upload'
+                      accept='image/*'
+                      multiple
+                      onChange={(e) =>
+                        e.target.files && handleImageUpload(e.target.files)
+                      }
+                      disabled={isUploading}
+                      className='hidden'
+                    />
+                    <Label
+                      htmlFor='image-upload'
+                      className='cursor-pointer flex items-center justify-center gap-2 border border-dashed border-gray-300 rounded-md p-4 w-full hover:bg-gray-50 transition-colors'
+                    >
+                      <Upload className='h-5 w-5' />
+                      <span>Upload Images</span>
+                    </Label>
+                  </div>
+
+                  {/* Upload Progress Indicators */}
+                  {Object.entries(uploadProgress).length > 0 && (
+                    <div className='mt-2 space-y-2'>
+                      {Object.entries(uploadProgress).map(([id, progress]) => (
+                        <div key={id} className='space-y-1'>
+                          <div className='flex justify-between text-xs'>
+                            <span>Uploading...</span>
+                            <span>{progress}%</span>
+                          </div>
+                          <Progress value={progress} className='h-2' />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-              <Button type='submit' className='col-span-2'>
+              <Button
+                type='submit'
+                className='col-span-2'
+                disabled={isUploading}
+              >
                 {newProduct.id ? 'Update Product' : 'Add Product'}
               </Button>
             </form>
@@ -391,16 +511,17 @@ export default function MerchandiseManagement() {
               <TableCell>{product.stock}</TableCell>
               <TableCell>
                 <div className='flex space-x-2'>
-                  {product.images.map((imageUrl, index) => (
-                    <Image
-                      key={index}
-                      src={imageUrl || '/placeholder.svg'}
-                      alt={`${product.name} image ${index + 1}`}
-                      width={50}
-                      height={50}
-                      className='object-cover rounded'
-                    />
-                  ))}
+                  {product.images &&
+                    product.images.map((imageUrl, index) => (
+                      <Image
+                        key={index}
+                        src={imageUrl || '/placeholder.svg'}
+                        alt={`${product.name} image ${index + 1}`}
+                        width={50}
+                        height={50}
+                        className='object-cover rounded'
+                      />
+                    ))}
                 </div>
               </TableCell>
               <TableCell>
