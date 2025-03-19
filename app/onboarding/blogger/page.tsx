@@ -44,8 +44,8 @@ export default function BloggerOnboarding() {
   const [error, setError] = useState('');
   const [newLabel, setNewLabel] = useState('');
   const [formData, setFormData] = useState({
-    blog_name: '',
-    blog_url: '',
+    blog_name: 'I dont have a blog',
+    blog_url: 'https://espazza.co.za',
     artist_bio: '',
     artist_name: '',
     date_of_birth: '',
@@ -337,7 +337,9 @@ export default function BloggerOnboarding() {
         </div>
         <div className='bg-zinc-900 rounded-lg p-6 space-y-4'>
           <div>
-            <Label htmlFor='blog_name'>Blog Name</Label>
+            <Label htmlFor='blog_name'>
+              Do you have a blog? what's its name?
+            </Label>
             <Input
               id='blog_name'
               value={formData.blog_name}
@@ -347,7 +349,7 @@ export default function BloggerOnboarding() {
             />
           </div>
           <div>
-            <Label htmlFor='blog_url'>Blog URL</Label>
+            <Label htmlFor='blog_url'>what's its link?</Label>
             <Input
               id='blog_url'
               type='url'
