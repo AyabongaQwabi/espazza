@@ -209,14 +209,14 @@ export default function MerchPage() {
         externalEntityID: selectedProduct.id,
         amount: totalPrice,
         currency: 'ZAR',
-        requesterUrl: 'https://espazza.co.za/merch',
+        requesterUrl: 'https://espazza.co.za/merch-store',
         description: `Purchase of ${orderDetails.quantity}x ${selectedProduct.name}`,
         paymentReference: `${currentUser.id}-${selectedProduct.id}`,
         mode: 'live',
         externalTransactionID: transactionId,
         urls: {
           callbackUrl: 'https://espazza.co.za/api/payment/callback',
-          successPageUrl: `https://espazza.co.za/merch/success?transaction_id=${transactionId}`,
+          successPageUrl: `https://espazza.co.za/merch-store/success?transaction_id=${transactionId}`,
           failurePageUrl: 'https://espazza.co.za/failure',
           cancelUrl: 'https://espazza.co.za/cancel',
         },
@@ -284,7 +284,7 @@ export default function MerchPage() {
   }
 
   const handleShare = async (product) => {
-    const shareUrl = `${window.location.origin}/merch/${product.code}`;
+    const shareUrl = `${window.location.origin}/merch-store/${product.code}`;
     const shareText = `Check out ${product.name} on eSpazza Merchandise!`;
 
     if (navigator.share) {
