@@ -76,6 +76,9 @@ export default function NewBlogPost() {
 
   // Cloudinary upload function
   const uploadToCloudinary = async (file: File) => {
+    // Only run in browser environment
+    if (typeof window === 'undefined') return '';
+
     const fileId = uid.rnd();
     setUploadProgress((prev) => ({ ...prev, [fileId]: 0 }));
 
@@ -134,7 +137,9 @@ export default function NewBlogPost() {
 
   // Check user's weekly post count on component mount
   useEffect(() => {
-    checkUserWeeklyPosts();
+    if (typeof window !== 'undefined') {
+      checkUserWeeklyPosts();
+    }
   }, []);
 
   async function checkUserWeeklyPosts() {

@@ -177,12 +177,14 @@ export default function BlogPostClient({
   const handleScroll = () => {
     if (typeof window === 'undefined') return;
 
-    const scrollPercentage =
-      (window.scrollY /
-        (document.documentElement.scrollHeight - window.innerHeight)) *
-      100;
-    if (scrollPercentage > 50 && !user && !showSignupPopup) {
-      setShowSignupPopup(true);
+    if (typeof document !== 'undefined') {
+      const scrollPercentage =
+        (window.scrollY /
+          (document.documentElement.scrollHeight - window.innerHeight)) *
+        100;
+      if (scrollPercentage > 50 && !user && !showSignupPopup) {
+        setShowSignupPopup(true);
+      }
     }
   };
 
