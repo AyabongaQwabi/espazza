@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 
 export const metadata = {
   title: 'Merchandisers | eSpazza',
-  description: 'Discover merchandise sellers for Xhosa hip hop culture',
+  description: 'Discover merchandise sellers for South African music culture',
 };
 
 export default async function MerchandisersPage({
@@ -62,7 +62,7 @@ export default async function MerchandisersPage({
           </h1>
           <p className='text-xl text-zinc-400 max-w-2xl mx-auto'>
             Discover authentic merchandise from talented creators supporting
-            Xhosa hip hop culture
+            South African music culture
           </p>
         </div>
 

@@ -19,12 +19,13 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   metadataBase: new URL('https://espazza.co.za'),
   title: {
-    default: 'eSpazza - Xhosa Hip Hop Spaza Shop',
+    default: 'eSpazza - South African music Spaza Shop',
     template: '%s | eSpazza',
   },
-  description: 'Iplatform yabaRhepi baseKhaya - The home of Xhosa Hip Hop',
+  description:
+    'Iplatform yabaRhepi baseKhaya - The home of South African music',
   keywords: [
-    'Xhosa Hip Hop',
+    'South African music',
     'South African Music',
     'Hip Hop',
     'Rap',
@@ -52,21 +53,22 @@ export const metadata: Metadata = {
     locale: 'en_ZA',
     url: 'https://espazza.co.za',
     siteName: 'eSpazza',
-    title: 'eSpazza - Xhosa Hip Hop Spaza Shop',
-    description: 'Iplatform yabaRhepi baseKhaya - The home of Xhosa Hip Hop',
+    title: 'eSpazza - South African music Spaza Shop',
+    description:
+      'Iplatform yabaRhepi baseKhaya - The home of South African music',
     images: [
       {
         url: 'https://espazza.co.za/logo.png',
         width: 1200,
         height: 630,
-        alt: 'eSpazza - Xhosa Hip Hop Platform',
+        alt: 'eSpazza - South African music Platform',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'eSpazza - Xhosa Hip Hop Spaza Shop',
-    description: 'The home of Xhosa Hip Hop',
+    title: 'eSpazza - South African music Spaza Shop',
+    description: 'The home of South African music',
     images: ['https://espazza.co.za/logo.jpg'],
     creator: '@xhap',
     site: '@espazza',
@@ -136,7 +138,7 @@ export default function RootLayout({
               '@type': 'WebSite',
               name: 'eSpazza',
               url: 'https://espazza.co.za',
-              description: 'The home of Xhosa Hip Hop',
+              description: 'The home of South African music',
               potentialAction: {
                 '@type': 'SearchAction',
                 target: {

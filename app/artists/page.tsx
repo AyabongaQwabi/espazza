@@ -291,7 +291,7 @@ export default function ArtistsPage({
             Abaculi
           </h1>
           <p className='text-zinc-400 text-lg'>
-            Discover Xhosa Hip Hop Artists
+            Discover South African music Artists
           </p>
         </div>
 

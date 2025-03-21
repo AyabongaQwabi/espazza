@@ -207,6 +207,17 @@ export default function BlogPostClient({
     );
   }
 
+  const getYoutubeVideoId = (url) => {
+    if (!url) return null;
+
+    // Handle different YouTube URL formats
+    const regExp =
+      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+
+    return match && match[2].length === 11 ? match[2] : null;
+  };
+
   return (
     <div className='min-h-screen bg-black pt-24'>
       <article className='max-w-4xl mx-auto px-4'>
@@ -291,9 +302,9 @@ export default function BlogPostClient({
             {post.youtube_url && (
               <div className='aspect-video mb-6'>
                 <iframe
-                  src={`https://www.youtube.com/embed/${
-                    post.youtube_url.split('v=')[1]
-                  }`}
+                  src={`https://www.youtube.com/embed/${getYoutubeVideoId(
+                    post.youtube_url
+                  )}`}
                   className='w-full h-full rounded-lg'
                   allowFullScreen
                 />

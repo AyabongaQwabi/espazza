@@ -121,7 +121,7 @@ export default function Home({
         <motion.div
           className='absolute inset-0 z-0 min-h-screen flex items-center justify-center'
           style={{
-            backgroundImage: 'url("/deekoala.jpg")',
+            backgroundImage: 'url("/home.jpeg")',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
@@ -146,7 +146,7 @@ export default function Home({
                 className='inline-flex items-center w-72 h-72 rounded-full'
               />
               <div className=''>
-                <span>Shop, Read and Support</span>
+                <span> Unlock the Sound. Own the Culture </span>
               </div>
             </motion.h1>
             <motion.p
@@ -155,8 +155,9 @@ export default function Home({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              Discover and connect with amazing artists across Trap, Xhosa
-              Drill, RnB, Hip Hop, Amapiano, Gospel, Gqom, and Sijokojoko.{' '}
+              Shop exclusive drops, vibe with the hottest artists, and fuel the
+              future of Trap, Drill, RnB, Hip Hop, Amapiano, Gospel, Gqom &
+              Sijokojoko. Tap in & make waves!{' '}
             </motion.p>
             <div className='space-x-4'>
               <Button asChild size='lg' className='bg-red-600 hover:bg-red-700'>

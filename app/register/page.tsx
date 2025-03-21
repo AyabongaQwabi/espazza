@@ -179,7 +179,9 @@ export default function Register() {
           <h1 className='text-3xl font-bold text-white mb-2'>
             Qala Apha (Get Started)
           </h1>
-          <p className='text-gray-400'>Join the Xhosa Hip Hop community</p>
+          <p className='text-gray-400'>
+            Join the South African music community
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className='space-y-4'>

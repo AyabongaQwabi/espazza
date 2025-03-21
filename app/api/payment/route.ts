@@ -29,6 +29,7 @@ export async function POST(request: Request) {
     if (!APPLICATION_ID || !APPLICATION_KEY) {
       throw new Error('Missing iKhokha API credentials');
     }
+    console.log('iKhokha API credentials:', APPLICATION_ID, APPLICATION_KEY);
 
     const body = await request.json();
     console.log('Payment API request body:', body);

@@ -30,25 +30,18 @@ function Navigation({ className = '' }: { className?: string }) {
     <nav className={`flex items-center ${className}`}>
       <div className='flex items-center space-x-8'>
         <Link
-          href='/about'
-          className='hover:text-red-500 transition-colors flex items-center gap-2'
-        >
-          <HoverIcon Icon={InfoIcon} size={16} />
-          <span>About us</span>
-        </Link>
-        <Link
           href='/blog'
           className='hover:text-red-500 transition-colors flex items-center gap-2'
         >
           <HoverIcon Icon={BookOpenIcon} size={16} />
-          <span>Posts</span>
+          <span>Community</span>
         </Link>
         <Link
           href='/artists'
           className='hover:text-red-500 transition-colors flex items-center gap-2'
         >
           <HoverIcon Icon={UsersIcon} size={16} />
-          <span>MCs</span>
+          <span>Artists</span>
         </Link>
         <Link
           href='/merch'
@@ -84,13 +77,6 @@ function Navigation({ className = '' }: { className?: string }) {
         >
           <HoverIcon Icon={CalendarIcon} size={16} />
           <span>Events</span>
-        </Link>
-        <Link
-          href='/contact'
-          className='hover:text-red-500 transition-colors flex items-center gap-2'
-        >
-          <HoverIcon Icon={MailIcon} size={16} />
-          <span>Contact</span>
         </Link>
       </div>
     </nav>
@@ -173,25 +159,18 @@ export function SiteHeader() {
               <div className='flex flex-col space-y-6 mt-8 p-6'>
                 <div className='flex flex-col space-y-4'>
                   <Link
-                    href='/about'
-                    className='hover:text-red-500 transition-colors flex items-center gap-2'
-                  >
-                    <HoverIcon Icon={InfoIcon} size={16} />
-                    <span>About us</span>
-                  </Link>
-                  <Link
                     href='/blog'
                     className='hover:text-red-500 transition-colors flex items-center gap-2'
                   >
                     <HoverIcon Icon={BookOpenIcon} size={16} />
-                    <span>Posts</span>
+                    <span>Community</span>
                   </Link>
                   <Link
                     href='/artists'
                     className='hover:text-red-500 transition-colors flex items-center gap-2'
                   >
                     <HoverIcon Icon={UsersIcon} size={16} />
-                    <span>MCs</span>
+                    <span>Artists</span>
                   </Link>
                   <Link
                     href='/merch'
@@ -227,13 +206,6 @@ export function SiteHeader() {
                   >
                     <HoverIcon Icon={CalendarIcon} size={16} />
                     <span>Events</span>
-                  </Link>
-                  <Link
-                    href='/contact'
-                    className='hover:text-red-500 transition-colors flex items-center gap-2'
-                  >
-                    <HoverIcon Icon={MailIcon} size={16} />
-                    <span>Contact</span>
                   </Link>
                 </div>
 
@@ -282,12 +254,12 @@ export function SiteHeader() {
                         <Link href='/dashboard/blog'>
                           <IconButton
                             Icon={EditIcon}
-                            label='Manage Posts'
+                            label='Manage Community'
                             variant='ghost'
                             className='w-full justify-start'
                             asChild
                           >
-                            Manage Posts
+                            Manage Community
                           </IconButton>
                         </Link>
                         <Link href='/dashboard/merchandise'>

@@ -29,7 +29,7 @@ export function SiteFooter() {
               <img src='/logo.png' className='w-10 h-10 rounded-full' />
               <span className='text-2xl font-bold text-white'>eSpazza</span>
             </div>
-            <p className='text-zinc-400'>The home of Xhosa Hip Hop</p>
+            <p className='text-zinc-400'>The home of South African music</p>
           </div>
 
           <div>

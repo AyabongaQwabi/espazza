@@ -18,7 +18,7 @@ export default function AboutPage() {
             Malunga Nathi
           </h1>
           <p className='text-xl text-zinc-300 max-w-2xl mx-auto'>
-            Siyinxalenye yeXhosa Hip Hop - We are part of Xhosa Hip Hop
+            Siyinxalenye yeXhosa Hip Hop - We are part of South African music
           </p>
         </div>
       </div>
@@ -40,10 +40,11 @@ export default function AboutPage() {
             ithuba lokwabelana ngemisebenzi yabo simahla okanye bayithengise.
           </p>
           <p className='text-zinc-400 text-lg max-w-3xl mx-auto mt-4'>
-            eSpazza is a platform created by the Xhosa Hip Hop Organisation to
-            create opportunities for Xhosa-language rappers. Our mission is to
-            spread Xhosa Hip Hop music globally, giving our artists a platform
-            to share their work freely or monetize their talent.
+            eSpazza is a platform created by the South African music
+            Organisation to create opportunities for Xhosa-language rappers. Our
+            mission is to spread South African music music globally, giving our
+            artists a platform to share their work freely or monetize their
+            talent.
           </p>
         </div>
 
@@ -102,9 +103,9 @@ export default function AboutPage() {
               amathuba emisebenzi kubaculi bethu.
             </p>
             <p className='text-zinc-400'>
-              We believe Xhosa Hip Hop can be a tool for youth empowerment,
-              cultural preservation, and creating economic opportunities for our
-              artists.
+              We believe South African music can be a tool for youth
+              empowerment, cultural preservation, and creating economic
+              opportunities for our artists.
             </p>
           </div>
         </div>

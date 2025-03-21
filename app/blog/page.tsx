@@ -297,7 +297,7 @@ export default function BlogPage() {
               iiPosts
             </h1>
             <p className='text-pink-200 text-lg'>
-              Stories from the Xhosa Hip Hop Community
+              Stories from the South African music Community
             </p>
           </div>
 
@@ -333,7 +333,7 @@ export default function BlogPage() {
             iiPosts
           </h1>
           <p className='text-pink-200 text-lg'>
-            Stories from the Xhosa Hip Hop Community
+            Stories from the South African music Community
           </p>
         </div>
 
