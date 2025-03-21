@@ -12,6 +12,8 @@ import {
   Clock,
   Tag,
   Mail,
+  Eye,
+  BarChart2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -47,6 +49,10 @@ export default function BlogPostClient({
   const [user, setUser] = useState<any>(null);
   const [showSignupPopup, setShowSignupPopup] = useState(false);
   const [currentUrl, setCurrentUrl] = useState('');
+  const [viewTracked, setViewTracked] = useState(false);
+  const [shareTracked, setShareTracked] = useState<Record<string, boolean>>({});
+  const [viewCount, setViewCount] = useState(post.views || 0);
+  const [shareCount, setShareCount] = useState(post.shares || 0);
   const supabase = createClientComponentClient();
 
   useEffect(() => {
@@ -62,6 +68,103 @@ export default function BlogPostClient({
       return () => window.removeEventListener('scroll', handleScroll);
     }
   }, [post.id]);
+
+  // Track view when component mounts
+  useEffect(() => {
+    if (post.id && !viewTracked) {
+      trackView();
+    }
+  }, [post.id, viewTracked]);
+
+  // Track view
+  const trackView = async () => {
+    console.log('trackView');
+    try {
+      // Get client IP for anonymous tracking
+      const response = await fetch('https://api.ipify.org?format=json');
+      const data = await response.json();
+      const clientIp = data.ip;
+
+      // Create a unique identifier for this view
+      const viewerId = user?.id || clientIp;
+      const viewDate = new Date().toISOString().split('T')[0]; // Current date
+
+      // Check if this viewer has already viewed this post today
+      const { data: existingViews } = await supabase
+        .from('blog_views')
+        .select('*')
+        .eq('post_id', post.id)
+        .eq('viewer_id', viewerId)
+        .eq('view_date', viewDate);
+      console.log('existing views: ', existingViews);
+      // If no view from this viewer today, record it
+      if (!existingViews || existingViews.length === 0) {
+        // Insert into blog_views table
+        await supabase.from('blog_views').insert([
+          {
+            post_id: post.id,
+            viewer_id: viewerId,
+            view_date: viewDate,
+            user_id: user?.id || null,
+            is_unique: true,
+          },
+        ]);
+
+        // Increment the views counter in the blog_posts table
+        const { data: updatedPost, error } = await supabase
+          .from('blog_posts')
+          .update({ views: (post.views || 0) + 1 })
+          .eq('id', post.id)
+          .select('views')
+          .single();
+
+        if (!error && updatedPost) {
+          setViewCount(updatedPost.views);
+        } else {
+          console.error('Error updating view count:', error);
+        }
+      }
+
+      setViewTracked(true);
+    } catch (error) {
+      console.error('Error tracking view:', error);
+    }
+  };
+
+  // Track share
+  const trackShare = async (platform: string) => {
+    if (shareTracked[platform]) return; // Don't track duplicate shares
+
+    try {
+      // Insert into blog_shares table
+      await supabase.from('blog_shares').insert([
+        {
+          post_id: post.id,
+          user_id: user?.id || null,
+          platform: platform,
+        },
+      ]);
+
+      // Increment the shares counter in the blog_posts table
+      const { data: updatedPost, error } = await supabase
+        .from('blog_posts')
+        .update({ shares: (post.shares || 0) + 1 })
+        .eq('id', post.id)
+        .select('shares')
+        .single();
+
+      if (!error && updatedPost) {
+        setShareCount(updatedPost.shares);
+      } else {
+        console.error('Error updating share count:', error);
+      }
+
+      // Mark this platform as tracked for this session
+      setShareTracked((prev) => ({ ...prev, [platform]: true }));
+    } catch (error) {
+      console.error(`Error tracking ${platform} share:`, error);
+    }
+  };
 
   const handleScroll = () => {
     if (typeof window === 'undefined') return;
@@ -178,6 +281,9 @@ export default function BlogPostClient({
       title: 'Link Copied',
       description: 'The link has been copied to your clipboard.',
     });
+
+    // Track share
+    trackShare('copy_link');
   };
 
   const handleEmailShare = () => {
@@ -186,6 +292,32 @@ export default function BlogPostClient({
     window.location.href = `mailto:?subject=${encodeURIComponent(
       post.title
     )}&body=${encodeURIComponent(currentUrl)}`;
+
+    // Track share
+    trackShare('email');
+  };
+
+  // Enhanced share handlers for social media
+  const handleFacebookShare = () => {
+    trackShare('facebook');
+  };
+
+  const handleTwitterShare = () => {
+    trackShare('twitter');
+  };
+
+  const handleLinkedInShare = () => {
+    trackShare('linkedin');
+  };
+
+  // Format large numbers
+  const formatNumber = (num: number): string => {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M';
+    } else if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toString();
   };
 
   if (!post) {
@@ -266,11 +398,24 @@ export default function BlogPostClient({
             </p>
           )}
 
-          <div className='flex items-center justify-center space-x-4 mb-8'>
+          <div className='flex flex-wrap items-center justify-center gap-4 mb-8'>
             <div className='flex items-center text-zinc-400'>
               <Clock className='w-5 h-5 mr-2' />
               <span>{estimatedReadingTime()} min read</span>
             </div>
+
+            {/* View Counter */}
+            <div className='flex items-center text-zinc-400'>
+              <Eye className='w-5 h-5 mr-2' />
+              <span>{formatNumber(viewCount)} views</span>
+            </div>
+
+            {/* Share Counter */}
+            <div className='flex items-center text-zinc-400'>
+              <Share2 className='w-5 h-5 mr-2' />
+              <span>{formatNumber(shareCount)} shares</span>
+            </div>
+
             <div className='flex items-center text-zinc-400'>
               <Tag className='w-5 h-5 mr-2' />
               <span>{post?.tags?.join(', ')}</span>
@@ -278,13 +423,21 @@ export default function BlogPostClient({
           </div>
 
           <div className='flex justify-center space-x-4'>
-            <FacebookShareButton url={currentUrl} quote={post.title}>
+            <FacebookShareButton
+              url={currentUrl}
+              quote={post.title}
+              onClick={handleFacebookShare}
+            >
               <FacebookIcon size={32} round />
             </FacebookShareButton>
-            <TwitterShareButton url={currentUrl} title={post.title}>
+            <TwitterShareButton
+              url={currentUrl}
+              title={post.title}
+              onClick={handleTwitterShare}
+            >
               <TwitterIcon size={32} round />
             </TwitterShareButton>
-            <LinkedinShareButton url={currentUrl}>
+            <LinkedinShareButton url={currentUrl} onClick={handleLinkedInShare}>
               <LinkedinIcon size={32} round />
             </LinkedinShareButton>
             <Button onClick={copyLinkToClipboard} variant='outline' size='icon'>
@@ -367,6 +520,40 @@ export default function BlogPostClient({
           >
             {post.content}
           </ReactMarkdown>
+        </div>
+
+        {/* Post Stats Card */}
+        <div className='bg-zinc-900 rounded-xl p-6 mb-12'>
+          <h3 className='text-xl font-bold text-white mb-4 flex items-center'>
+            <BarChart2 className='h-5 w-5 mr-2 text-red-500' />
+            Post Statistics
+          </h3>
+          <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+            <div className='bg-zinc-800 p-4 rounded-lg text-center'>
+              <p className='text-zinc-400 text-sm mb-1'>Views</p>
+              <p className='text-white text-2xl font-bold'>
+                {formatNumber(viewCount)}
+              </p>
+            </div>
+            <div className='bg-zinc-800 p-4 rounded-lg text-center'>
+              <p className='text-zinc-400 text-sm mb-1'>Shares</p>
+              <p className='text-white text-2xl font-bold'>
+                {formatNumber(shareCount)}
+              </p>
+            </div>
+            <div className='bg-zinc-800 p-4 rounded-lg text-center'>
+              <p className='text-zinc-400 text-sm mb-1'>Likes</p>
+              <p className='text-white text-2xl font-bold'>
+                {formatNumber(likes.length)}
+              </p>
+            </div>
+            <div className='bg-zinc-800 p-4 rounded-lg text-center'>
+              <p className='text-zinc-400 text-sm mb-1'>Comments</p>
+              <p className='text-white text-2xl font-bold'>
+                {formatNumber(comments.length)}
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Call to Action */}
