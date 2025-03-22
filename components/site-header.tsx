@@ -30,7 +30,7 @@ function Navigation({ className = '' }: { className?: string }) {
     <nav className={`flex items-center ${className}`}>
       <div className='flex items-center space-x-8'>
         <Link
-          href='/blog'
+          href='/'
           className='hover:text-red-500 transition-colors flex items-center gap-2'
         >
           <HoverIcon Icon={BookOpenIcon} size={16} />
@@ -159,7 +159,7 @@ export function SiteHeader() {
               <div className='flex flex-col space-y-6 mt-8 p-6'>
                 <div className='flex flex-col space-y-4'>
                   <Link
-                    href='/blog'
+                    href='/'
                     className='hover:text-red-500 transition-colors flex items-center gap-2'
                   >
                     <HoverIcon Icon={BookOpenIcon} size={16} />
