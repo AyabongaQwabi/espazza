@@ -122,7 +122,7 @@ export function SiteHeader() {
               </motion.div>
             ) : (
               <>
-                {/* <Link href='/login'>
+                <Link href='/login'>
                   <IconButton
                     Icon={UserIcon}
                     label='Ngena'
@@ -142,7 +142,7 @@ export function SiteHeader() {
                   >
                     Qala Apha
                   </IconButton>
-                </Link> */}
+                </Link>
               </>
             ))}
         </div>
@@ -299,7 +299,7 @@ export function SiteHeader() {
                     </div>
                   ) : (
                     <div className='space-y-4'>
-                      {/* <Link href='/login'>
+                      <Link href='/login'>
                         <IconButton
                           Icon={UserIcon}
                           label='Ngena'
@@ -320,7 +320,7 @@ export function SiteHeader() {
                         >
                           Qala Apha
                         </IconButton>
-                      </Link> */}
+                      </Link>
                     </div>
                   ))}
               </div>
