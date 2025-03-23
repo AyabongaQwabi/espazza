@@ -67,7 +67,12 @@ const navGroups = [
   {
     label: 'Content',
     items: [
-      { href: '/dashboard/blog', icon: EditIcon, label: 'Manage Posts' },
+      { href: '/dashboard/blog', icon: EditIcon, label: 'Your Profile' },
+      {
+        href: '/dashboard/blog/admin',
+        icon: CreditCard,
+        label: 'Post Payment',
+      },
       {
         href: '/dashboard/events',
         icon: CalendarPlusIcon,
