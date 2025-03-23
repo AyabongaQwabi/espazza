@@ -100,7 +100,7 @@ export default function Login() {
     <div className='min-h-screen bg-black flex items-center justify-center px-4'>
       <div className='max-w-md w-full'>
         <div className='text-center mb-8'>
-          <h1 className='text-3xl font-bold text-white mb-2'>Ngena (Login)</h1>
+          <h1 className='text-3xl font-bold text-white mb-2'>Login </h1>
           <p className='text-gray-400'>Welcome back to eSpazza</p>
         </div>
 
@@ -177,7 +177,7 @@ export default function Login() {
                 href='/register'
                 className='text-red-500 hover:text-red-400'
               >
-                Qala Apha (Register)
+                Sign up (Register)
               </Link>
             </p>
           </>

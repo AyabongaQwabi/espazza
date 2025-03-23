@@ -177,7 +177,7 @@ export default function Register() {
       <div className='max-w-md w-full'>
         <div className='text-center mb-8'>
           <h1 className='text-3xl font-bold text-white mb-2'>
-            Qala Apha (Get Started)
+            Sign up (Get Started)
           </h1>
           <p className='text-gray-400'>
             Join the South African music community
@@ -267,7 +267,7 @@ export default function Register() {
           <p className='text-center text-gray-400 text-sm'>
             Already have an account?{' '}
             <Link href='/login' className='text-red-500 hover:text-red-400'>
-              Ngena (Login)
+              Login
             </Link>
           </p>
         </form>

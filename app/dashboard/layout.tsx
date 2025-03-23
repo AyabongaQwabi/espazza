@@ -60,7 +60,7 @@ const navGroups = [
     label: 'Dashboard',
     items: [
       { href: '/dashboard', icon: LayoutDashboardIcon, label: 'Overview' },
-      { href: '/dashboard/profile', icon: UserIcon, label: 'Profile Yakho' },
+      { href: '/dashboard/profile', icon: UserIcon, label: 'Your Profile' },
       { href: '/dashboard/messages', icon: MessageSquare, label: 'Messages' },
     ],
   },
@@ -71,12 +71,12 @@ const navGroups = [
       {
         href: '/dashboard/events',
         icon: CalendarPlusIcon,
-        label: 'iiEvents Zakho',
+        label: 'Your Events',
       },
       {
         href: '/dashboard/promotion',
         icon: MusicIcon,
-        label: 'iiTracks Zakho',
+        label: 'Your Tracks',
       },
     ],
   },

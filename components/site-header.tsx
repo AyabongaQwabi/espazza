@@ -125,22 +125,22 @@ export function SiteHeader() {
                 <Link href='/login'>
                   <IconButton
                     Icon={UserIcon}
-                    label='Ngena'
+                    label='Login'
                     variant='ghost'
                     asChild
                   >
-                    Ngena
+                    Login
                   </IconButton>
                 </Link>
 
                 <Link href='/register'>
                   <IconButton
                     Icon={MusicIcon}
-                    label='Qala Apha'
+                    label='Sign up'
                     className='bg-red-600 hover:bg-red-700'
                     asChild
                   >
-                    Qala Apha
+                    Sign up
                   </IconButton>
                 </Link>
               </>
@@ -302,23 +302,23 @@ export function SiteHeader() {
                       <Link href='/login'>
                         <IconButton
                           Icon={UserIcon}
-                          label='Ngena'
+                          label='Login'
                           variant='ghost'
                           className='w-full'
                           asChild
                         >
-                          Ngena
+                          Login
                         </IconButton>
                       </Link>
 
                       <Link href='/register'>
                         <IconButton
                           Icon={MusicIcon}
-                          label='Qala Apha'
+                          label='Sign up'
                           className='bg-red-600 hover:bg-red-700 w-full'
                           asChild
                         >
-                          Qala Apha
+                          Sign up
                         </IconButton>
                       </Link>
                     </div>

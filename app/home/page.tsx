@@ -161,7 +161,7 @@ export default function Home({
             </motion.p>
             <div className='space-x-4'>
               <Button asChild size='lg' className='bg-red-600 hover:bg-red-700'>
-                <Link href='/register'>Qala Apha</Link>
+                <Link href='/register'>Sign up</Link>
               </Button>
               <Button
                 asChild
@@ -169,7 +169,7 @@ export default function Home({
                 variant='outline'
                 className='text-white border-white hover:bg-white/10'
               >
-                <Link href='/login'>Ngena</Link>
+                <Link href='/login'>Login</Link>
               </Button>
             </div>
           </div>
