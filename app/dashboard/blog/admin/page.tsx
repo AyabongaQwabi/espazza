@@ -212,8 +212,8 @@ export default function BlogAdminPage() {
         .select(
           `
           *,
-          profiles:author_id (
-            full_name,
+          profiles (
+            username,
             email
           )
         `
@@ -237,13 +237,14 @@ export default function BlogAdminPage() {
       const { data, error } = await query;
 
       if (error) throw error;
-
+      console.log(data);
       // Transform data to include author information
       const transformedData = data.map((post) => ({
         ...post,
-        author_name: post.profiles?.full_name || 'Unknown',
+        author_name: `@${post.profiles?.username}` || 'Unknown',
         author_email: post.profiles?.email || 'No email',
       }));
+      console.log(transformedData);
 
       setPosts(transformedData);
     } catch (error: any) {
@@ -339,6 +340,18 @@ export default function BlogAdminPage() {
         description: error.message,
         variant: 'destructive',
       });
+    }
+  }
+
+  // Helper function to determine post category based on AI score
+  // This matches the logic from the blog post creation page
+  function getPostCategory(score: number): string {
+    if (score >= 80) {
+      return 'Quality Post (R80)';
+    } else if (score >= 50) {
+      return 'Regular Post (R50)';
+    } else {
+      return 'Below Standards';
     }
   }
 
@@ -808,19 +821,40 @@ export default function BlogAdminPage() {
                                 <Badge variant='outline'>Draft</Badge>
                               )}
                             </TableCell>
-                            <TableCell>
-                              <Badge
-                                variant='outline'
-                                className={
+                            <TableCell
+                              className='text-xs col-span-2'
+                              colSpan={2}
+                            >
+                              <p
+                                className={` flex-col ${
                                   post.category === 'Quality Post (R80)'
                                     ? 'border-green-500 text-green-500'
                                     : post.category === 'Regular Post (R50)'
                                     ? 'border-yellow-500 text-yellow-500'
                                     : 'border-red-500 text-red-500'
-                                }
+                                }`}
                               >
-                                {post.ai_score} - {post.category}
-                              </Badge>
+                                <p>
+                                  <b>Score: </b>
+                                  {post.ai_score}
+                                </p>
+                                <p>
+                                  <b>Pay: </b>
+                                  {post.ai_score >= 80 ? (
+                                    <div className='text-xs text-green-500 mt-1'>
+                                      R80 payment eligible
+                                    </div>
+                                  ) : post.ai_score >= 50 ? (
+                                    <div className='text-xs text-yellow-500 mt-1'>
+                                      R50 payment eligible
+                                    </div>
+                                  ) : (
+                                    <div className='text-xs text-red-500 mt-1'>
+                                      Below payment standards
+                                    </div>
+                                  )}
+                                </p>
+                              </p>
                             </TableCell>
                             <TableCell>
                               <div className='flex items-center gap-2'>
@@ -1246,6 +1280,44 @@ export default function BlogAdminPage() {
             </DialogDescription>
           </DialogHeader>
           <div className='py-4'>
+            {selectedPostAuthorId && (
+              <div className='mb-4 p-3 rounded-md border border-blue-500/30 bg-blue-900/20'>
+                <h3 className='text-sm font-medium text-blue-300 mb-2'>
+                  Post Quality Information
+                </h3>
+                <div className='grid grid-cols-2 gap-2 text-sm'>
+                  {posts
+                    .filter((post) => post.author_id === selectedPostAuthorId)
+                    .map((post) => (
+                      <div
+                        key={post.id}
+                        className='col-span-2 p-2 rounded bg-gray-800/50 mb-1'
+                      >
+                        <div className='flex justify-between items-center'>
+                          <span className='font-medium truncate max-w-[200px]'>
+                            {post.title}
+                          </span>
+                          <Badge
+                            variant='outline'
+                            className={
+                              post.category === 'Quality Post (R80)'
+                                ? 'border-green-500 text-green-500'
+                                : post.category === 'Regular Post (R50)'
+                                ? 'border-yellow-500 text-yellow-500'
+                                : 'border-red-500 text-red-500'
+                            }
+                          >
+                            {post.ai_score}
+                          </Badge>
+                        </div>
+                        <div className='text-xs text-muted-foreground mt-1'>
+                          {post.category} - {post.is_paid ? 'Paid' : 'Unpaid'}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
             {paymentDetails ? (
               <div className='space-y-4'>
                 <div className='flex items-center'>
