@@ -52,8 +52,22 @@ import {
   ArrowUpDown,
   Calendar,
   User,
+  CreditCard,
+  Phone,
+  BanknoteIcon as BankIcon,
+  AlertTriangle,
 } from 'lucide-react';
 import { format } from 'date-fns';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 
 type BlogPost = {
   id: string;
@@ -72,6 +86,22 @@ type BlogPost = {
   payment_reference: string | null;
   author_name?: string;
   author_email?: string;
+  is_payment_details_submitted?: boolean;
+  payment_details_id?: string | null;
+};
+
+type PaymentDetails = {
+  id: string;
+  user_id: string;
+  payment_method: 'bank_transfer' | 'atm_voucher';
+  bank_name?: string;
+  account_number?: string;
+  branch_code?: string;
+  account_type?: string;
+  account_holder?: string;
+  cellphone_number?: string;
+  created_at: string;
+  updated_at: string;
 };
 
 export default function BlogAdminPage() {
@@ -86,6 +116,27 @@ export default function BlogAdminPage() {
   const [sortDirection, setSortDirection] = useState('desc');
   const [isAdmin, setIsAdmin] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [paymentDetailsDialogOpen, setPaymentDetailsDialogOpen] =
+    useState(false);
+  const [viewPaymentDetailsDialogOpen, setViewPaymentDetailsDialogOpen] =
+    useState(false);
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+  const [selectedPostAuthorId, setSelectedPostAuthorId] = useState<
+    string | null
+  >(null);
+  const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(
+    null
+  );
+  const [paymentMethod, setPaymentMethod] = useState<
+    'bank_transfer' | 'atm_voucher'
+  >('bank_transfer');
+  const [bankName, setBankName] = useState('');
+  const [accountNumber, setAccountNumber] = useState('');
+  const [branchCode, setBranchCode] = useState('');
+  const [accountType, setAccountType] = useState('');
+  const [accountHolder, setAccountHolder] = useState('');
+  const [cellphoneNumber, setCellphoneNumber] = useState('');
   const postsPerPage = 15;
 
   useEffect(() => {
@@ -108,6 +159,8 @@ export default function BlogAdminPage() {
         router.push('/login');
         return;
       }
+
+      setCurrentUserId(user.id);
 
       // Check if user has admin role
       const { data: profile, error: profileError } = await supabase
@@ -289,6 +342,152 @@ export default function BlogAdminPage() {
     }
   }
 
+  async function fetchPaymentDetails(userId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('payment_details')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "no rows returned"
+
+      if (data) {
+        setPaymentDetails(data);
+        setPaymentMethod(data.payment_method);
+        setBankName(data.bank_name || '');
+        setAccountNumber(data.account_number || '');
+        setBranchCode(data.branch_code || '');
+        setAccountType(data.account_type || '');
+        setAccountHolder(data.account_holder || '');
+        setCellphoneNumber(data.cellphone_number || '');
+      } else {
+        setPaymentDetails(null);
+        // Set default values
+        setPaymentMethod('bank_transfer');
+        setBankName('');
+        setAccountNumber('');
+        setBranchCode('');
+        setAccountType('');
+        setAccountHolder('');
+        setCellphoneNumber('');
+      }
+    } catch (error: any) {
+      console.error('Error fetching payment details:', error);
+      toast({
+        title: 'Error',
+        description: 'Could not fetch payment details',
+        variant: 'destructive',
+      });
+    }
+  }
+
+  async function savePaymentDetails() {
+    try {
+      if (!currentUserId) {
+        toast({
+          title: 'Authentication required',
+          description: 'You need to be logged in to save payment details',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Validate based on payment method
+      if (paymentMethod === 'bank_transfer') {
+        if (
+          !bankName ||
+          !accountNumber ||
+          !branchCode ||
+          !accountType ||
+          !accountHolder
+        ) {
+          toast({
+            title: 'Missing information',
+            description: 'Please fill in all banking details',
+            variant: 'destructive',
+          });
+          return;
+        }
+      } else if (paymentMethod === 'atm_voucher') {
+        if (!cellphoneNumber) {
+          toast({
+            title: 'Missing information',
+            description: 'Please provide your cellphone number',
+            variant: 'destructive',
+          });
+          return;
+        }
+      }
+
+      const paymentData = {
+        user_id: currentUserId,
+        payment_method: paymentMethod,
+        bank_name: paymentMethod === 'bank_transfer' ? bankName : null,
+        account_number:
+          paymentMethod === 'bank_transfer' ? accountNumber : null,
+        branch_code: paymentMethod === 'bank_transfer' ? branchCode : null,
+        account_type: paymentMethod === 'bank_transfer' ? accountType : null,
+        account_holder:
+          paymentMethod === 'bank_transfer' ? accountHolder : null,
+        cellphone_number:
+          paymentMethod === 'atm_voucher' ? cellphoneNumber : null,
+      };
+
+      let operation;
+      if (paymentDetails?.id) {
+        // Update existing payment details
+        operation = supabase
+          .from('payment_details')
+          .update(paymentData)
+          .eq('id', paymentDetails.id);
+      } else {
+        // Insert new payment details
+        operation = supabase.from('payment_details').insert([paymentData]);
+      }
+
+      const { error } = await operation;
+      if (error) throw error;
+
+      // If a post is selected, update its payment details status
+      if (selectedPostId) {
+        const { error: postError } = await supabase
+          .from('blog_posts')
+          .update({ is_payment_details_submitted: true })
+          .eq('id', selectedPostId);
+
+        if (postError) throw postError;
+
+        // Update local state
+        setPosts(
+          posts.map((post) =>
+            post.id === selectedPostId
+              ? {
+                  ...post,
+                  is_payment_details_submitted: true,
+                }
+              : post
+          )
+        );
+      }
+
+      toast({
+        title: 'Payment details saved',
+        description: 'Your payment details have been successfully saved',
+        variant: 'default',
+      });
+
+      setPaymentDetailsDialogOpen(false);
+    } catch (error: any) {
+      console.error('Error saving payment details:', error);
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  }
+
   function handleSort(field: string) {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -296,6 +495,19 @@ export default function BlogAdminPage() {
       setSortField(field);
       setSortDirection('desc');
     }
+  }
+
+  function handleAddPaymentDetails(postId: string, authorId: string) {
+    setSelectedPostId(postId);
+    setSelectedPostAuthorId(authorId);
+    fetchPaymentDetails(authorId);
+    setPaymentDetailsDialogOpen(true);
+  }
+
+  function handleViewPaymentDetails(authorId: string) {
+    setSelectedPostAuthorId(authorId);
+    fetchPaymentDetails(authorId);
+    setViewPaymentDetailsDialogOpen(true);
   }
 
   const filteredPosts = posts.filter((post) => {
@@ -518,13 +730,14 @@ export default function BlogAdminPage() {
                             <ArrowUpDown className='h-3 w-3' />
                           </button>
                         </TableHead>
+                        <TableHead>Payment Details</TableHead>
                         <TableHead className='text-right'>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {loading ? (
                         <TableRow>
-                          <TableCell colSpan={7} className='h-24 text-center'>
+                          <TableCell colSpan={8} className='h-24 text-center'>
                             <div className='flex justify-center'>
                               <div className='animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary'></div>
                             </div>
@@ -535,7 +748,7 @@ export default function BlogAdminPage() {
                         </TableRow>
                       ) : filteredPosts.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={7} className='h-24 text-center'>
+                          <TableCell colSpan={8} className='h-24 text-center'>
                             <div className='flex justify-center'>
                               <AlertCircle className='h-6 w-6 text-muted-foreground' />
                             </div>
@@ -643,6 +856,58 @@ export default function BlogAdminPage() {
                                   {format(
                                     new Date(post.payment_date),
                                     'MMM dd, yyyy'
+                                  )}
+                                </div>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {post.is_payment_details_submitted ? (
+                                <div className='flex flex-col gap-1'>
+                                  <Badge
+                                    variant='outline'
+                                    className='border-green-500 text-green-500 flex items-center gap-1 w-fit'
+                                  >
+                                    <CheckCircle2 className='h-3 w-3' />
+                                    Details Submitted
+                                  </Badge>
+                                  {isAdmin && (
+                                    <Button
+                                      variant='outline'
+                                      size='sm'
+                                      className='mt-1'
+                                      onClick={() =>
+                                        handleViewPaymentDetails(post.author_id)
+                                      }
+                                    >
+                                      <Eye className='h-3 w-3 mr-1' />
+                                      View Details
+                                    </Button>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className='flex flex-col gap-1'>
+                                  <Badge
+                                    variant='outline'
+                                    className='border-amber-500 text-amber-500 flex items-center gap-1 w-fit'
+                                  >
+                                    <AlertTriangle className='h-3 w-3' />
+                                    No Details
+                                  </Badge>
+                                  {currentUserId === post.author_id && (
+                                    <Button
+                                      variant='outline'
+                                      size='sm'
+                                      className='mt-1'
+                                      onClick={() =>
+                                        handleAddPaymentDetails(
+                                          post.id,
+                                          post.author_id
+                                        )
+                                      }
+                                    >
+                                      <CreditCard className='h-3 w-3 mr-1' />
+                                      Add Details
+                                    </Button>
                                   )}
                                 </div>
                               )}
@@ -838,6 +1103,219 @@ export default function BlogAdminPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Payment Details Dialog */}
+      <Dialog
+        open={paymentDetailsDialogOpen}
+        onOpenChange={setPaymentDetailsDialogOpen}
+      >
+        <DialogContent className='sm:max-w-[500px]'>
+          <DialogHeader>
+            <DialogTitle>Payment Details</DialogTitle>
+            <DialogDescription>
+              Please provide your payment details. This information will be used
+              to process payments for your blog posts.
+            </DialogDescription>
+          </DialogHeader>
+          <div className='py-4'>
+            <div className='mb-4'>
+              <Label
+                htmlFor='payment-method'
+                className='text-base font-medium mb-2 block'
+              >
+                Payment Method
+              </Label>
+              <RadioGroup
+                value={paymentMethod}
+                onValueChange={(value) =>
+                  setPaymentMethod(value as 'bank_transfer' | 'atm_voucher')
+                }
+                className='flex flex-col space-y-2'
+              >
+                <div className='flex items-center space-x-2'>
+                  <RadioGroupItem value='bank_transfer' id='bank_transfer' />
+                  <Label htmlFor='bank_transfer' className='flex items-center'>
+                    <BankIcon className='mr-2 h-4 w-4' />
+                    Bank Transfer
+                  </Label>
+                </div>
+                <div className='flex items-center space-x-2'>
+                  <RadioGroupItem value='atm_voucher' id='atm_voucher' />
+                  <Label htmlFor='atm_voucher' className='flex items-center'>
+                    <Phone className='mr-2 h-4 w-4' />
+                    ATM Voucher
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <Tabs value={paymentMethod} className='w-full'>
+              <TabsContent value='bank_transfer' className='space-y-4 mt-4'>
+                <div className='grid grid-cols-2 gap-4'>
+                  <div className='col-span-2'>
+                    <Label htmlFor='bank-name'>Bank Name</Label>
+                    <Input
+                      id='bank-name'
+                      value={bankName}
+                      onChange={(e) => setBankName(e.target.value)}
+                      placeholder='e.g., Standard Bank, FNB, Absa'
+                    />
+                  </div>
+                  <div className='col-span-2'>
+                    <Label htmlFor='account-holder'>Account Holder Name</Label>
+                    <Input
+                      id='account-holder'
+                      value={accountHolder}
+                      onChange={(e) => setAccountHolder(e.target.value)}
+                      placeholder='Full name as it appears on your account'
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor='account-number'>Account Number</Label>
+                    <Input
+                      id='account-number'
+                      value={accountNumber}
+                      onChange={(e) => setAccountNumber(e.target.value)}
+                      placeholder='Your account number'
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor='branch-code'>Branch Code</Label>
+                    <Input
+                      id='branch-code'
+                      value={branchCode}
+                      onChange={(e) => setBranchCode(e.target.value)}
+                      placeholder='e.g., 051001'
+                    />
+                  </div>
+                  <div className='col-span-2'>
+                    <Label htmlFor='account-type'>Account Type</Label>
+                    <Select value={accountType} onValueChange={setAccountType}>
+                      <SelectTrigger>
+                        <SelectValue placeholder='Select account type' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='savings'>Savings</SelectItem>
+                        <SelectItem value='cheque'>Cheque / Current</SelectItem>
+                        <SelectItem value='transmission'>
+                          Transmission
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </TabsContent>
+              <TabsContent value='atm_voucher' className='space-y-4 mt-4'>
+                <div>
+                  <Label htmlFor='cellphone-number'>Cellphone Number</Label>
+                  <Input
+                    id='cellphone-number'
+                    value={cellphoneNumber}
+                    onChange={(e) => setCellphoneNumber(e.target.value)}
+                    placeholder='e.g., 0721234567'
+                  />
+                  <p className='text-sm text-muted-foreground mt-2'>
+                    This number will receive the ATM voucher code via SMS.
+                  </p>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+          <DialogFooter>
+            <Button
+              variant='outline'
+              onClick={() => setPaymentDetailsDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={savePaymentDetails}>Save Details</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Payment Details Dialog (Admin Only) */}
+      <Dialog
+        open={viewPaymentDetailsDialogOpen}
+        onOpenChange={setViewPaymentDetailsDialogOpen}
+      >
+        <DialogContent className='sm:max-w-[500px]'>
+          <DialogHeader>
+            <DialogTitle>Payment Details</DialogTitle>
+            <DialogDescription>
+              Payment details submitted by the user.
+            </DialogDescription>
+          </DialogHeader>
+          <div className='py-4'>
+            {paymentDetails ? (
+              <div className='space-y-4'>
+                <div className='flex items-center'>
+                  <Badge className='bg-blue-500'>
+                    {paymentDetails.payment_method === 'bank_transfer'
+                      ? 'Bank Transfer'
+                      : 'ATM Voucher'}
+                  </Badge>
+                  <span className='text-sm text-muted-foreground ml-2'>
+                    Last updated:{' '}
+                    {format(
+                      new Date(paymentDetails.updated_at),
+                      'MMM dd, yyyy'
+                    )}
+                  </span>
+                </div>
+
+                {paymentDetails.payment_method === 'bank_transfer' ? (
+                  <div className='space-y-3 border rounded-md p-4'>
+                    <div>
+                      <p className='text-sm font-medium'>Bank Name</p>
+                      <p>{paymentDetails.bank_name}</p>
+                    </div>
+                    <div>
+                      <p className='text-sm font-medium'>Account Holder</p>
+                      <p>{paymentDetails.account_holder}</p>
+                    </div>
+                    <div className='grid grid-cols-2 gap-4'>
+                      <div>
+                        <p className='text-sm font-medium'>Account Number</p>
+                        <p>{paymentDetails.account_number}</p>
+                      </div>
+                      <div>
+                        <p className='text-sm font-medium'>Branch Code</p>
+                        <p>{paymentDetails.branch_code}</p>
+                      </div>
+                    </div>
+                    <div>
+                      <p className='text-sm font-medium'>Account Type</p>
+                      <p className='capitalize'>
+                        {paymentDetails.account_type}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className='space-y-3 border rounded-md p-4'>
+                    <div>
+                      <p className='text-sm font-medium'>Cellphone Number</p>
+                      <p>{paymentDetails.cellphone_number}</p>
+                    </div>
+                    <p className='text-sm text-muted-foreground'>
+                      ATM voucher will be sent to this number via SMS.
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className='text-center py-4'>
+                <AlertCircle className='h-8 w-8 text-amber-500 mx-auto mb-2' />
+                <p>No payment details have been submitted by this user.</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setViewPaymentDetailsDialogOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
