@@ -93,7 +93,8 @@ html {
 }
 
 @keyframes bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -257,4 +258,22 @@ html {
 
 .skip-to-content:focus {
   top: 0;
+}
+
+.yoco-payment-container {
+  z-index: 100000 !important;
+}
+
+/* Lower the z-index of our own dialog when Yoco is active */
+[data-radix-popper-content-wrapper] {
+  z-index: 50 !important;
+}
+
+/* Ensure the Yoco overlay is above our dialog */
+.yoco-payment-overlay {
+  z-index: 99999 !important;
+}
+.yc-auto-shown-popup {
+  position: absolute;
+  z-index: 99999 !important;
 }
