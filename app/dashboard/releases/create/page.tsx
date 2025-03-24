@@ -151,7 +151,6 @@ export default function CreateReleasePage() {
 
         // Populate the form with the unpaid release data
         setNewRelease({
-          id: unpaidRelease.id,
           title: unpaidRelease.title || '',
           description: unpaidRelease.description || '',
           record_label_id: unpaidRelease.record_label_id || '',
@@ -345,6 +344,7 @@ export default function CreateReleasePage() {
 
   // Update the handleCreateRelease function to handle updating an existing release
   const handleCreateRelease = async (e: React.FormEvent) => {
+    console.log('creating new release', newRelease);
     e.preventDefault();
 
     // If release is already created, just show payment dialog
@@ -439,7 +439,14 @@ export default function CreateReleasePage() {
         (song): song is Song => song !== null
       );
       setCreationStatus('Saving to database...');
-
+      console.log({
+        ...newRelease,
+        record_owner: user.id,
+        cover_image_url: updatedCoverImageUrl,
+        tracks,
+        price: tracks.reduce((total, track) => total + (track.price || 0), 0),
+        is_paid: false, // Initially set to false until payment is made
+      });
       // Create release with is_paid set to false initially
       const { data, error } = await supabase
         .from('releases')
