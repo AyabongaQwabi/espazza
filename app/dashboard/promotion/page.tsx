@@ -33,6 +33,7 @@ import { format } from 'date-fns';
 import { ArtistMultiSelect } from './artists';
 import { SongPreview } from '@/components/SongPreview';
 import ProgressBar from '@/components/ProgressBar';
+import Link from 'next/link';
 
 interface Song {
   id: string;
@@ -558,11 +559,11 @@ export default function ReleasesManagement() {
             else setIsDialogOpen(true);
           }}
         >
-          <DialogTrigger asChild>
+          <Link href='/dashboard/releases/create'>
             <Button className='w-full sm:w-auto'>
               <Plus className='mr-2 h-4 w-4' /> Create New Release
             </Button>
-          </DialogTrigger>
+          </Link>
           <DialogContent className='max-w-3xl w-full max-h-[90vh] overflow-y-auto'>
             <DialogHeader>
               <DialogTitle>
