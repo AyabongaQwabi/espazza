@@ -49,7 +49,6 @@ export default function CreateReleasePage() {
     [key: string]: number;
   }>({});
   const [newRelease, setNewRelease] = useState({
-    id: short().generate(),
     title: '',
     description: '',
     record_label_id: '',
