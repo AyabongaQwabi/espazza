@@ -18,12 +18,15 @@ import {
   ShoppingCart,
   BarChart3,
 } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useSupabase } from '@/components/providers/supabase-provider';
 import { motion } from 'framer-motion';
 import { IconButton } from '@/components/ui/icon-button';
 import { HoverIcon } from '@/components/ui/hover-icon';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar } from '@/components/ui/avatar';
 
 function Navigation({ className = '' }: { className?: string }) {
   return (
@@ -85,7 +88,7 @@ function Navigation({ className = '' }: { className?: string }) {
 
 export function SiteHeader() {
   const { user, loading } = useSupabase();
-
+  const router = useRouter();
   return (
     <motion.header
       className='fixed w-full z-50 bg-zinc-900/90 backdrop-blur-sm border-b border-zinc-800'
@@ -117,6 +120,16 @@ export function SiteHeader() {
                     asChild
                   >
                     Dashboard
+                  </IconButton>
+                </Link>
+                <Link
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    router.push('/login');
+                  }}
+                >
+                  <IconButton className='text-red-500 hover:text-red-400 hover:bg-red-500/10'>
+                    Logout
                   </IconButton>
                 </Link>
               </motion.div>

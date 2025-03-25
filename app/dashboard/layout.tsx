@@ -188,6 +188,9 @@ export default function DashboardLayout({
       ) {
         router.push('/user-type-selection');
       }
+      if (!profileData && pathname !== '/user-type-selection') {
+        router.push('/user-type-selection');
+      }
     }
     checkAuth();
   }, [router, pathname]);
