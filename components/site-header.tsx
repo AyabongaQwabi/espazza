@@ -122,16 +122,21 @@ export function SiteHeader() {
                     Dashboard
                   </IconButton>
                 </Link>
-                <Link
+                <a
                   onClick={async () => {
                     await supabase.auth.signOut();
                     router.push('/login');
                   }}
                 >
-                  <IconButton className='text-red-500 hover:text-red-400 hover:bg-red-500/10'>
+                  <IconButton
+                    Icon={LayoutDashboardIcon}
+                    label='Logout'
+                    variant='default'
+                    className='ml-2'
+                  >
                     Logout
                   </IconButton>
-                </Link>
+                </a>
               </motion.div>
             ) : (
               <>
