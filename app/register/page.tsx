@@ -86,9 +86,11 @@ export default function Register() {
         throw new Error('Failed to create user account');
       }
 
+     
+
       // Wait for the session to be established
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
+     
       // Sign in the user to get a fresh session
       const { data: signInData, error: signInError } =
         await supabase.auth.signInWithPassword({
@@ -113,6 +115,9 @@ export default function Register() {
             id: signUpData.user.id,
             username,
             email: signUpData.user.email,
+            town_id:"ab4ac681-5596-438a-82bc-52e06e934f15",
+            distributor_id:"e8aa2a31-a488-46a7-994f-0c328de92fa3",
+            record_label_id:"1421499d-042a-4085-9e08-543d65070cbc",
           },
         ])
         .select()
@@ -128,7 +133,7 @@ export default function Register() {
       }
 
       // Redirect to user type selection page after successful registration
-      router.push('/user-type-selection');
+     router.push('/user-type-selection');
     } catch (err: any) {
       console.error('Registration error:', err);
 
