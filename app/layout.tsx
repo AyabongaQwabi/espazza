@@ -13,6 +13,7 @@ import AnimationWrapper from '@/components/AnimationWrapper';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/next';
+import Banner from '@/components/Banner';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -170,6 +171,20 @@ export default function RootLayout({
               <div className='flex flex-col min-h-screen bg-gradient-to-br from-zinc-900 to-zinc-800'>
                 <SiteHeader />
                 <main id='main-content' className='flex-1 pb-16'>
+                  <div className='hidden lg:block'>
+                    <Banner
+                      adKey='a41124e6da244c907bdb18fdcb259abb'
+                      height={90}
+                      weight={728}
+                    />
+                  </div>
+                  <div className='lg:hidden'>
+                    <Banner
+                      adKey='cc0e176d77097568fccfc3da0c7d922f'
+                      height={50}
+                      weight={320}
+                    />
+                  </div>
                   <AnimationWrapper>{children}</AnimationWrapper>
                   <Analytics />
                 </main>
