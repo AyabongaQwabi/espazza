@@ -612,7 +612,7 @@ export default function ReleasesPage() {
             >
               Pay with Card (Yoco)
             </Button>
-            {selectedRelease?.record_owner.payment_credentials.ikhoka && (
+            {/* {selectedRelease?.record_owner.payment_credentials.ikhoka && (
               <Button
                 onClick={() => handlePaymentMethodSelection('ikhoka')}
                 className='bg-red-500 hover:bg-red-600 text-white'
@@ -635,7 +635,7 @@ export default function ReleasesPage() {
               >
                 Pay with PayFast
               </Button>
-            )}
+            )} */}
           </div>
         </DialogContent>
       </Dialog>
