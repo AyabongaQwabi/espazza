@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import {
   Card,
@@ -27,60 +27,97 @@ function SuccessPage() {
   const [purchaseDetails, setPurchaseDetails] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [tracks, setTracks] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
+  const router = useRouter();
   const transactionId = searchParams.get('transaction_id');
   const supabase = createClientComponentClient();
 
   useEffect(() => {
-    async function fetchPurchaseDetails() {
-      if (!transactionId) return;
+    async function updatePurchaseAndFetchDetails() {
+      if (!transactionId) {
+        setError('No transaction ID provided');
+        setLoading(false);
+        return;
+      }
 
-      const { data, error } = await supabase
-        .from('purchases')
-        .select('*, release:releases (*)')
-        .eq('transaction_id', transactionId)
-        .single();
-
-      if (error) {
-        console.error('Error fetching purchase details:', error);
-      } else {
-        setPurchaseDetails(data);
-
-        // Fetch the release tracks
-        if (data.release && data.release.tracks) {
-          setTracks(data.release.tracks);
-        }
-
-        // Update the purchase status to 'complete'
+      try {
+        // First, update the purchase status to completed
         const { error: updateError } = await supabase
           .from('purchases')
-          .update({ status: 'complete' })
+          .update({ status: 'completed' })
           .eq('transaction_id', transactionId);
 
         if (updateError) {
           console.error('Error updating purchase status:', updateError);
+          setError('Failed to update purchase status');
         }
+
+        // Get the purchase record with release details
+        const { data: purchaseData, error: purchaseError } = await supabase
+          .from('purchases')
+          .select('*, release:releases (*, profiles:record_owner(*))')
+          .eq('transaction_id', transactionId)
+          .single();
+
+        if (purchaseError || !purchaseData) {
+          console.error('Error fetching purchase details:', purchaseError);
+          setError('Purchase details not found');
+          setLoading(false);
+          return;
+        }
+
+        // Update the release payment status if this is a release purchase
+        if (
+          purchaseData.purchase_type === 'release' &&
+          purchaseData.release_id
+        ) {
+          const { error: releaseError } = await supabase
+            .from('releases')
+            .update({
+              is_paid: true,
+              payment_method: purchaseData.payment_method || 'yoco',
+              payment_date: new Date().toISOString(),
+              transaction_id: transactionId,
+            })
+            .eq('id', purchaseData.release_id);
+
+          if (releaseError) {
+            console.error('Error updating release status:', releaseError);
+          }
+        }
+
+        setPurchaseDetails(purchaseData);
+
+        // Fetch the release tracks
+        if (purchaseData.release && purchaseData.release.tracks) {
+          setTracks(purchaseData.release.tracks);
+        }
+      } catch (err) {
+        console.error('Error processing purchase:', err);
+        setError('An unexpected error occurred');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
 
-    fetchPurchaseDetails();
+    updatePurchaseAndFetchDetails();
   }, [transactionId, supabase]);
 
   if (loading) {
     return (
       <div className='flex flex-col items-center justify-center min-h-[60vh]'>
         <Loader2 className='h-12 w-12 animate-spin text-primary mb-4' />
-        <p className='text-muted-foreground'>Loading purchase details...</p>
+        <p className='text-muted-foreground'>Processing your purchase...</p>
       </div>
     );
   }
 
-  if (!purchaseDetails) {
+  if (error || !purchaseDetails) {
     return (
       <div className='flex flex-col items-center justify-center min-h-[60vh]'>
         <p className='text-xl text-muted-foreground'>
-          Purchase details not found.
+          {error || 'Purchase details not found.'}
         </p>
         <Button className='mt-4' asChild>
           <Link href='/releases'>Back to Releases</Link>
@@ -127,16 +164,24 @@ function SuccessPage() {
             </div>
             <div className='flex justify-between'>
               <span className='font-medium'>Release:</span>
-              <span>{purchaseDetails.release.title}</span>
+              <span>{purchaseDetails.release?.title || 'N/A'}</span>
             </div>
             <div className='flex justify-between'>
               <span className='font-medium'>Amount:</span>
-              <span>R{purchaseDetails.amount.toFixed(2)}</span>
+              <span>R{purchaseDetails.amount?.toFixed(2) || '0.00'}</span>
             </div>
             <div className='flex justify-between'>
               <span className='font-medium'>Purchase Date:</span>
               <span>
-                {new Date(purchaseDetails.created_at).toLocaleString()}
+                {new Date(
+                  purchaseDetails.purchase_date || purchaseDetails.created_at
+                ).toLocaleString()}
+              </span>
+            </div>
+            <div className='flex justify-between'>
+              <span className='font-medium'>Payment Method:</span>
+              <span className='capitalize'>
+                {purchaseDetails.payment_method || 'Card'}
               </span>
             </div>
           </div>
@@ -157,10 +202,10 @@ function SuccessPage() {
                   >
                     <SongPreview
                       url={track.url}
-                      coverArt={purchaseDetails.release.cover_image_url}
+                      coverArt={purchaseDetails.release?.cover_image_url}
                       title={track.title}
                       artist={
-                        purchaseDetails.release.profiles?.artist_name ||
+                        purchaseDetails.release?.profiles?.artist_name ||
                         'Artist'
                       }
                     />

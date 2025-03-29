@@ -547,6 +547,52 @@ export default function ReleasesPage() {
     }
   };
 
+  async function handleCardPayment(release: Release | null) {
+    if (!release || !currentUser) {
+      toast({
+        title: 'Warning',
+        description: 'Invalid release or user data. Please log in again.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setPurchaseLoading(true);
+    const totalPrice = calculateReleasePrice(release.tracks) + SURCHARGE;
+    const transactionId = short().toUUID(short.generate());
+
+    try {
+      // Create a checkout session with Yoco
+      const response = await axios.post('/api/yoco-payment', {
+        amountInCents: Math.round(totalPrice * 100), // Convert to cents
+        currency: 'ZAR',
+        releaseId: release.id,
+        userId: currentUser?.id,
+        transactionId,
+        description: `Purchase of ${release.title} (includes R${SURCHARGE} service fee)`,
+      });
+
+      if (response.data.redirectUrl) {
+        // Close the payment modal
+        setPaymentModalOpen(false);
+
+        // Redirect to Yoco's hosted checkout page
+        window.location.href = response.data.redirectUrl;
+      } else {
+        throw new Error('No redirect URL received from payment provider');
+      }
+    } catch (error: any) {
+      console.error('Error initializing payment:', error);
+      toast({
+        title: 'Payment Error',
+        description:
+          error.response?.data?.error || 'Could not initialize payment system',
+        variant: 'destructive',
+      });
+      setPurchaseLoading(false);
+    }
+  }
+
   return (
     <div className='flex flex-col min-h-screen bg-gray-900 text-white'>
       <Dialog open={paymentModalOpen} onOpenChange={setPaymentModalOpen}>
@@ -560,6 +606,12 @@ export default function ReleasesPage() {
             </DialogDescription>
           </DialogHeader>
           <div className='flex flex-col space-y-4 mt-4'>
+            <Button
+              onClick={() => handleCardPayment(selectedRelease)}
+              className='bg-primary hover:bg-primary/90 text-white'
+            >
+              Pay with Card (Yoco)
+            </Button>
             {selectedRelease?.record_owner.payment_credentials.ikhoka && (
               <Button
                 onClick={() => handlePaymentMethodSelection('ikhoka')}
@@ -1033,6 +1085,7 @@ export default function ReleasesPage() {
                                   <Image
                                     src={
                                       release.cover_image_url ||
+                                      '/placeholder.svg' ||
                                       '/placeholder.svg'
                                     }
                                     alt={release.title}
@@ -1280,4 +1333,12 @@ export default function ReleasesPage() {
       </Dialog>
     </div>
   );
+}
+
+// Add the global declaration for YocoSDK at the end of the file
+// Add this to the global.d.ts file or declare it here
+declare global {
+  interface Window {
+    YocoSDK: any;
+  }
 }

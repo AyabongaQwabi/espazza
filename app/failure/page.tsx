@@ -1,45 +1,49 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import { Loader2 } from 'lucide-react';
-import { Suspense } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { AlertTriangle } from 'lucide-react';
 
-function FailurePage() {
-  const searchParams = useSearchParams();
-  const errorMessage = searchParams.get('error') || 'An unknown error occurred';
+export default function PaymentFailurePage() {
+  const router = useRouter();
 
   return (
-    <div className='container mx-auto px-4 py-8'>
-      <Card className='max-w-lg mx-auto'>
+    <div className='container mx-auto py-12 px-4'>
+      <Card className='max-w-md mx-auto'>
         <CardHeader>
-          <CardTitle className='text-2xl text-center text-red-600'>
+          <CardTitle className='flex items-center text-red-600'>
+            <AlertTriangle className='h-6 w-6 mr-2' />
             Payment Failed
           </CardTitle>
+          <CardDescription>We couldn't process your payment.</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className='text-center mb-4'>
-            We're sorry, but your payment could not be processed.
-          </p>
-          <p className='text-center mb-6'>Error: {errorMessage}</p>
-          <div className='flex justify-center space-x-4'>
-            <Link href='/releases'>
-              <Button variant='outline'>Back to Releases</Button>
-            </Link>
-            <Button>Try Again</Button>
+          <div className='text-center py-4'>
+            <p className='mb-2'>There was an issue processing your payment.</p>
+            <p className='text-sm text-muted-foreground'>
+              This could be due to insufficient funds, incorrect card details,
+              or a temporary issue with the payment provider.
+            </p>
           </div>
         </CardContent>
+        <CardFooter className='flex justify-center gap-4'>
+          <Button
+            variant='outline'
+            onClick={() => router.push('/dashboard/releases')}
+          >
+            My Releases
+          </Button>
+          <Button onClick={() => router.push('/releases')}>Try Again</Button>
+        </CardFooter>
       </Card>
     </div>
   );
 }
-
-export default () => {
-  return (
-    <Suspense fallback={<Loader2 className='h-12 w-12 text-white' />}>
-      <FailurePage />
-    </Suspense>
-  );
-};
