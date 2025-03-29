@@ -175,7 +175,7 @@ export default function RootLayout({
                 <SiteHeader />
                 <main id='main-content' className='flex-1 pb-16'>
                   {/* Desktop Ad */}
-                  <div className='hidden lg:block mt-20'>
+                  <div className='hidden lg:block mt-20 -mb-12'>
                     <div className='mt-4'>
                       <AdBanner
                         adKey='c1f9c7a0bc454e5477f0b3c1f4a8b06f'
