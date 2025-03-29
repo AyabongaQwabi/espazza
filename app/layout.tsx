@@ -186,6 +186,12 @@ export default function RootLayout({
                       type='text/javascript'
                       src='//www.highperformanceformat.com/a41124e6da244c907bdb18fdcb259abb/invoke.js'
                     ></script>
+                    <script
+                      async='async'
+                      dataCfasync='false'
+                      src='//pl26249233.effectiveratecpm.com/c1f9c7a0bc454e5477f0b3c1f4a8b06f/invoke.js'
+                    ></script>
+                    <div id='container-c1f9c7a0bc454e5477f0b3c1f4a8b06f'></div>
                   </div>
                   <div className='lg:hidden'>
                     <script
@@ -202,6 +208,12 @@ export default function RootLayout({
                       type='text/javascript'
                       src='//www.highperformanceformat.com/cc0e176d77097568fccfc3da0c7d922f/invoke.js'
                     ></script>
+                    <script
+                      async='async'
+                      dataCfasync='false'
+                      src='//pl26249233.effectiveratecpm.com/c1f9c7a0bc454e5477f0b3c1f4a8b06f/invoke.js'
+                    ></script>
+                    <div id='container-c1f9c7a0bc454e5477f0b3c1f4a8b06f'></div>
                   </div>
                   <AnimationWrapper>{children}</AnimationWrapper>
                   <Analytics />
