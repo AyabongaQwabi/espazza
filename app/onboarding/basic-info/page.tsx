@@ -36,11 +36,8 @@ import {
 import { Label } from '@/components/ui/label';
 
 const formSchema = z.object({
-  first_name: z.string().min(2, {
+  full_name: z.string().min(2, {
     message: 'First name must be at least 2 characters.',
-  }),
-  last_name: z.string().min(2, {
-    message: 'Last name must be at least 2 characters.',
   }),
   artist_name: z.string().min(2, {
     message: 'Artist name must be at least 2 characters.',
@@ -48,7 +45,7 @@ const formSchema = z.object({
   town_id: z.string().uuid().or(z.literal('')),
   record_label_id: z.string().uuid().or(z.literal('')),
   distributor_id: z.string().uuid(),
-  bio: z.string().optional(),
+  artist_bio: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -87,21 +84,24 @@ export default function BasicInfoPage() {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      first_name: '',
-      last_name: '',
+      full_name: '',
       artist_name: '',
       town_id: '',
       record_label_id: '',
       distributor_id: '',
-      bio: '',
+      artist_bio: '',
     },
   });
 
-  const [formData, setFormData] = useState(form.getValues());
+  // Create a separate state for the custom select fields
+  const [customFields, setCustomFields] = useState({
+    town_id: '',
+    record_label_id: '',
+    distributor_id: '',
+  });
 
-  useEffect(() => {
-    setFormData(form.getValues());
-  }, [form.watch()]);
+  // Remove the problematic useEffect that was causing the infinite loop
+  // Instead, we'll sync the form values with our custom fields when needed
 
   useEffect(() => {
     loadData();
@@ -146,7 +146,15 @@ export default function BasicInfoPage() {
           distributor_id: profileData.distributor_id || '',
         };
 
-        setFormData(updatedProfileData);
+        // Update form values
+        form.reset(updatedProfileData);
+
+        // Update custom fields
+        setCustomFields({
+          town_id: updatedProfileData.town_id || '',
+          record_label_id: updatedProfileData.record_label_id || '',
+          distributor_id: updatedProfileData.distributor_id || '',
+        });
       }
     }
   }
@@ -157,8 +165,19 @@ export default function BasicInfoPage() {
     try {
       const { data, error } = await supabase
         .from('south_african_towns')
-        .insert([{ name: newTown, province: newTownProvince }]);
+        .insert([{ name: newTown, province: newTownProvince }])
+        .select();
+
       if (error) throw error;
+
+      if (data && data.length > 0) {
+        // Select the newly created town
+        setCustomFields({
+          ...customFields,
+          town_id: data[0].id,
+        });
+      }
+
       setNewTown('');
       setNewTownProvince('');
       loadData();
@@ -175,8 +194,19 @@ export default function BasicInfoPage() {
     try {
       const { data, error } = await supabase
         .from('record_labels')
-        .insert([{ name: newLabel }]);
+        .insert([{ name: newLabel }])
+        .select();
+
       if (error) throw error;
+
+      if (data && data.length > 0) {
+        // Select the newly created label
+        setCustomFields({
+          ...customFields,
+          record_label_id: data[0].id,
+        });
+      }
+
       setNewLabel('');
       loadData();
     } catch (err: any) {
@@ -192,8 +222,19 @@ export default function BasicInfoPage() {
     try {
       const { data, error } = await supabase
         .from('distributors')
-        .insert([{ name: newDistributor }]);
+        .insert([{ name: newDistributor }])
+        .select();
+
       if (error) throw error;
+
+      if (data && data.length > 0) {
+        // Select the newly created distributor
+        setCustomFields({
+          ...customFields,
+          distributor_id: data[0].id,
+        });
+      }
+
       setNewDistributor('');
       loadData();
     } catch (err: any) {
@@ -209,6 +250,17 @@ export default function BasicInfoPage() {
     setError('');
 
     try {
+      // Get form values
+      const formValues = form.getValues();
+
+      // Combine form values with custom fields
+      const formData = {
+        ...formValues,
+        town_id: customFields.town_id,
+        record_label_id: customFields.record_label_id,
+        distributor_id: customFields.distributor_id,
+      };
+
       // Validate required UUID fields
       if (!formData.town_id) {
         throw new Error(
@@ -298,25 +350,12 @@ export default function BasicInfoPage() {
         <form onSubmit={handleSubmit} className='space-y-8'>
           <FormField
             control={form.control}
-            name='first_name'
+            name='full_name'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>First Name</FormLabel>
+                <FormLabel>Full Name</FormLabel>
                 <FormControl>
-                  <Input placeholder='First Name' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name='last_name'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Last Name</FormLabel>
-                <FormControl>
-                  <Input placeholder='Last Name' {...field} />
+                  <Input placeholder='Full name' {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -342,15 +381,15 @@ export default function BasicInfoPage() {
             </Label>
             <div className='flex gap-2'>
               <Select
-                value={formData.town_id}
+                value={customFields.town_id}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, town_id: value })
+                  setCustomFields({ ...customFields, town_id: value })
                 }
                 required
               >
                 <SelectTrigger
                   className={`flex-1 ${
-                    !formData.town_id ? 'border-red-500' : ''
+                    !customFields.town_id ? 'border-red-500' : ''
                   }`}
                 >
                   <SelectValue placeholder='Select town' />
@@ -410,7 +449,7 @@ export default function BasicInfoPage() {
                 </DialogContent>
               </Dialog>
             </div>
-            {!formData.town_id && (
+            {!customFields.town_id && (
               <p className='text-red-500 text-xs mt-1'>
                 Town selection is required
               </p>
@@ -423,15 +462,15 @@ export default function BasicInfoPage() {
             </Label>
             <div className='flex gap-2'>
               <Select
-                value={formData.record_label_id}
+                value={customFields.record_label_id}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, record_label_id: value })
+                  setCustomFields({ ...customFields, record_label_id: value })
                 }
                 required
               >
                 <SelectTrigger
                   className={`flex-1 ${
-                    !formData.record_label_id ? 'border-red-500' : ''
+                    !customFields.record_label_id ? 'border-red-500' : ''
                   }`}
                 >
                   <SelectValue placeholder='Select record label' />
@@ -470,7 +509,7 @@ export default function BasicInfoPage() {
                 </DialogContent>
               </Dialog>
             </div>
-            {!formData.record_label_id && (
+            {!customFields.record_label_id && (
               <p className='text-red-500 text-xs mt-1'>
                 Record label selection is required
               </p>
@@ -483,15 +522,15 @@ export default function BasicInfoPage() {
             </Label>
             <div className='flex gap-2'>
               <Select
-                value={formData.distributor_id}
+                value={customFields.distributor_id}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, distributor_id: value })
+                  setCustomFields({ ...customFields, distributor_id: value })
                 }
                 required
               >
                 <SelectTrigger
                   className={`flex-1 ${
-                    !formData.distributor_id ? 'border-red-500' : ''
+                    !customFields.distributor_id ? 'border-red-500' : ''
                   }`}
                 >
                   <SelectValue placeholder='Select distributor' />
@@ -532,7 +571,7 @@ export default function BasicInfoPage() {
                 </DialogContent>
               </Dialog>
             </div>
-            {!formData.distributor_id && (
+            {!customFields.distributor_id && (
               <p className='text-red-500 text-xs mt-1'>
                 Distributor selection is required
               </p>
@@ -541,7 +580,7 @@ export default function BasicInfoPage() {
 
           <FormField
             control={form.control}
-            name='bio'
+            name='artist_bio'
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Bio</FormLabel>
@@ -558,7 +597,7 @@ export default function BasicInfoPage() {
         </form>
       </Form>
       {error && (
-        <div className='bg-red-500/10 border border-red-500/50 rounded-lg p-4 animate-pulse'>
+        <div className='bg-red-500/10 border border-red-500/50 rounded-lg p-4 mt-4 animate-pulse'>
           <p className='text-red-500 font-medium'>{error}</p>
           {error.includes('invalid') && (
             <ul className='text-red-400 text-sm mt-2 list-disc list-inside'>

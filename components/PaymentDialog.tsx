@@ -112,6 +112,7 @@ export function PaymentDialog({
     try {
       const response = await axios.post('/api/coupons/validate', {
         couponCode: couponCode.trim(),
+        profileId: currentUser.id,
       });
 
       if (response.data.valid) {
@@ -143,6 +144,7 @@ export function PaymentDialog({
       const response = await axios.post('/api/coupons/redeem', {
         couponId: validCoupon.couponId,
         releaseId,
+        profileId: currentUser.id,
       });
 
       if (response.data.success) {

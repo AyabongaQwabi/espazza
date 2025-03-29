@@ -26,8 +26,8 @@ interface Song {
   title: string;
   cover_image_url: string;
   url: string;
-  featured_artists: object[];
-  producers: object[];
+  featured_artists: { id: string; artist_name: string }[];
+  producers: { id: string; artist_name: string }[];
   lyrics: string;
   price: number;
   preview_start: string;
@@ -96,8 +96,7 @@ export default function CreateReleasePage() {
           setDistributors(distributorsResponse.data);
         if (genresResponse.data) setGenres(genresResponse.data);
 
-        // Check for unpaid release
-        await checkUnpaidRelease();
+        // No longer checking for unpaid releases on load
       } catch (error) {
         console.error('Error loading initial data:', error);
         toast({
@@ -620,9 +619,9 @@ export default function CreateReleasePage() {
     return (
       <div className='flex flex-col items-center justify-center min-h-[60vh] p-4'>
         <Loader2 className='h-12 w-12 animate-spin text-primary mb-4' />
-        <h2 className='text-xl font-semibold mb-2'>Loading your release...</h2>
+        <h2 className='text-xl font-semibold mb-2'>Loading...</h2>
         <p className='text-muted-foreground'>
-          Please wait while we fetch your data
+          Please wait while we prepare your form
         </p>
       </div>
     );
@@ -650,7 +649,18 @@ export default function CreateReleasePage() {
         </div>
       </div>
 
-      <form onSubmit={handleCreateRelease} className='space-y-6 text-red-500'>
+      <div className='flex justify-end mb-4'>
+        <Button
+          variant='outline'
+          onClick={checkUnpaidRelease}
+          className='flex items-center gap-2'
+        >
+          <Loader2 className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          Check for Unpaid Releases
+        </Button>
+      </div>
+
+      <form onSubmit={handleCreateRelease} className='space-y-6'>
         <Card>
           <CardHeader>
             <CardTitle>Release Information</CardTitle>
@@ -803,20 +813,68 @@ export default function CreateReleasePage() {
             <div className='bg-gray-50 dark:bg-gray-900 rounded-lg p-6 space-y-4'>
               <h2 className='text-xl font-semibold mb-4'>Upload Tracks</h2>
 
+              <div className='flex flex-col space-y-2'>
+                <Label>Upload Track</Label>
+                <p className='text-xs text-gray-500 dark:text-gray-400 mb-2'>
+                  Upload high quality MP3 files for your release
+                </p>
+                <div className='flex items-center gap-4'>
+                  <Input
+                    type='file'
+                    accept='audio/*'
+                    onChange={(e) => handleFileSelect(e, 'release')}
+                    className='flex-1'
+                  />
+                  <Button
+                    type='button'
+                    onClick={(e) => {
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.accept = 'audio/*';
+                      input.multiple = true;
+                      input.onchange = (e) => {
+                        const files = e.target.files;
+                        if (files) {
+                          for (let i = 0; i < files.length; i++) {
+                            if (newReleaseSongs.length < 20) {
+                              const newFile = files[i];
+                              const newSong = {
+                                id: short.generate(),
+                                file: newFile,
+                                title: newFile.name.split('.')[0],
+                                cover_image_url: '',
+                                url: URL.createObjectURL(newFile),
+                                featured_artists: [],
+                                producers: [],
+                                lyrics: '',
+                                price: 0.99,
+                                preview_start: '00:30',
+                                release_date: new Date(),
+                                genre_id: '',
+                              };
+                              setReleaseSongs((prev) => [...prev, newSong]);
+                            }
+                          }
+                        }
+                      };
+                      input.click();
+                    }}
+                  >
+                    Upload Multiple
+                  </Button>
+                </div>
+              </div>
               <div className='space-y-4'>
-                <Label>Upload high quality release mp3s</Label>
-                <Input
-                  type='file'
-                  accept='audio/*'
-                  onChange={(e) => handleFileSelect(e, 'release')}
-                />
-                <div className='space-y-4'>
-                  {newReleaseSongs.map((song, index) => (
-                    <div
-                      key={`new-${song.id}`}
-                      className='flex flex-col bg-gray-100 dark:bg-gray-800 p-4 rounded-lg'
-                    >
-                      <div className='flex flex-col sm:flex-row items-center justify-between mb-2 space-y-2 sm:space-y-0'>
+                {newReleaseSongs.map((song, index) => (
+                  <div
+                    key={`new-${song.id}`}
+                    className='flex flex-col bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-6 border border-gray-200 dark:border-gray-700'
+                  >
+                    <div className='flex flex-col sm:flex-row items-center justify-between mb-4 space-y-2 sm:space-y-0'>
+                      <div className='flex items-center gap-2'>
+                        <span className='bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium'>
+                          {index + 1}
+                        </span>
                         <SongPreview
                           url={song.url}
                           title={song.title}
@@ -827,48 +885,59 @@ export default function CreateReleasePage() {
                             '/placeholder.svg'
                           }
                         />
-                        <Button
-                          variant='destructive'
-                          size='sm'
-                          onClick={(e) => {
-                            e.preventDefault();
-                            removeFile(index);
-                          }}
-                        >
-                          <X className='h-4 w-4' />
-                        </Button>
                       </div>
-                      <label className='text-sm font-medium my-2 mt-4'>
-                        Title
-                      </label>
-                      <Input
-                        value={song.title}
-                        onChange={(e) => {
-                          const updatedSongs = [...newReleaseSongs];
-                          updatedSongs[index].title = e.target.value;
-                          setReleaseSongs(updatedSongs);
+                      <Button
+                        variant='destructive'
+                        size='sm'
+                        onClick={(e) => {
+                          e.preventDefault();
+                          removeFile(index);
                         }}
-                        placeholder='Song title'
-                        className='mb-2'
-                      />
-                      <label className='text-sm font-medium my-2 mt-4'>
-                        Genre
-                      </label>
-                      <SearchableSelect
-                        id={`genre-${song.id}`}
-                        name={`genre-${song.id}`}
-                        displayName='Genre'
-                        value={song.genre_id}
-                        onChange={(value) => {
-                          const updatedSongs = [...newReleaseSongs];
-                          updatedSongs[index].genre_id = value;
-                          setReleaseSongs(updatedSongs);
-                        }}
-                        onCreateNew={handleCreateNewGenre}
-                        options={genres}
-                        placeholder='Select or create a genre'
-                      />
-                      <label className='text-sm font-medium my-2 mt-4'>
+                      >
+                        <X className='h-4 w-4 mr-2' /> Remove
+                      </Button>
+                    </div>
+
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                      <div>
+                        <label className='text-sm font-medium mb-2 block'>
+                          Title
+                        </label>
+                        <Input
+                          value={song.title}
+                          onChange={(e) => {
+                            const updatedSongs = [...newReleaseSongs];
+                            updatedSongs[index].title = e.target.value;
+                            setReleaseSongs(updatedSongs);
+                          }}
+                          placeholder='Song title'
+                          className='mb-4'
+                        />
+                      </div>
+
+                      <div>
+                        <label className='text-sm font-medium mb-2 block'>
+                          Genre
+                        </label>
+                        <SearchableSelect
+                          id={`genre-${song.id}`}
+                          name={`genre-${song.id}`}
+                          displayName='Genre'
+                          value={song.genre_id}
+                          onChange={(value) => {
+                            const updatedSongs = [...newReleaseSongs];
+                            updatedSongs[index].genre_id = value;
+                            setReleaseSongs(updatedSongs);
+                          }}
+                          onCreateNew={handleCreateNewGenre}
+                          options={genres}
+                          placeholder='Select or create a genre'
+                        />
+                      </div>
+                    </div>
+
+                    <div className='mt-4'>
+                      <label className='text-sm font-medium mb-2 block'>
                         Price
                       </label>
                       <Input
@@ -883,28 +952,34 @@ export default function CreateReleasePage() {
                           setReleaseSongs(updatedSongs);
                         }}
                         required
+                        className='mb-4'
                       />
-                      <ArtistMultiSelect
-                        song={song}
-                        title='Featured Artists'
-                        id='featured_artists'
-                        updateSong={(updatedSong) => {
-                          const updatedSongs = [...newReleaseSongs];
-                          updatedSongs[index] = updatedSong;
-                          setReleaseSongs(updatedSongs);
-                        }}
-                      />
-                      <ArtistMultiSelect
-                        song={song}
-                        title='Producers'
-                        id='producers'
-                        updateSong={(updatedSong) => {
-                          const updatedSongs = [...newReleaseSongs];
-                          updatedSongs[index] = updatedSong;
-                          setReleaseSongs(updatedSongs);
-                        }}
-                      />
-                      <label className='text-sm font-medium my-2 mt-4'>
+                    </div>
+
+                    <ArtistMultiSelect
+                      song={song}
+                      title='Featured Artists'
+                      id='featured_artists'
+                      updateSong={(updatedSong) => {
+                        const updatedSongs = [...newReleaseSongs];
+                        updatedSongs[index] = updatedSong;
+                        setReleaseSongs(updatedSongs);
+                      }}
+                    />
+
+                    <ArtistMultiSelect
+                      song={song}
+                      title='Producers'
+                      id='producers'
+                      updateSong={(updatedSong) => {
+                        const updatedSongs = [...newReleaseSongs];
+                        updatedSongs[index] = updatedSong;
+                        setReleaseSongs(updatedSongs);
+                      }}
+                    />
+
+                    <div className='mt-4'>
+                      <label className='text-sm font-medium mb-2 block'>
                         Lyrics
                       </label>
                       <Textarea
@@ -916,11 +991,15 @@ export default function CreateReleasePage() {
                           setReleaseSongs(updatedSongs);
                         }}
                         required
+                        className='mb-4'
                       />
-                      <label className='text-sm font-medium my-2'>
+                    </div>
+
+                    <div>
+                      <label className='text-sm font-medium mb-2 block'>
                         Preview Start Time
                       </label>
-                      <p className='text-xs text-gray-500 dark:text-gray-400 my-2'>
+                      <p className='text-xs text-gray-500 dark:text-gray-400 mb-2'>
                         Enter the time in the song where the preview should
                         start in the format mm:ss
                       </p>
@@ -934,12 +1013,15 @@ export default function CreateReleasePage() {
                         }}
                         required
                       />
-                      {songUploadProgress[song.id] !== undefined && (
-                        <ProgressBar progress={songUploadProgress[song.id]} />
-                      )}
                     </div>
-                  ))}
-                </div>
+
+                    {songUploadProgress[song.id] !== undefined && (
+                      <div className='mt-4'>
+                        <ProgressBar progress={songUploadProgress[song.id]} />
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           </CardContent>

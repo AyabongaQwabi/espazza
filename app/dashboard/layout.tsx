@@ -180,7 +180,7 @@ export default function DashboardLayout({
 
       setProfile(profileData);
       setLoading(false);
-
+      console.log('PROFILE DATA', profileData);
       if (
         profileData &&
         !profileData.registration_complete &&
