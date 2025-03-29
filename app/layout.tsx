@@ -175,13 +175,7 @@ export default function RootLayout({
                 <SiteHeader />
                 <main id='main-content' className='flex-1 pb-16'>
                   {/* Desktop Ad */}
-                  <div className='hidden lg:block my-4'>
-                    <AdBanner
-                      adKey='a41124e6da244c907bdb18fdcb259abb'
-                      width={728}
-                      height={90}
-                      className='mx-auto'
-                    />
+                  <div className='hidden lg:block mt-20'>
                     <div className='mt-4'>
                       <AdBanner
                         adKey='c1f9c7a0bc454e5477f0b3c1f4a8b06f'
@@ -194,13 +188,7 @@ export default function RootLayout({
                   </div>
 
                   {/* Mobile Ad */}
-                  <div className='lg:hidden my-4'>
-                    <AdBanner
-                      adKey='cc0e176d77097568fccfc3da0c7d922f'
-                      width={320}
-                      height={50}
-                      className='mx-auto'
-                    />
+                  <div className='lg:hidden mt-20'>
                     <div className='mt-4'>
                       <AdBanner
                         adKey='c1f9c7a0bc454e5477f0b3c1f4a8b06f'
