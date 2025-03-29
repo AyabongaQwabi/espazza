@@ -176,6 +176,7 @@ export default function RootLayout({
                       adKey='a41124e6da244c907bdb18fdcb259abb'
                       height={90}
                       weight={728}
+                      url='//www.highperformanceformat.com/a41124e6da244c907bdb18fdcb259abb/invoke.js'
                     />
                   </div>
                   <div className='lg:hidden'>
@@ -183,6 +184,7 @@ export default function RootLayout({
                       adKey='cc0e176d77097568fccfc3da0c7d922f'
                       height={50}
                       weight={320}
+                      url='//www.highperformanceformat.com/cc0e176d77097568fccfc3da0c7d922f/invoke.js'
                     />
                   </div>
                   <AnimationWrapper>{children}</AnimationWrapper>

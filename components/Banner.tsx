@@ -5,6 +5,7 @@ export default function Banner(options: {
   adKey: string;
   height: number;
   weight: number;
+  url: string;
 }): JSX.Element {
   const banner = useRef<HTMLDivElement>();
 
@@ -22,7 +23,7 @@ export default function Banner(options: {
       const conf = document.createElement('script');
       const script = document.createElement('script');
       script.type = 'text/javascript';
-      script.src = `//www.highperformanceformat.com/${atOptions.key}/invoke.js`;
+      script.src = options.url;
       conf.innerHTML = `atOptions = ${JSON.stringify(atOptions)}`;
 
       banner.current.append(conf);
