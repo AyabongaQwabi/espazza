@@ -172,20 +172,36 @@ export default function RootLayout({
                 <SiteHeader />
                 <main id='main-content' className='flex-1 pb-16'>
                   <div className='hidden lg:block'>
-                    <Banner
-                      adKey='a41124e6da244c907bdb18fdcb259abb'
-                      height={90}
-                      weight={728}
-                      url='//www.highperformanceformat.com/a41124e6da244c907bdb18fdcb259abb/invoke.js'
-                    />
+                    <script
+                      type='text/javascript'
+                      atOptions={{
+                        key: 'a41124e6da244c907bdb18fdcb259abb',
+                        format: 'iframe',
+                        height: 90,
+                        width: 728,
+                        params: {},
+                      }}
+                    ></script>
+                    <script
+                      type='text/javascript'
+                      src='//www.highperformanceformat.com/a41124e6da244c907bdb18fdcb259abb/invoke.js'
+                    ></script>
                   </div>
                   <div className='lg:hidden'>
-                    <Banner
-                      adKey='cc0e176d77097568fccfc3da0c7d922f'
-                      height={50}
-                      weight={320}
-                      url='//www.highperformanceformat.com/cc0e176d77097568fccfc3da0c7d922f/invoke.js'
-                    />
+                    <script
+                      type='text/javascript'
+                      atOptions={{
+                        key: 'cc0e176d77097568fccfc3da0c7d922f',
+                        format: 'iframe',
+                        height: 50,
+                        width: 320,
+                        params: {},
+                      }}
+                    ></script>
+                    <script
+                      type='text/javascript'
+                      src='//www.highperformanceformat.com/cc0e176d77097568fccfc3da0c7d922f/invoke.js'
+                    ></script>
                   </div>
                   <AnimationWrapper>{children}</AnimationWrapper>
                   <Analytics />
