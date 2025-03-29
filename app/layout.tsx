@@ -13,7 +13,10 @@ import AnimationWrapper from '@/components/AnimationWrapper';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/next';
-import Banner from '@/components/Banner';
+import dynamic from 'next/dynamic';
+
+// Dynamically import the AdBanner component with SSR disabled
+const AdBanner = dynamic(() => import('@/components/AdBanner'), { ssr: false });
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -171,50 +174,44 @@ export default function RootLayout({
               <div className='flex flex-col min-h-screen bg-gradient-to-br from-zinc-900 to-zinc-800'>
                 <SiteHeader />
                 <main id='main-content' className='flex-1 pb-16'>
-                  <div className='hidden lg:block'>
-                    <script
-                      type='text/javascript'
-                      atOptions={{
-                        key: 'a41124e6da244c907bdb18fdcb259abb',
-                        format: 'iframe',
-                        height: 90,
-                        width: 728,
-                        params: {},
-                      }}
-                    ></script>
-                    <script
-                      type='text/javascript'
-                      src='//www.highperformanceformat.com/a41124e6da244c907bdb18fdcb259abb/invoke.js'
-                    ></script>
-                    <script
-                      async='async'
-                      dataCfasync='false'
-                      src='//pl26249233.effectiveratecpm.com/c1f9c7a0bc454e5477f0b3c1f4a8b06f/invoke.js'
-                    ></script>
-                    <div id='container-c1f9c7a0bc454e5477f0b3c1f4a8b06f'></div>
+                  {/* Desktop Ad */}
+                  <div className='hidden lg:block my-4'>
+                    <AdBanner
+                      adKey='a41124e6da244c907bdb18fdcb259abb'
+                      width={728}
+                      height={90}
+                      className='mx-auto'
+                    />
+                    <div className='mt-4'>
+                      <AdBanner
+                        adKey='c1f9c7a0bc454e5477f0b3c1f4a8b06f'
+                        width={728}
+                        height={90}
+                        adNetwork='effectiverate'
+                        className='mx-auto'
+                      />
+                    </div>
                   </div>
-                  <div className='lg:hidden'>
-                    <script
-                      type='text/javascript'
-                      atOptions={{
-                        key: 'cc0e176d77097568fccfc3da0c7d922f',
-                        format: 'iframe',
-                        height: 50,
-                        width: 320,
-                        params: {},
-                      }}
-                    ></script>
-                    <script
-                      type='text/javascript'
-                      src='//www.highperformanceformat.com/cc0e176d77097568fccfc3da0c7d922f/invoke.js'
-                    ></script>
-                    <script
-                      async='async'
-                      dataCfasync='false'
-                      src='//pl26249233.effectiveratecpm.com/c1f9c7a0bc454e5477f0b3c1f4a8b06f/invoke.js'
-                    ></script>
-                    <div id='container-c1f9c7a0bc454e5477f0b3c1f4a8b06f'></div>
+
+                  {/* Mobile Ad */}
+                  <div className='lg:hidden my-4'>
+                    <AdBanner
+                      adKey='cc0e176d77097568fccfc3da0c7d922f'
+                      width={320}
+                      height={50}
+                      className='mx-auto'
+                    />
+                    <div className='mt-4'>
+                      <AdBanner
+                        adKey='c1f9c7a0bc454e5477f0b3c1f4a8b06f'
+                        width={320}
+                        height={50}
+                        adNetwork='effectiverate'
+                        className='mx-auto'
+                      />
+                    </div>
                   </div>
+
                   <AnimationWrapper>{children}</AnimationWrapper>
                   <Analytics />
                 </main>
