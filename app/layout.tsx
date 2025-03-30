@@ -177,26 +177,24 @@ export default function RootLayout({
                   {/* Desktop Ad */}
                   <div className='hidden lg:block mt-20 -mb-12'>
                     <div className='mt-4'>
-                      <AdBanner
-                        adKey='c1f9c7a0bc454e5477f0b3c1f4a8b06f'
-                        width={728}
-                        height={90}
-                        adNetwork='effectiverate'
-                        className='mx-auto'
-                      />
+                      <script
+                        async='async'
+                        dataCfasync='false'
+                        src='//pl26249233.effectiveratecpm.com/c1f9c7a0bc454e5477f0b3c1f4a8b06f/invoke.js'
+                      ></script>
+                      <div id='container-c1f9c7a0bc454e5477f0b3c1f4a8b06f'></div>
                     </div>
                   </div>
 
                   {/* Mobile Ad */}
                   <div className='lg:hidden mt-20'>
                     <div className='mt-4'>
-                      <AdBanner
-                        adKey='c1f9c7a0bc454e5477f0b3c1f4a8b06f'
-                        width={320}
-                        height={50}
-                        adNetwork='effectiverate'
-                        className='mx-auto'
-                      />
+                      <script
+                        async='async'
+                        dataCfasync='false'
+                        src='//pl26249233.effectiveratecpm.com/c1f9c7a0bc454e5477f0b3c1f4a8b06f/invoke.js'
+                      ></script>
+                      <div id='container-c1f9c7a0bc454e5477f0b3c1f4a8b06f'></div>
                     </div>
                   </div>
 
