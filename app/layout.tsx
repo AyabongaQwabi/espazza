@@ -179,7 +179,7 @@ export default function RootLayout({
                     <div className='mt-4'>
                       <script
                         async='async'
-                        dataCfasync='false'
+                        data-cfasync='false'
                         src='//pl26249233.effectiveratecpm.com/c1f9c7a0bc454e5477f0b3c1f4a8b06f/invoke.js'
                       ></script>
                       <div id='container-c1f9c7a0bc454e5477f0b3c1f4a8b06f'></div>
@@ -191,7 +191,7 @@ export default function RootLayout({
                     <div className='mt-4'>
                       <script
                         async='async'
-                        dataCfasync='false'
+                        data-cfasync='false'
                         src='//pl26249233.effectiveratecpm.com/c1f9c7a0bc454e5477f0b3c1f4a8b06f/invoke.js'
                       ></script>
                       <div id='container-c1f9c7a0bc454e5477f0b3c1f4a8b06f'></div>
