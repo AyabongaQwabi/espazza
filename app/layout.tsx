@@ -175,7 +175,12 @@ export default function RootLayout({
                 <SiteHeader />
                 <main id='main-content' className='flex-1 pb-16'>
                   {/* Desktop Ad */}
-                  <div className='hidden lg:block mt-20 -mb-12'>
+                  <script
+                    async
+                    src='https://script.adquake.com/js/adquake.js'
+                    adquake-key='jU4ct88nmUGU290dbTftwg=='
+                  ></script>
+                  {/* <div className='hidden lg:block mt-20 -mb-12'>
                     <div className='mt-4'>
                       <script
                         async='async'
@@ -184,10 +189,10 @@ export default function RootLayout({
                       ></script>
                       <div id='container-c1f9c7a0bc454e5477f0b3c1f4a8b06f'></div>
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* Mobile Ad */}
-                  <div className='lg:hidden mt-20'>
+                  {/* <div className='lg:hidden mt-20'>
                     <div className='mt-4'>
                       <script
                         async='async'
@@ -196,7 +201,7 @@ export default function RootLayout({
                       ></script>
                       <div id='container-c1f9c7a0bc454e5477f0b3c1f4a8b06f'></div>
                     </div>
-                  </div>
+                  </div> */}
 
                   <AnimationWrapper>{children}</AnimationWrapper>
                   <Analytics />
