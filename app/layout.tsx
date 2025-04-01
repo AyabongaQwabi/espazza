@@ -106,6 +106,15 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const restartQuake = async (): Promise<void> => {
+    if (typeof window !== 'undefined') {
+      await window?.adquake.restart();
+    }
+    console.log('AdQuake restarted');
+  };
+  if (typeof window !== 'undefined') {
+    restartQuake(window);
+  }
   return (
     <html lang='xh' className='dark'>
       <head>
