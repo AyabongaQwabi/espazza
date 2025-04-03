@@ -16,9 +16,8 @@ import short from 'short-uuid';
 import { ArtistMultiSelect } from '../artists';
 import { SongPreview } from '@/components/SongPreview';
 import ProgressBar from '@/components/ProgressBar';
-import { PaymentDialog } from '@/components/PaymentDialog';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { X, CreditCard, AlertCircle, Loader2 } from 'lucide-react';
+import { X, AlertCircle, Loader2 } from 'lucide-react';
 
 interface Song {
   id: string;
@@ -70,11 +69,9 @@ export default function CreateReleasePage() {
     string | null
   >(null);
   const [creationStatus, setCreationStatus] = useState<string | null>(null);
-  // Update the payment dialog handling to reset state when closed
-  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
-  const [createdReleaseId, setCreatedReleaseId] = useState<string | null>(null);
   const [releaseCreated, setReleaseCreated] = useState(false); // Track if release has been created
   const [isUpdating, setIsUpdating] = useState(false); // Track if we're updating an existing release
+  const [createdReleaseId, setCreatedReleaseId] = useState<string | null>(null);
 
   const router = useRouter();
   const supabase = createClientComponentClient();
@@ -112,95 +109,6 @@ export default function CreateReleasePage() {
     loadInitialData();
   }, []); // Empty dependency array to run only once
 
-  // Update the checkUnpaidRelease function to properly fetch and populate all release details
-  const checkUnpaidRelease = async () => {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Check for the most recent unpaid release by this user with complete data
-      const { data, error } = await supabase
-        .from('releases')
-        .select(
-          `
-        *,
-        tracks,
-        record_label:record_label_id (id, name),
-        distributor:distributor_id (id, name),
-        genre:genre_id (id, name)
-      `
-        )
-        .eq('record_owner', user.id)
-        .eq('is_paid', false)
-        .order('created_at', { ascending: false })
-        .limit(1);
-
-      if (error) throw error;
-
-      if (data && data.length > 0) {
-        const unpaidRelease = data[0];
-        console.log('Found unpaid release:', unpaidRelease);
-
-        // Set the release ID and mark as created
-        setCreatedReleaseId(unpaidRelease.id);
-        setReleaseCreated(true);
-        setIsUpdating(true);
-
-        // Populate the form with the unpaid release data
-        setNewRelease({
-          title: unpaidRelease.title || '',
-          description: unpaidRelease.description || '',
-          record_label_id: unpaidRelease.record_label_id || '',
-          distributor_id: unpaidRelease.distributor_id || '',
-          genre_id: unpaidRelease.genre_id || '',
-          cover_image_url: unpaidRelease.cover_image_url || '',
-          tracks: unpaidRelease.tracks || [],
-          release_date: unpaidRelease.release_date
-            ? new Date(unpaidRelease.release_date)
-            : new Date(),
-        });
-
-        // Set cover image preview if available
-        if (unpaidRelease.cover_image_url) {
-          setCoverImagePreview(unpaidRelease.cover_image_url);
-        }
-
-        // Convert tracks to the format expected by the form
-        if (unpaidRelease.tracks && Array.isArray(unpaidRelease.tracks)) {
-          const formattedSongs: Song[] = unpaidRelease.tracks.map(
-            (track: any) => ({
-              id: track.id,
-              title: track.title || '',
-              cover_image_url: track.cover_image_url || '',
-              url: track.url || '',
-              featured_artists: track.featured_artists || [],
-              producers: track.producers || [],
-              lyrics: track.lyrics || '',
-              price: track.price || 0.99,
-              preview_start: track.preview_start || '00:30',
-              release_date: track.release_date
-                ? new Date(track.release_date)
-                : new Date(),
-              genre_id: track.genre_id || '',
-            })
-          );
-
-          setReleaseSongs(formattedSongs);
-        }
-
-        toast({
-          title: 'Unpaid Release Found',
-          description:
-            "We've loaded your unpaid release. Complete the payment to list it on our platform.",
-        });
-      }
-    } catch (error) {
-      console.error('Error checking for unpaid releases:', error);
-    }
-  };
-
   const handleFileSelect = (
     e: React.ChangeEvent<HTMLInputElement>,
     type: 'cover' | 'release'
@@ -224,7 +132,7 @@ export default function CreateReleasePage() {
           featured_artists: [],
           producers: [],
           lyrics: '',
-          price: 0.99,
+          price: 10,
           preview_start: '00:30',
           release_date: new Date(),
           genre_id: '',
@@ -346,16 +254,6 @@ export default function CreateReleasePage() {
     console.log('creating new release', newRelease);
     e.preventDefault();
 
-    // If release is already created, just show payment dialog
-    if (releaseCreated && createdReleaseId) {
-      // Update the release with any changes before showing payment dialog
-      if (isUpdating) {
-        await updateExistingRelease();
-      }
-      setPaymentDialogOpen(true);
-      return;
-    }
-
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -364,10 +262,30 @@ export default function CreateReleasePage() {
       return;
     }
 
+    // Add validation for required song fields
+    const validateSongs = () => {
+      for (let i = 0; i < newReleaseSongs.length; i++) {
+        if (!newReleaseSongs[i].genre_id || !newReleaseSongs[i].title) {
+          toast({
+            title: 'Missing song information',
+            description: `Please fill in all required fields for song #${
+              i + 1
+            }.`,
+            variant: 'destructive',
+          });
+          return false;
+        }
+      }
+      return true;
+    };
+
     if (
       !newRelease.title ||
       !newRelease.genre_id ||
-      newReleaseSongs.length === 0
+      !newRelease.record_label_id ||
+      !newRelease.distributor_id ||
+      newReleaseSongs.length === 0 ||
+      !validateSongs()
     ) {
       toast({
         title: 'Missing information',
@@ -444,7 +362,7 @@ export default function CreateReleasePage() {
         cover_image_url: updatedCoverImageUrl,
         tracks,
         price: tracks.reduce((total, track) => total + (track.price || 0), 0),
-        is_paid: false, // Initially set to false until payment is made
+        is_paid: true, // No payment required, set to true by default
       });
       // Create release with is_paid set to false initially
       const { data, error } = await supabase
@@ -459,25 +377,21 @@ export default function CreateReleasePage() {
               (total, track) => total + (track.price || 0),
               0
             ),
-            is_paid: false, // Initially set to false until payment is made
+            is_paid: true, // No payment required, set to true by default
           },
         ])
         .select();
 
       if (error) throw error;
 
-      // Store the created release ID for payment
-      setCreatedReleaseId(data[0].id);
-      setReleaseCreated(true); // Mark release as created
-
-      // Show payment dialog
-      setPaymentDialogOpen(true);
-
       toast({
-        title: 'Release created',
+        title: 'Success!',
         description:
-          'Your release has been created. Please complete the payment to list it on our platform.',
+          'Your release has been created and is now live on our platform!',
       });
+
+      // Redirect to releases page
+      router.push('/dashboard/releases');
     } catch (error: any) {
       console.error('Error creating release:', error);
       toast({
@@ -569,16 +483,20 @@ export default function CreateReleasePage() {
           tracks,
           release_date: newRelease.release_date,
           price: tracks.reduce((total, track) => total + (track.price || 0), 0),
+          is_paid: true, // No payment required, set to true by default
         })
         .eq('id', createdReleaseId);
 
       if (error) throw error;
 
       toast({
-        title: 'Release updated',
+        title: 'Success!',
         description:
-          'Your release has been updated. Please complete the payment to list it on our platform.',
+          'Your release has been updated and is now live on our platform!',
       });
+
+      // Redirect to releases page
+      router.push('/dashboard/releases');
     } catch (error: any) {
       console.error('Error updating release:', error);
       toast({
@@ -590,27 +508,6 @@ export default function CreateReleasePage() {
     } finally {
       setLoading(false);
       setCreationStatus(null);
-    }
-  };
-
-  const handlePaymentComplete = () => {
-    toast({
-      title: 'Success',
-      description: 'Your release has been successfully listed on our platform!',
-    });
-
-    // Redirect to releases page
-    router.push('/dashboard/releases');
-  };
-
-  // Add this function to handle payment dialog state changes
-  const handlePaymentDialogChange = (open: boolean) => {
-    setPaymentDialogOpen(open);
-
-    // If dialog is closed, reset any loading states
-    if (!open) {
-      setCreationStatus(null);
-      setLoading(false);
     }
   };
 
@@ -633,32 +530,31 @@ export default function CreateReleasePage() {
       <h1 className='text-2xl font-bold mb-4'>
         {isUpdating ? 'Continue Your Release' : 'Create New Release'}
       </h1>
-
-      <div className='bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md p-4 mb-6'>
+      <p className='text-gray-500 dark:text-gray-400 mb-6'>
+        Share your music with the world! Creating a release is now completely
+        free.
+      </p>
+      <div className='bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-4 mb-6'>
         <div className='flex items-start'>
-          <AlertCircle className='h-5 w-5 text-amber-600 dark:text-amber-500 mt-0.5 mr-3' />
+          <AlertCircle className='h-5 w-5 text-blue-600 dark:text-blue-500 mt-0.5 mr-3' />
           <div>
-            <h3 className='font-medium text-amber-800 dark:text-amber-400'>
-              Release Listing Fee
+            <h3 className='font-medium text-blue-800 dark:text-blue-400'>
+              How to Create a Release
             </h3>
-            <p className='text-sm text-amber-700 dark:text-amber-300 mt-1'>
-              There is a R20.00 fee to list your release on our platform. You'll
-              be prompted to pay after creating your release.
-            </p>
+            <ol className='text-sm text-blue-700 dark:text-blue-300 mt-1 list-decimal pl-5 space-y-1'>
+              <li>Fill in your release details (title, description, etc.)</li>
+              <li>Upload a cover image for your release</li>
+              <li>Add your songs (MP3 files)</li>
+              <li>Fill in details for each song</li>
+              <li>Click "Create Release" when you're done</li>
+            </ol>
           </div>
         </div>
       </div>
 
-      <div className='flex justify-end mb-4'>
-        <Button
-          variant='outline'
-          onClick={checkUnpaidRelease}
-          className='flex items-center gap-2'
-        >
-          <Loader2 className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-          Check for Unpaid Releases
-        </Button>
-      </div>
+      <p className='text-sm text-gray-500 dark:text-gray-400 mb-6'>
+        Fields marked with <span className='text-red-500'>*</span> are required.
+      </p>
 
       <form onSubmit={handleCreateRelease} className='space-y-6'>
         <Card>
@@ -667,10 +563,15 @@ export default function CreateReleasePage() {
           </CardHeader>
           <CardContent className='space-y-4'>
             <div>
-              <Label htmlFor='title'>Title</Label>
+              <Label htmlFor='title' className='flex items-center'>
+                Release Title <span className='text-red-500 ml-1'>*</span>
+              </Label>
+              <p className='text-xs text-gray-500 dark:text-gray-400 mb-2'>
+                Enter the name of your album or single (e.g., "Summer Vibes")
+              </p>
               <Input
                 id='title'
-                placeholder='Release Title'
+                placeholder='Enter your release title here'
                 value={newRelease.title}
                 onChange={(e) =>
                   setNewRelease({ ...newRelease, title: e.target.value })
@@ -681,19 +582,27 @@ export default function CreateReleasePage() {
 
             <div>
               <Label htmlFor='description'>Description</Label>
+              <p className='text-xs text-gray-500 dark:text-gray-400 mb-2'>
+                Tell listeners about your release. What inspired it? What makes
+                it special?
+              </p>
               <Textarea
                 id='description'
-                placeholder='Description'
+                placeholder='Write about your music here...'
                 value={newRelease.description}
                 onChange={(e) =>
                   setNewRelease({ ...newRelease, description: e.target.value })
                 }
-                required
               />
             </div>
 
             <div>
-              <Label htmlFor='genre'>Genre</Label>
+              <Label htmlFor='genre' className='flex items-center'>
+                Music Genre <span className='text-red-500 ml-1'>*</span>
+              </Label>
+              <p className='text-xs text-gray-500 dark:text-gray-400 mb-2'>
+                Select the type of music (e.g., Hip Hop, Amapiano, Gospel)
+              </p>
               <SearchableSelect
                 id='genre'
                 name='genre'
@@ -713,6 +622,9 @@ export default function CreateReleasePage() {
 
             <div>
               <Label>Release Date</Label>
+              <p className='text-xs text-gray-500 dark:text-gray-400 mb-2'>
+                When should your music be available to listeners?
+              </p>
               <Calendar
                 mode='single'
                 selected={newRelease.release_date}
@@ -766,7 +678,12 @@ export default function CreateReleasePage() {
           <CardContent className='space-y-4'>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
-                <Label htmlFor='record_label_id'>Record Label</Label>
+                <Label htmlFor='record_label_id' className='flex items-center'>
+                  Record Label <span className='text-red-500 ml-1'>*</span>
+                </Label>
+                <p className='text-xs text-gray-500 dark:text-gray-400 mb-2'>
+                  The company that produces and markets your music
+                </p>
                 <SearchableSelect
                   id='record_label_id'
                   name='record_label_id'
@@ -784,7 +701,12 @@ export default function CreateReleasePage() {
                 />
               </div>
               <div>
-                <Label htmlFor='distributor_id'>Distributor</Label>
+                <Label htmlFor='distributor_id' className='flex items-center'>
+                  Distributor <span className='text-red-500 ml-1'>*</span>
+                </Label>
+                <p className='text-xs text-gray-500 dark:text-gray-400 mb-2'>
+                  The company that delivers your music to streaming platforms
+                </p>
                 <SearchableSelect
                   id='distributor_id'
                   name='distributor_id'
@@ -807,11 +729,25 @@ export default function CreateReleasePage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Tracks</CardTitle>
+            <CardTitle>Your Songs</CardTitle>
           </CardHeader>
           <CardContent className='space-y-4'>
             <div className='bg-gray-50 dark:bg-gray-900 rounded-lg p-6 space-y-4'>
-              <h2 className='text-xl font-semibold mb-4'>Upload Tracks</h2>
+              <h2 className='text-xl font-semibold mb-4'>Upload Your Songs</h2>
+              <div className='bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-4'>
+                <div className='flex items-start'>
+                  <AlertCircle className='h-5 w-5 text-green-600 dark:text-green-500 mt-0.5 mr-3' />
+                  <div>
+                    <h3 className='font-medium text-green-800 dark:text-green-400'>
+                      Free Upload
+                    </h3>
+                    <p className='text-sm text-green-700 dark:text-green-300 mt-1'>
+                      You can now upload your music for free! Each track will be
+                      priced at R10 by default.
+                    </p>
+                  </div>
+                </div>
+              </div>
 
               <div className='flex flex-col space-y-2'>
                 <Label>Upload Track</Label>
@@ -833,7 +769,7 @@ export default function CreateReleasePage() {
                       input.accept = 'audio/*';
                       input.multiple = true;
                       input.onchange = (e) => {
-                        const files = e.target.files;
+                        const files = (e.target as HTMLInputElement).files;
                         if (files) {
                           for (let i = 0; i < files.length; i++) {
                             if (newReleaseSongs.length < 20) {
@@ -847,7 +783,7 @@ export default function CreateReleasePage() {
                                 featured_artists: [],
                                 producers: [],
                                 lyrics: '',
-                                price: 0.99,
+                                price: 10,
                                 preview_start: '00:30',
                                 release_date: new Date(),
                                 genre_id: '',
@@ -900,9 +836,13 @@ export default function CreateReleasePage() {
 
                     <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                       <div>
-                        <label className='text-sm font-medium mb-2 block'>
-                          Title
+                        <label className='text-sm font-medium mb-2 block flex items-center'>
+                          Song Title{' '}
+                          <span className='text-red-500 ml-1'>*</span>
                         </label>
+                        <p className='text-xs text-gray-500 dark:text-gray-400 mb-2'>
+                          What is this song called?
+                        </p>
                         <Input
                           value={song.title}
                           onChange={(e) => {
@@ -916,9 +856,13 @@ export default function CreateReleasePage() {
                       </div>
 
                       <div>
-                        <label className='text-sm font-medium mb-2 block'>
-                          Genre
+                        <label className='text-sm font-medium mb-2 block flex items-center'>
+                          Song Genre{' '}
+                          <span className='text-red-500 ml-1'>*</span>
                         </label>
+                        <p className='text-xs text-gray-500 dark:text-gray-400 mb-2'>
+                          What type of music is this specific song?
+                        </p>
                         <SearchableSelect
                           id={`genre-${song.id}`}
                           name={`genre-${song.id}`}
@@ -938,8 +882,11 @@ export default function CreateReleasePage() {
 
                     <div className='mt-4'>
                       <label className='text-sm font-medium mb-2 block'>
-                        Price
+                        Price (in Rands)
                       </label>
+                      <p className='text-xs text-gray-500 dark:text-gray-400 mb-2'>
+                        How much will this song cost? Default is R10.
+                      </p>
                       <Input
                         placeholder='Price'
                         value={song.price}
@@ -980,8 +927,11 @@ export default function CreateReleasePage() {
 
                     <div className='mt-4'>
                       <label className='text-sm font-medium mb-2 block'>
-                        Lyrics
+                        Song Lyrics
                       </label>
+                      <p className='text-xs text-gray-500 dark:text-gray-400 mb-2'>
+                        Type or paste the words to your song here
+                      </p>
                       <Textarea
                         placeholder='Lyrics'
                         value={song.lyrics}
@@ -990,7 +940,6 @@ export default function CreateReleasePage() {
                           updatedSongs[index].lyrics = e.target.value;
                           setReleaseSongs(updatedSongs);
                         }}
-                        required
                         className='mb-4'
                       />
                     </div>
@@ -1038,33 +987,16 @@ export default function CreateReleasePage() {
           <Button
             type='submit'
             disabled={loading}
-            className='flex items-center gap-2'
+            className='flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-2'
           >
             {loading ? (
               <>{creationStatus || 'Processing...'}</>
-            ) : releaseCreated ? (
-              <>
-                <CreditCard className='h-4 w-4' />
-                Pay R20.00
-              </>
             ) : (
-              <>
-                <CreditCard className='h-4 w-4' />
-                Create Release & Pay R20.00
-              </>
+              <>Create Release</>
             )}
           </Button>
         </div>
       </form>
-
-      {createdReleaseId && (
-        <PaymentDialog
-          open={paymentDialogOpen}
-          onOpenChange={handlePaymentDialogChange}
-          releaseId={createdReleaseId}
-          onPaymentComplete={handlePaymentComplete}
-        />
-      )}
     </div>
   );
 }
