@@ -41,6 +41,8 @@ function SuccessPage() {
         return;
       }
 
+      console.log('Transaction ID:', transactionId);
+
       try {
         // First, update the purchase status to completed
         const { error: updateError } = await supabase
@@ -59,7 +61,7 @@ function SuccessPage() {
           .select('*, release:releases (*, profiles:record_owner(*))')
           .eq('transaction_id', transactionId)
           .single();
-
+        console.log('Purchase Data:', purchaseData);
         if (purchaseError || !purchaseData) {
           console.error('Error fetching purchase details:', purchaseError);
           setError('Purchase details not found');
