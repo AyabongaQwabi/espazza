@@ -59,8 +59,28 @@ function SuccessPage() {
         const { data: purchaseData, error: purchaseError } = await supabase
           .from('purchases')
           .select('*')
-          .eq('transaction_id', transactionId)
+          .eq('transaction_id', transactionId.toString().trim())
           .single();
+
+        const releaseId = purchaseData?.release_id;
+        console.log('Release ID:', releaseId);
+
+        const { data: releaseData, error: releaseError } = await supabase
+          .from('releases')
+          .select('*')
+          .eq('id', releaseId)
+          .single();
+
+        if (releaseError) {
+          console.error('Error fetching release details:', releaseError);
+          setError('Release details not found');
+          setLoading(false);
+          return;
+        }
+
+        // Update the purchase data with release details
+        purchaseData.release = releaseData;
+        console.log('Updated Purchase Data:', purchaseData);
 
         console.log('Purchase Data:', purchaseData);
         if (purchaseError || !purchaseData) {
