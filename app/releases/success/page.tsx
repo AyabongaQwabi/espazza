@@ -58,7 +58,7 @@ function SuccessPage() {
         // Get the purchase record with release details
         const { data: purchaseData, error: purchaseError } = await supabase
           .from('purchases')
-          .select('*, release:releases (*, profiles:record_owner(*))')
+          .select('*, release:releases (*, profiles(*))')
           .eq('transaction_id', transactionId)
           .single();
         console.log('Purchase Data:', purchaseData);
