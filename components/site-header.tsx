@@ -33,11 +33,18 @@ function Navigation({ className = '' }: { className?: string }) {
     <nav className={`flex items-center ${className}`}>
       <div className='flex items-center space-x-8'>
         <Link
+          href='/releases'
+          className='hover:text-red-500 transition-colors flex items-center gap-2'
+        >
+          <HoverIcon Icon={ShoppingBagIcon} size={16} />
+          <span>Music</span>
+        </Link>
+        <Link
           href='/'
           className='hover:text-red-500 transition-colors flex items-center gap-2'
         >
           <HoverIcon Icon={BookOpenIcon} size={16} />
-          <span>Community</span>
+          <span>Posts</span>
         </Link>
         <Link
           href='/artists'
@@ -51,7 +58,7 @@ function Navigation({ className = '' }: { className?: string }) {
           className='hover:text-red-500 transition-colors flex items-center gap-2'
         >
           <HoverIcon Icon={ShoppingBagIcon} size={16} />
-          <span>Merchants</span>
+          <span>Merch Sellers</span>
         </Link>
         <Link
           href='/producers'
@@ -60,13 +67,7 @@ function Navigation({ className = '' }: { className?: string }) {
           <HoverIcon Icon={ShoppingBagIcon} size={16} />
           <span>Producers</span>
         </Link>
-        <Link
-          href='/releases'
-          className='hover:text-red-500 transition-colors flex items-center gap-2'
-        >
-          <HoverIcon Icon={ShoppingBagIcon} size={16} />
-          <span>Tracks</span>
-        </Link>
+
         <Link
           href='/merch-store'
           className='hover:text-red-500 transition-colors flex items-center gap-2'
