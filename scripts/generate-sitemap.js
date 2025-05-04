@@ -35,10 +35,14 @@ async function generateSitemap() {
     .select('slug')
     .eq('published', true);
 
+  const { data: releases } = await supabase.from('releases').select('id');
+
   const { data: artists } = await supabase
     .from('profiles')
     .select('username')
     .eq('user_type', 'artist');
+
+  const { data: products } = await supabase.from('products').select('code');
 
   const { data: events } = await supabase.from('events').select('id');
 
@@ -47,6 +51,8 @@ async function generateSitemap() {
     ...(posts?.map((post) => `/blog/${post.slug}`) || []),
     ...(artists?.map((artist) => `/artists/${artist.username}`) || []),
     ...(events?.map((event) => `/events/${event.id}`) || []),
+    ...(releases?.map((release) => `/releases/${release.id}`) || []),
+    ...(products?.map((product) => `/merch-store/${product.code}`) || []),
   ];
 
   const allRoutes = [...pages, ...dynamicRoutes];

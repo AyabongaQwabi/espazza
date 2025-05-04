@@ -907,7 +907,7 @@ export default function ReleasesPage() {
                                 <DropdownMenuItem
                                   className='cursor-pointer hover:bg-gray-700'
                                   onClick={() =>
-                                    router.push(`/release/${release.id}`)
+                                    router.push(`/releases/${release.id}`)
                                   }
                                 >
                                   <Music className='mr-2 h-4 w-4' />
