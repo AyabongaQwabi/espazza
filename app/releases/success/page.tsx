@@ -58,9 +58,10 @@ function SuccessPage() {
         // Get the purchase record with release details
         const { data: purchaseData, error: purchaseError } = await supabase
           .from('purchases')
-          .select('*, release:releases (*)')
+          .select('*')
           .eq('transaction_id', transactionId)
           .single();
+
         console.log('Purchase Data:', purchaseData);
         if (purchaseError || !purchaseData) {
           console.error('Error fetching purchase details:', purchaseError);
