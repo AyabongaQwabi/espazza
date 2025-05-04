@@ -480,6 +480,7 @@ export default function ReleasesPage() {
     transactionId: string,
     paymentMethod: string
   ) {
+    console.log('Creating purchase record...');
     const { error: purchaseError } = await supabase.from('purchases').insert([
       {
         release_id: release.id,
@@ -575,6 +576,7 @@ export default function ReleasesPage() {
       if (response.data.redirectUrl) {
         // Close the payment modal
         setPaymentModalOpen(false);
+        await createPurchaseRecord(release, totalPrice, transactionId, 'yoco');
 
         // Redirect to Yoco's hosted checkout page
         window.location.href = response.data.redirectUrl;
