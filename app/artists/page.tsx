@@ -288,10 +288,10 @@ export default function ArtistsPage({
       <div className='max-w-7xl mx-auto px-4'>
         <div className='text-center mb-12'>
           <h1 className='text-4xl md:text-5xl font-bold text-white mb-4'>
-            Abaculi
+            Who's who?
           </h1>
           <p className='text-zinc-400 text-lg'>
-            Discover South African music Artists
+            We've got a list of dope artists for you to check out.
           </p>
         </div>
 
