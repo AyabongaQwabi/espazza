@@ -361,6 +361,11 @@ export default function BlogPostClient({
   return (
     <div className='min-h-screen bg-black pt-24'>
       <article className='max-w-4xl mx-auto px-4'>
+        <Link href='/blog'>
+          <Button variant='default' className='text-white mb-6'>
+            Back to Stories
+          </Button>
+        </Link>
         {/* Featured Image */}
         {post.featured_image && (
           <div
