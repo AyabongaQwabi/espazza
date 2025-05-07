@@ -18,6 +18,9 @@ import { SongPreview } from '@/components/SongPreview';
 import ProgressBar from '@/components/ProgressBar';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { AlertCircle, Loader2, Search, X, User } from 'lucide-react';
+import ShortUniqueId from 'short-unique-id';
+
+const uid = new ShortUniqueId({ length: 10 });
 
 interface Song {
   id: string;
@@ -64,6 +67,7 @@ export default function CreateReleasePage() {
     genre_id: '',
     cover_image_url: '',
     tracks: [],
+    short_unique_id: uid.rnd(),
     release_date: new Date(),
   });
   const [coverImage, setCoverImage] = useState<File | null>(null);
