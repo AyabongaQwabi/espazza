@@ -159,7 +159,8 @@ export default function CreateReleasePage() {
 
   // Replace with improved search function
   const searchProfiles = async (query: string) => {
-    if (!query || query.length < 2) {
+    console.log('Searching for profiles with query:', query);
+    if (!query || query.length < 1) {
       setProfiles([]);
       return;
     }
@@ -169,15 +170,14 @@ export default function CreateReleasePage() {
       // Improved query with better pattern matching
       const searchPattern = `%${query}%`;
 
+      console.log('Searching for profiles with pattern:', searchPattern);
+
       const { data, error } = await supabase
         .from('profiles')
         .select(
           'id, username, email, artist_name, government_name, profile_image_url'
         )
-        .or(
-          `username.ilike.${searchPattern},email.ilike.${searchPattern},artist_name.ilike.${searchPattern},government_name.ilike.${searchPattern}`
-        )
-        .limit(10);
+        .or(`artist_name.ilike.${searchPattern}`);
 
       if (error) {
         console.error('Supabase query error:', error);
