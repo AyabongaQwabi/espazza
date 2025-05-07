@@ -17,7 +17,20 @@ import { ArtistMultiSelect } from '../artists';
 import { SongPreview } from '@/components/SongPreview';
 import ProgressBar from '@/components/ProgressBar';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { X, AlertCircle, Loader2 } from 'lucide-react';
+import { Check, AlertCircle, Loader2, Search, X, User } from 'lucide-react';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 interface Song {
   id: string;
@@ -32,6 +45,15 @@ interface Song {
   preview_start: string;
   release_date: Date;
   genre_id: string;
+}
+
+interface Profile {
+  id: string;
+  username: string;
+  email: string;
+  artist_name?: string;
+  government_name?: string;
+  profile_image_url?: string;
 }
 
 export default function CreateReleasePage() {
@@ -72,11 +94,34 @@ export default function CreateReleasePage() {
   const [releaseCreated, setReleaseCreated] = useState(false); // Track if release has been created
   const [isUpdating, setIsUpdating] = useState(false); // Track if we're updating an existing release
   const [createdReleaseId, setCreatedReleaseId] = useState<string | null>(null);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [recordOwner, setRecordOwner] = useState<Profile | null>(null);
+  const [profilesLoading, setProfilesLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const router = useRouter();
   const supabase = createClientComponentClient();
 
   useEffect(() => {
+    const loadCurrentUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select(
+            'id, username, email, artist_name, government_name, profile_image_url'
+          )
+          .eq('id', user.id)
+          .single();
+
+        if (profileData) {
+          setRecordOwner(profileData);
+        }
+      }
+    };
+
     const loadInitialData = async () => {
       setInitialLoading(true);
       try {
@@ -93,6 +138,9 @@ export default function CreateReleasePage() {
           setDistributors(distributorsResponse.data);
         if (genresResponse.data) setGenres(genresResponse.data);
 
+        // Load current user profile
+        await loadCurrentUser();
+
         // No longer checking for unpaid releases on load
       } catch (error) {
         console.error('Error loading initial data:', error);
@@ -108,6 +156,38 @@ export default function CreateReleasePage() {
 
     loadInitialData();
   }, []); // Empty dependency array to run only once
+
+  const searchProfiles = async (query: string) => {
+    if (!query || query.length < 2) {
+      setProfiles([]);
+      return;
+    }
+
+    setProfilesLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select(
+          'id, username, email, artist_name, government_name, profile_image_url'
+        )
+        .or(
+          `username.ilike.%${query}%,email.ilike.%${query}%,artist_name.ilike.%${query}%,government_name.ilike.%${query}%`
+        )
+        .limit(10);
+
+      if (error) throw error;
+      setProfiles(data || []);
+    } catch (error) {
+      console.error('Error searching profiles:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to search profiles. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setProfilesLoading(false);
+    }
+  };
 
   const handleFileSelect = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -254,11 +334,12 @@ export default function CreateReleasePage() {
     console.log('creating new release', newRelease);
     e.preventDefault();
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      router.push('/login');
+    if (!recordOwner) {
+      toast({
+        title: 'Missing information',
+        description: 'Please select a record owner.',
+        variant: 'destructive',
+      });
       return;
     }
 
@@ -358,7 +439,7 @@ export default function CreateReleasePage() {
       setCreationStatus('Saving to database...');
       console.log({
         ...newRelease,
-        record_owner: user.id,
+        record_owner: recordOwner.id,
         cover_image_url: updatedCoverImageUrl,
         tracks,
         price: tracks.reduce((total, track) => total + (track.price || 0), 0),
@@ -370,7 +451,7 @@ export default function CreateReleasePage() {
         .insert([
           {
             ...newRelease,
-            record_owner: user.id,
+            record_owner: recordOwner.id,
             cover_image_url: updatedCoverImageUrl,
             tracks,
             price: tracks.reduce(
@@ -557,6 +638,129 @@ export default function CreateReleasePage() {
       </p>
 
       <form onSubmit={handleCreateRelease} className='space-y-6'>
+        <Card className='mb-6'>
+          <CardHeader>
+            <CardTitle>Record Owner</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className='space-y-2'>
+              <Label htmlFor='record-owner'>Record Owner</Label>
+              <p className='text-xs text-gray-500 dark:text-gray-400 mb-2'>
+                Select who will own this release. Defaults to your account.
+              </p>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant='outline'
+                    role='combobox'
+                    className='w-full justify-between'
+                  >
+                    {recordOwner ? (
+                      <div className='flex items-center gap-2'>
+                        {recordOwner.profile_image_url ? (
+                          <img
+                            src={
+                              recordOwner.profile_image_url ||
+                              '/placeholder.svg'
+                            }
+                            alt={recordOwner.username || recordOwner.email}
+                            className='w-6 h-6 rounded-full object-cover'
+                          />
+                        ) : (
+                          <User className='h-5 w-5 text-muted-foreground' />
+                        )}
+                        <span>
+                          {recordOwner.artist_name ||
+                            recordOwner.government_name ||
+                            recordOwner.username ||
+                            recordOwner.email}
+                        </span>
+                      </div>
+                    ) : (
+                      <span>Select record owner</span>
+                    )}
+                    <Search className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className='w-full p-0' align='start'>
+                  <Command>
+                    <CommandInput
+                      placeholder='Search users...'
+                      value={searchQuery}
+                      onValueChange={(value) => {
+                        setSearchQuery(value);
+                        searchProfiles(value);
+                      }}
+                    />
+                    <CommandList>
+                      <CommandEmpty>
+                        {profilesLoading ? (
+                          <div className='flex items-center justify-center p-4'>
+                            <Loader2 className='h-4 w-4 animate-spin mr-2' />
+                            Searching...
+                          </div>
+                        ) : (
+                          'No users found.'
+                        )}
+                      </CommandEmpty>
+                      <CommandGroup>
+                        {profiles.map((profile) => (
+                          <CommandItem
+                            key={profile.id}
+                            value={profile.id}
+                            onSelect={() => {
+                              setRecordOwner(profile);
+                              setSearchQuery('');
+                            }}
+                          >
+                            <div className='flex items-center gap-2 w-full'>
+                              {profile.profile_image_url ? (
+                                <img
+                                  src={
+                                    profile.profile_image_url ||
+                                    '/placeholder.svg'
+                                  }
+                                  alt={profile.username || profile.email}
+                                  className='w-6 h-6 rounded-full object-cover'
+                                />
+                              ) : (
+                                <User className='h-5 w-5 text-muted-foreground' />
+                              )}
+                              <div className='flex flex-col'>
+                                <span className='font-medium'>
+                                  {profile.artist_name ||
+                                    profile.government_name ||
+                                    profile.username}
+                                </span>
+                                <span className='text-xs text-muted-foreground'>
+                                  {profile.email}
+                                </span>
+                              </div>
+                              {recordOwner?.id === profile.id && (
+                                <Check className='ml-auto h-4 w-4' />
+                              )}
+                            </div>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              {recordOwner && (
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  className='mt-2'
+                  onClick={() => setRecordOwner(null)}
+                >
+                  <X className='h-4 w-4 mr-2' />
+                  Clear selection
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader>
             <CardTitle>Release Information</CardTitle>
