@@ -288,6 +288,65 @@ export default function ReleasePage({ params }: { params: { id: string } }) {
     }
   }
 
+  async function handleCardPayment() {
+    if (!release || !currentUser) {
+      toast({
+        title: 'Warning',
+        description: 'Invalid release or user data. Please log in again.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setPurchaseLoading(true);
+    const totalPrice = calculateReleasePrice(release.tracks) + SURCHARGE;
+    const transactionId = short().toUUID(short.generate());
+
+    try {
+      // Create a checkout session with Yoco
+      const response = await axios.post('/api/yoco-payment', {
+        amountInCents: Math.round(totalPrice * 100), // Convert to cents
+        currency: 'ZAR',
+        releaseId: release.id,
+        userId: currentUser?.id,
+        transactionId,
+        description: `Purchase of ${release.title} (includes R${SURCHARGE} service fee)`,
+      });
+
+      if (response.data.redirectUrl) {
+        // Close the payment modal
+
+        const { error: purchaseError } = await supabase
+          .from('purchases')
+          .insert([
+            {
+              release_id: release.id,
+              user_id: currentUser.id,
+              amount: totalPrice,
+              transaction_id: transactionId,
+              purchase_date: new Date(),
+              status: 'pending',
+              purchase_type: 'release',
+            },
+          ]);
+
+        // Redirect to Yoco's hosted checkout page
+        window.location.href = response.data.redirectUrl;
+      } else {
+        throw new Error('No redirect URL received from payment provider');
+      }
+    } catch (error: any) {
+      console.error('Error initializing payment:', error);
+      toast({
+        title: 'Payment Error',
+        description:
+          error.response?.data?.error || 'Could not initialize payment system',
+        variant: 'destructive',
+      });
+      setPurchaseLoading(false);
+    }
+  }
+
   const parseTimeString = (timeString) => {
     const [minutes, seconds] = timeString.split(':').map(Number);
     return minutes * 60 + seconds;
@@ -533,7 +592,7 @@ export default function ReleasePage({ params }: { params: { id: string } }) {
               <div className='flex flex-wrap gap-3 mt-6'>
                 <Button
                   className='bg-red-500 hover:bg-red-600 text-white'
-                  onClick={handlePurchase}
+                  onClick={handleCardPayment}
                   disabled={purchaseLoading}
                 >
                   <DollarSign className='mr-2 h-4 w-4' />

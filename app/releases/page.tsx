@@ -462,7 +462,7 @@ export default function ReleasesPage() {
         });
     } else {
       // Fallback for browsers that don't support navigator.share
-      const shareUrl = `${window.location.origin}/release/${release.id}`;
+      const shareUrl = `${window.location.origin}/releases/${release.id}`;
       window.open(
         `https://twitter.com/intent/tweet?text=${encodeURIComponent(
           `Check out ${release.title} by ${
@@ -936,7 +936,7 @@ export default function ReleasesPage() {
                         </div>
                         <div className='p-3'>
                           <Link
-                            href={`/release/${release.id}`}
+                            href={`/releases/${release.id}`}
                             className='block'
                           >
                             <h3 className='font-bold text-sm mb-1 line-clamp-1 hover:text-red-500 transition-colors'>
@@ -1112,7 +1112,7 @@ export default function ReleasesPage() {
                                 </div>
                                 <div>
                                   <Link
-                                    href={`/release/${release.id}`}
+                                    href={`/releases/${release.id}`}
                                     className='font-medium hover:text-red-500 transition-colors line-clamp-1'
                                   >
                                     {release.title}
@@ -1157,7 +1157,7 @@ export default function ReleasesPage() {
                                     <DropdownMenuItem
                                       className='cursor-pointer hover:bg-gray-700'
                                       onClick={() =>
-                                        router.push(`/release/${release.id}`)
+                                        router.push(`/releases/${release.id}`)
                                       }
                                     >
                                       <Music className='mr-2 h-4 w-4' />
