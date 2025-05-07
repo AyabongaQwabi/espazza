@@ -17,20 +17,7 @@ import { ArtistMultiSelect } from '../artists';
 import { SongPreview } from '@/components/SongPreview';
 import ProgressBar from '@/components/ProgressBar';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Check, AlertCircle, Loader2, Search, X, User } from 'lucide-react';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { AlertCircle, Loader2, Search, X, User } from 'lucide-react';
 
 interface Song {
   id: string;
@@ -98,6 +85,7 @@ export default function CreateReleasePage() {
   const [recordOwner, setRecordOwner] = useState<Profile | null>(null);
   const [profilesLoading, setProfilesLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [open, setOpen] = useState(false);
 
   const router = useRouter();
   const supabase = createClientComponentClient();
@@ -159,8 +147,7 @@ export default function CreateReleasePage() {
 
   // Replace with improved search function
   const searchProfiles = async (query: string) => {
-    console.log('Searching for profiles with query:', query);
-    if (!query || query.length < 1) {
+    if (!query || query.length < 2) {
       setProfiles([]);
       return;
     }
@@ -170,14 +157,15 @@ export default function CreateReleasePage() {
       // Improved query with better pattern matching
       const searchPattern = `%${query}%`;
 
-      console.log('Searching for profiles with pattern:', searchPattern);
-
       const { data, error } = await supabase
         .from('profiles')
         .select(
           'id, username, email, artist_name, government_name, profile_image_url'
         )
-        .or(`artist_name.ilike.${searchPattern}`);
+        .or(
+          `username.ilike.${searchPattern},email.ilike.${searchPattern},artist_name.ilike.${searchPattern},government_name.ilike.${searchPattern}`
+        )
+        .limit(10);
 
       if (error) {
         console.error('Supabase query error:', error);
@@ -185,7 +173,7 @@ export default function CreateReleasePage() {
       }
 
       console.log('Search results:', data);
-      setProfiles(data);
+      setProfiles(data || []);
     } catch (error) {
       console.error('Error searching profiles:', error);
       toast({
@@ -614,8 +602,6 @@ export default function CreateReleasePage() {
     );
   }
 
-  console.log('Profiles:', profiles);
-
   // Update the button text based on whether the release has been created
   return (
     <div className='p-4 my-4 text-white'>
@@ -705,82 +691,90 @@ export default function CreateReleasePage() {
               <p className='text-xs text-gray-500 dark:text-gray-400 mb-2'>
                 Select who will own this release. Defaults to your account.
               </p>
-              <Popover>
-                <PopoverTrigger asChild>
+
+              {/* Simplified user selection with direct rendering */}
+              <div className='relative'>
+                <div className='flex items-center'>
+                  <Input
+                    placeholder='Search users by name or email...'
+                    value={searchQuery}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setSearchQuery(value);
+                      if (value.length >= 2) {
+                        searchProfiles(value);
+                      }
+                    }}
+                    className='w-full'
+                  />
                   <Button
-                    variant='outline'
-                    role='combobox'
-                    className='w-full justify-between'
+                    variant='ghost'
+                    size='icon'
+                    className='absolute right-0'
+                    onClick={() => searchProfiles(searchQuery)}
                   >
-                    {recordOwner ? (
-                      <div className='flex items-center gap-2'>
-                        {recordOwner.profile_image_url ? (
-                          <img
-                            src={
-                              recordOwner.profile_image_url ||
-                              '/placeholder.svg'
-                            }
-                            alt={recordOwner.username || recordOwner.email}
-                            className='w-6 h-6 rounded-full object-cover'
-                          />
-                        ) : (
-                          <User className='h-5 w-5 text-muted-foreground' />
-                        )}
-                        <span>
+                    <Search className='h-4 w-4' />
+                  </Button>
+                </div>
+
+                {/* Selected user display */}
+                {recordOwner && (
+                  <div className='mt-2 p-2 border rounded-md flex items-center justify-between'>
+                    <div className='flex items-center gap-2'>
+                      {recordOwner.profile_image_url ? (
+                        <img
+                          src={
+                            recordOwner.profile_image_url || '/placeholder.svg'
+                          }
+                          alt={recordOwner.username || recordOwner.email}
+                          className='w-8 h-8 rounded-full object-cover'
+                        />
+                      ) : (
+                        <User className='h-6 w-6 text-muted-foreground' />
+                      )}
+                      <div>
+                        <div className='font-medium'>
                           {recordOwner.artist_name ||
                             recordOwner.government_name ||
                             recordOwner.username ||
                             recordOwner.email}
-                        </span>
+                        </div>
+                        <div className='text-xs text-muted-foreground'>
+                          {recordOwner.email}
+                        </div>
                       </div>
-                    ) : (
-                      <span>Select record owner</span>
-                    )}
-                    <Search className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className='w-full p-0' align='start'>
-                  <Command>
-                    <CommandInput
-                      placeholder='Search users by name or email...'
-                      value={searchQuery}
-                      onValueChange={(value) => {
-                        setSearchQuery(value);
-                        if (value.length >= 2) {
-                          searchProfiles(value);
-                        }
-                      }}
-                    />
-                    <CommandList>
-                      <CommandEmpty>
-                        {profilesLoading ? (
-                          <div className='flex items-center justify-center p-4'>
-                            <Loader2 className='h-4 w-4 animate-spin mr-2' />
-                            Searching...
-                          </div>
-                        ) : searchQuery.length < 2 ? (
-                          'Type at least 2 characters to search'
-                        ) : (
-                          <div className='p-2 text-center'>
-                            <p>No users found matching "{searchQuery}"</p>
-                            <p className='text-xs text-muted-foreground mt-1'>
-                              Try a different search term or click "Load Users"
-                              to see available users
-                            </p>
-                          </div>
-                        )}
-                      </CommandEmpty>
-                      <CommandGroup>
-                        {profiles.map((profile) => (
-                          <CommandItem
-                            key={profile.id}
-                            value={profile.id}
-                            onSelect={() => {
-                              setRecordOwner(profile);
-                              setSearchQuery('');
-                            }}
-                          >
-                            <div className='flex items-center gap-2 w-full'>
+                    </div>
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      onClick={() => setRecordOwner(null)}
+                    >
+                      <X className='h-4 w-4' />
+                    </Button>
+                  </div>
+                )}
+
+                {/* Search results */}
+                {searchQuery.length >= 2 &&
+                  profiles.length > 0 &&
+                  !recordOwner && (
+                    <div className='absolute z-10 w-full mt-1 bg-background border rounded-md shadow-md max-h-60 overflow-y-auto'>
+                      {profilesLoading ? (
+                        <div className='flex items-center justify-center p-4'>
+                          <Loader2 className='h-4 w-4 animate-spin mr-2' />
+                          <span>Searching...</span>
+                        </div>
+                      ) : (
+                        <div>
+                          {profiles.map((profile) => (
+                            <div
+                              key={profile.id}
+                              className='p-2 hover:bg-muted cursor-pointer flex items-center gap-2'
+                              onClick={() => {
+                                setRecordOwner(profile);
+                                setSearchQuery('');
+                              }}
+                            >
                               {profile.profile_image_url ? (
                                 <img
                                   src={
@@ -788,43 +782,43 @@ export default function CreateReleasePage() {
                                     '/placeholder.svg'
                                   }
                                   alt={profile.username || profile.email}
-                                  className='w-6 h-6 rounded-full object-cover'
+                                  className='w-8 h-8 rounded-full object-cover'
                                 />
                               ) : (
-                                <User className='h-5 w-5 text-muted-foreground' />
+                                <User className='h-6 w-6 text-muted-foreground' />
                               )}
-                              <div className='flex flex-col'>
-                                <span className='font-medium'>
+                              <div>
+                                <div className='font-medium'>
                                   {profile.artist_name ||
                                     profile.government_name ||
-                                    profile.username}
-                                </span>
-                                <span className='text-xs text-muted-foreground'>
+                                    profile.username ||
+                                    profile.email}
+                                </div>
+                                <div className='text-xs text-muted-foreground'>
                                   {profile.email}
-                                </span>
+                                </div>
                               </div>
-                              {recordOwner?.id === profile.id && (
-                                <Check className='ml-auto h-4 w-4' />
-                              )}
                             </div>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              {recordOwner && (
-                <Button
-                  variant='ghost'
-                  size='sm'
-                  className='mt-2'
-                  onClick={() => setRecordOwner(null)}
-                >
-                  <X className='h-4 w-4 mr-2' />
-                  Clear selection
-                </Button>
-              )}
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                {/* No results message */}
+                {searchQuery.length >= 2 &&
+                  profiles.length === 0 &&
+                  !profilesLoading &&
+                  !recordOwner && (
+                    <div className='absolute z-10 w-full mt-1 bg-background border rounded-md shadow-md p-4 text-center'>
+                      <p>No users found matching "{searchQuery}"</p>
+                      <p className='text-xs text-muted-foreground mt-1'>
+                        Try a different search term or click "Load Users" to see
+                        available users
+                      </p>
+                    </div>
+                  )}
+              </div>
             </div>
           </CardContent>
         </Card>
