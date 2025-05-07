@@ -157,6 +157,7 @@ export default function CreateReleasePage() {
     loadInitialData();
   }, []); // Empty dependency array to run only once
 
+  // Replace with improved search function
   const searchProfiles = async (query: string) => {
     if (!query || query.length < 2) {
       setProfiles([]);
@@ -165,17 +166,25 @@ export default function CreateReleasePage() {
 
     setProfilesLoading(true);
     try {
+      // Improved query with better pattern matching
+      const searchPattern = `%${query}%`;
+
       const { data, error } = await supabase
         .from('profiles')
         .select(
           'id, username, email, artist_name, government_name, profile_image_url'
         )
         .or(
-          `username.ilike.%${query}%,email.ilike.%${query}%,artist_name.ilike.%${query}%,government_name.ilike.%${query}%`
+          `username.ilike.${searchPattern},email.ilike.${searchPattern},artist_name.ilike.${searchPattern},government_name.ilike.${searchPattern}`
         )
         .limit(10);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase query error:', error);
+        throw error;
+      }
+
+      console.log('Search results:', data);
       setProfiles(data || []);
     } catch (error) {
       console.error('Error searching profiles:', error);
@@ -644,7 +653,53 @@ export default function CreateReleasePage() {
           </CardHeader>
           <CardContent>
             <div className='space-y-2'>
-              <Label htmlFor='record-owner'>Record Owner</Label>
+              <div className='flex justify-between items-center'>
+                <Label htmlFor='record-owner'>Record Owner</Label>
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  onClick={(e) => {
+                    e.preventDefault();
+                    // Load first 10 profiles to verify data access
+                    setProfilesLoading(true);
+                    supabase
+                      .from('profiles')
+                      .select(
+                        'id, username, email, artist_name, government_name, profile_image_url'
+                      )
+                      .limit(10)
+                      .then(({ data, error }) => {
+                        if (error) {
+                          console.error('Error loading profiles:', error);
+                          toast({
+                            title: 'Error',
+                            description:
+                              'Failed to load profiles. Please check console for details.',
+                            variant: 'destructive',
+                          });
+                        } else {
+                          console.log('Available profiles:', data);
+                          setProfiles(data || []);
+                          if (data && data.length > 0) {
+                            toast({
+                              title: 'Profiles loaded',
+                              description: `Found ${data.length} profiles. Check console for details.`,
+                            });
+                          } else {
+                            toast({
+                              title: 'No profiles found',
+                              description:
+                                'No profiles available in the database.',
+                            });
+                          }
+                        }
+                        setProfilesLoading(false);
+                      });
+                  }}
+                >
+                  Load Users
+                </Button>
+              </div>
               <p className='text-xs text-gray-500 dark:text-gray-400 mb-2'>
                 Select who will own this release. Defaults to your account.
               </p>
@@ -685,11 +740,13 @@ export default function CreateReleasePage() {
                 <PopoverContent className='w-full p-0' align='start'>
                   <Command>
                     <CommandInput
-                      placeholder='Search users...'
+                      placeholder='Search users by name or email...'
                       value={searchQuery}
                       onValueChange={(value) => {
                         setSearchQuery(value);
-                        searchProfiles(value);
+                        if (value.length >= 2) {
+                          searchProfiles(value);
+                        }
                       }}
                     />
                     <CommandList>
@@ -699,8 +756,16 @@ export default function CreateReleasePage() {
                             <Loader2 className='h-4 w-4 animate-spin mr-2' />
                             Searching...
                           </div>
+                        ) : searchQuery.length < 2 ? (
+                          'Type at least 2 characters to search'
                         ) : (
-                          'No users found.'
+                          <div className='p-2 text-center'>
+                            <p>No users found matching "{searchQuery}"</p>
+                            <p className='text-xs text-muted-foreground mt-1'>
+                              Try a different search term or click "Load Users"
+                              to see available users
+                            </p>
+                          </div>
                         )}
                       </CommandEmpty>
                       <CommandGroup>
