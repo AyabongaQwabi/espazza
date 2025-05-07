@@ -185,7 +185,7 @@ export default function CreateReleasePage() {
       }
 
       console.log('Search results:', data);
-      setProfiles(data || []);
+      setProfiles(data);
     } catch (error) {
       console.error('Error searching profiles:', error);
       toast({
@@ -613,6 +613,8 @@ export default function CreateReleasePage() {
       </div>
     );
   }
+
+  console.log('Profiles:', profiles);
 
   // Update the button text based on whether the release has been created
   return (
