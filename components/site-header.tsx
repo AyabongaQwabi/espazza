@@ -40,7 +40,7 @@ function Navigation({ className = '' }: { className?: string }) {
           <span>Music</span>
         </Link>
         <Link
-          href='/'
+          href='/blog'
           className='hover:text-red-500 transition-colors flex items-center gap-2'
         >
           <HoverIcon Icon={BookOpenIcon} size={16} />

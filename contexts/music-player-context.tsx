@@ -227,6 +227,11 @@ function musicPlayerReducer(
         ...state,
         queue: [...state.queue, action.payload],
       };
+    case 'ADD_TRACKS_TO_QUEUE':
+      return {
+        ...state,
+        queue: [...state.queue, ...action.payload],
+      };
     case 'REMOVE_FROM_QUEUE': {
       const newQueue = state.queue.filter(
         (track) => track.id !== action.payload
@@ -1157,6 +1162,19 @@ export function MusicPlayerProvider({
     dispatch({ type: 'TOGGLE_SHUFFLE' });
   };
 
+  const addToQueue = (track: Track) => {
+    dispatch({ type: 'ADD_TO_QUEUE', payload: track });
+  };
+
+  const addTracksToQueue = (tracks: Track[]) => {
+    // Check if the tracks are already in the queue
+    const existingTrackIds = new Set(state.queue.map((track) => track.id));
+    console.log('Existing track IDs in queue:', existingTrackIds);
+    const newTracks = tracks.filter((track) => !existingTrackIds.has(track.id));
+    console.log('Adding tracks to queue:', newTracks);
+    dispatch({ type: 'ADD_TRACKS_TO_QUEUE', payload: newTracks });
+  };
+
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -1171,6 +1189,13 @@ export function MusicPlayerProvider({
     return state.userPlaylists.includes(playlistId);
   };
 
+  const playFirstTrackFromQueue = () => {
+    console.log('Playing first song from queue');
+    if (state.queue.length > 0) {
+      dispatch({ type: 'SET_TRACK', payload: state.queue[0] });
+    }
+  };
+
   return (
     <MusicPlayerContext.Provider
       value={{
@@ -1180,6 +1205,9 @@ export function MusicPlayerProvider({
         playTrack,
         playPlaylist,
         addToPlaylist,
+        addToQueue,
+        playFirstTrackFromQueue,
+        addTracksToQueue,
         createPlaylist,
         updatePlaylist,
         deletePlaylist,

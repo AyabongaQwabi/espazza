@@ -67,6 +67,7 @@ export type MusicPlayerAction =
   | { type: 'TOGGLE_SHUFFLE' }
   | { type: 'SET_QUEUE'; payload: Track[] }
   | { type: 'ADD_TO_QUEUE'; payload: Track }
+  | { type: 'ADD_TRACKS_TO_QUEUE'; payload: Track[] }
   | { type: 'REMOVE_FROM_QUEUE'; payload: string }
   | { type: 'CLEAR_QUEUE' }
   | { type: 'SET_PLAYLIST'; payload: Playlist }

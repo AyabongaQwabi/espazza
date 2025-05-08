@@ -1,673 +1,913 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { MusicIcon, Loader2, Heart, Search, Share2, X } from 'lucide-react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useRouter } from 'next/navigation';
+
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { formatDistanceToNow } from 'date-fns';
-import { toast } from '@/hooks/use-toast';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+  Play,
+  Pause,
+  Heart,
+  Share2,
+  Headphones,
+  ArrowRight,
+  ChevronRight,
+  Sparkles,
+  BookOpen,
+  TrendingUp,
+  Flame,
+  Loader2,
+} from 'lucide-react';
+import { useMusicPlayer } from '@/hooks/use-music-player';
+import { add } from 'date-fns';
 
-export default function BlogPage() {
-  const [posts, setPosts] = useState([]);
+export default function HomePage() {
+  const [featuredReleases, setFeaturedReleases] = useState([]);
+  const [latestPosts, setLatestPosts] = useState([]);
+  const [trendingArtists, setTrendingArtists] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
-  const [user, setUser] = useState(null);
-  const [postLikes, setPostLikes] = useState({});
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState([]);
-  const loaderRef = useRef(null);
+  const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
+  const [allTracks, setAllTracks] = useState([]);
+  const router = useRouter();
   const supabase = createClientComponentClient();
+  const {
+    playTrack,
+    playTrackFromRelease,
+    addTracksToQueue,
+    state,
+    playFirstTrackFromQueue,
+    togglePlay,
+  } = useMusicPlayer();
+  const initialLoadRef = useRef(true);
+  const buttonRef = useRef(null);
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      await Promise.all([
+        fetchFeaturedReleases(),
+        fetchLatestPosts(),
+        fetchTrendingArtists(),
+      ]);
+      setLoading(false);
+    }
 
-  const POSTS_PER_PAGE = 9; // Changed to 9 for 3x3 grid
+    fetchData();
+  }, []);
 
-  // Function to fetch posts
-  const fetchPosts = useCallback(
-    async (pageNumber) => {
-      const start = (pageNumber - 1) * POSTS_PER_PAGE;
-      const end = start + POSTS_PER_PAGE - 1;
-
-      try {
-        const {
-          data: newPosts,
-          count,
-          error,
-        } = await supabase
-          .from('blog_posts')
-          .select(
-            `
-            *,
-            profiles:author_id (username, full_name, profile_image_url),
-            likes:blog_likes(count),
-            comments:blog_comments(count)
-          `,
-            { count: 'exact' }
+  async function fetchFeaturedReleases() {
+    try {
+      const { data, error } = await supabase
+        .from('releases')
+        .select(
+          `
+          *,
+          genre:genres(id, name),
+          record_label:record_labels(name),
+          record_owner:profiles!inner(
+            id,
+            artist_name, 
+            username
           )
-          .eq('published', true)
-          .order('created_at', { ascending: false })
-          .range(start, end);
+    `
+        )
+        .order('created_at', { ascending: false }) // DESC order
+        .limit(6);
 
-        if (error) {
-          console.error('Error fetching posts:', error);
-          return false;
-        }
+      if (error) throw error;
+      const allTracks = data.reduce((acc, release) => {
+        const tracks = release.tracks.map((track) => ({
+          id: track.id,
+          title: track.title,
+          artist:
+            release.record_owner.artist_name || release.record_owner.username,
+          artistId: release.record_owner.username,
+          cover_image_url: track.cover_image_url || release.cover_image_url,
+          url: track.url,
+          release_id: release.id,
+        }));
+        return [...acc, ...tracks];
+      }, []);
+      setAllTracks(allTracks);
+      addTracksToQueue(allTracks);
+      setFeaturedReleases(data || []);
+    } catch (error) {
+      console.error('Error fetching releases:', error);
+    }
+  }
 
-        if (newPosts && newPosts.length > 0) {
-          // If it's the first page, replace posts, otherwise append
-          setPosts((prevPosts) =>
-            pageNumber === 1 ? newPosts : [...prevPosts, ...newPosts]
-          );
+  async function fetchLatestPosts() {
+    try {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select(
+          `
+          *,
+          profiles:author_id (username, full_name, profile_image_url),
+          likes:blog_likes(count)
+        `
+        )
+        .eq('published', true)
+        .order('created_at', { ascending: false })
+        .limit(4);
 
-          // Check if we've reached the end
-          setHasMore(start + newPosts.length < (count || 0));
+      if (error) throw error;
+      setLatestPosts(data || []);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
+  }
 
-          // Initialize likes for each post
-          const likesObj = {};
-          for (const post of newPosts) {
-            await fetchLikes(post.id, likesObj);
-          }
+  async function fetchTrendingArtists() {
+    try {
+      // Fetch all likes (or a large enough number for trending purposes)
+      const { data: likesData, error: likesError } = await supabase
+        .from('artist_likes')
+        .select('artist_id');
 
-          return true;
-        } else {
-          setHasMore(false);
-          return false;
-        }
-      } catch (error) {
-        console.error('Error in fetchPosts:', error);
-        return false;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [supabase]
-  );
+      if (likesError) throw likesError;
 
-  // Search posts function
-  const searchPosts = useCallback(
-    async (query) => {
-      if (!query.trim()) {
-        setSearchResults([]);
+      if (!likesData || likesData.length === 0) {
+        console.warn('No likes found');
+        setTrendingArtists([]);
         return;
       }
 
-      setIsSearching(true);
-      try {
-        const { data, error } = await supabase
-          .from('blog_posts')
-          .select(
-            `
-            *,
-            profiles:author_id (username, full_name, profile_image_url),
-            likes:blog_likes(count),
-            comments:blog_comments(count)
-          `
-          )
-          .eq('published', true)
-          .or(
-            `title.ilike.%${query}%,excerpt.ilike.%${query}%,content.ilike.%${query}%`
-          )
-          .order('created_at', { ascending: false })
-          .limit(20);
+      // Count likes per artist in JS
+      const likeCounts = likesData.reduce((acc, { artist_id }) => {
+        acc[artist_id] = (acc[artist_id] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
 
-        if (error) {
-          console.error('Error searching posts:', error);
-          toast({
-            title: 'Search Error',
-            description: 'Failed to search posts. Please try again.',
-            variant: 'destructive',
-          });
-          return;
-        }
+      // Sort artist IDs by like count
+      const sortedArtistIds = Object.entries(likeCounts)
+        .sort(([, a], [, b]) => b - a)
+        .map(([artist_id]) => artist_id)
+        .slice(0, 10); // limit to top 10
 
-        setSearchResults(data || []);
+      // Fetch artist profiles for the top artist IDs
+      const { data: artistProfiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*, south_african_towns(*)')
+        .eq('user_type', 'artist')
+        .not('artist_name', 'is', null)
+        .not('artist_name', 'eq', '')
+        .in('username', sortedArtistIds); // NOTE: match against `id`, not `username`
 
-        // Initialize likes for search results
-        const likesObj = { ...postLikes };
-        for (const post of data || []) {
-          await fetchLikes(post.id, likesObj);
-        }
-      } catch (error) {
-        console.error('Error in searchPosts:', error);
-      } finally {
-        setIsSearching(false);
-      }
-    },
-    [supabase, postLikes]
-  );
+      if (profilesError) throw profilesError;
 
-  // Check authentication
-  useEffect(() => {
-    async function checkAuth() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUser(user);
-    }
+      // Merge like count into profiles
+      const artistsWithLikes = artistProfiles.map((profile) => ({
+        ...profile,
+        likes_count: likeCounts[profile.id] || 0,
+      }));
 
-    checkAuth();
-  }, [supabase]);
+      // Sort final results again and limit to top 5
+      const sortedArtists = artistsWithLikes
+        .sort((a, b) => b.likes_count - a.likes_count)
+        .slice(0, 5);
 
-  // Initial load
-  useEffect(() => {
-    fetchPosts(1);
-  }, [fetchPosts]);
-
-  // Set up intersection observer for infinite scroll
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (entry.isIntersecting && hasMore && !loading && !searchQuery) {
-          setPage((prevPage) => {
-            const nextPage = prevPage + 1;
-            fetchPosts(nextPage);
-            return nextPage;
-          });
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    const currentLoader = loaderRef.current;
-    if (currentLoader) {
-      observer.observe(currentLoader);
-    }
-
-    return () => {
-      if (currentLoader) {
-        observer.unobserve(currentLoader);
-      }
-    };
-  }, [hasMore, loading, fetchPosts, searchQuery]);
-
-  // Handle search input changes with debounce
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchQuery) {
-        searchPosts(searchQuery);
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery, searchPosts]);
-
-  // Fetch likes for a post
-  async function fetchLikes(postId, likesObj = postLikes) {
-    try {
-      const { data: likes } = await supabase
-        .from('blog_likes')
-        .select('*, profiles(username, profile_image_url)')
-        .eq('post_id', postId);
-
-      const newLikesObj = { ...likesObj };
-      newLikesObj[postId] = likes || [];
-      setPostLikes(newLikesObj);
-
-      return likes || [];
+      setTrendingArtists(sortedArtists);
     } catch (error) {
-      console.error('Error fetching likes:', error);
-      return [];
+      console.error('Error fetching trending artists:', error);
+      setTrendingArtists([]);
     }
   }
 
-  // Handle like button click
-  async function handleLike(postId) {
-    if (!user) {
-      toast({
-        title: 'Authentication Required',
-        description: 'Please log in to like posts',
-        variant: 'destructive',
-      });
-      return;
+  const handlePlayPreview = (track, release) => {
+    if (currentlyPlaying === track.url) {
+      setCurrentlyPlaying(null);
+    } else {
+      setCurrentlyPlaying(track.url);
+
+      const playerTrack = {
+        id: track.id,
+        title: track.title,
+        artist:
+          release.record_owner.artist_name || release.record_owner.username,
+        artistId: release.record_owner.username,
+        cover_image_url: track.cover_image_url || release.cover_image_url,
+        url: track.url,
+        release_id: release.id,
+      };
+
+      playTrack(playerTrack);
     }
+  };
 
-    const currentLikes = postLikes[postId] || [];
-    const existingLike = currentLikes.find((like) => like.user_id === user.id);
-
-    try {
-      if (existingLike) {
-        // Unlike the post
-        const { error } = await supabase
-          .from('blog_likes')
-          .delete()
-          .eq('id', existingLike.id);
-
-        if (!error) {
-          const updatedLikes = currentLikes.filter(
-            (like) => like.id !== existingLike.id
-          );
-          setPostLikes({
-            ...postLikes,
-            [postId]: updatedLikes,
-          });
-
-          // Update the post's likes count in the UI
-          const updatePostLikes = (postArray) =>
-            postArray.map((post) => {
-              if (post.id === postId) {
-                return {
-                  ...post,
-                  likes: [{ count: (post.likes?.[0]?.count || 1) - 1 }],
-                };
-              }
-              return post;
-            });
-
-          setPosts(updatePostLikes(posts));
-          if (searchResults.length > 0) {
-            setSearchResults(updatePostLikes(searchResults));
-          }
-        }
-      } else {
-        // Like the post
-        const { data, error } = await supabase
-          .from('blog_likes')
-          .insert([{ post_id: postId, user_id: user.id }])
-          .select('*, profiles(username, profile_image_url)')
-          .single();
-
-        if (!error && data) {
-          setPostLikes({
-            ...postLikes,
-            [postId]: [...currentLikes, data],
-          });
-
-          // Update the post's likes count in the UI
-          const updatePostLikes = (postArray) =>
-            postArray.map((post) => {
-              if (post.id === postId) {
-                return {
-                  ...post,
-                  likes: [{ count: (post.likes?.[0]?.count || 0) + 1 }],
-                };
-              }
-              return post;
-            });
-
-          setPosts(updatePostLikes(posts));
-          if (searchResults.length > 0) {
-            setSearchResults(updatePostLikes(searchResults));
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error handling like:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to process your like. Please try again.',
-        variant: 'destructive',
-      });
-    }
-  }
-
-  // Format date for display
   const formatPostDate = (dateString) => {
     try {
-      return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      }).format(date);
     } catch (error) {
       return 'recently';
     }
   };
 
-  // Check if the current user has liked a post
-  const hasUserLikedPost = (postId) => {
-    const likes = postLikes[postId] || [];
-    return likes.some((like) => like.user_id === user?.id);
+  const calculateReleasePrice = (tracks) => {
+    return tracks.reduce((total, track) => total + (track.price || 0), 0);
   };
 
-  // Clear search
-  const clearSearch = () => {
-    setSearchQuery('');
-    setSearchResults([]);
-  };
-
-  // Render post grid
-  const renderPostGrid = (postsToRender) => {
-    if (!postsToRender || postsToRender.length === 0) {
-      return (
-        <div className='text-center py-20 bg-white/10 backdrop-blur-sm rounded-xl p-8'>
-          <MusicIcon className='h-16 w-16 text-pink-400 mx-auto mb-6' />
-          <h2 className='text-2xl font-semibold text-white mb-4'>
-            No posts found
-          </h2>
-          <p className='text-pink-200 mb-8'>
-            {searchQuery
-              ? 'Try a different search term'
-              : 'Check back later for updates'}
-          </p>
-        </div>
-      );
-    }
-
+  if (loading) {
     return (
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-        {postsToRender.map((post, index) => (
-          <motion.div
-            key={`${post.id}-${index}`}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.5) }}
-          >
-            <Card className='h-full flex flex-col overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white dark:bg-gray-800'>
-              {/* Featured Image */}
-              <div className='relative overflow-hidden h-48'>
-                <Link href={`/blog/${post.slug}`}>
-                  <img
-                    src={
-                      post.featured_image ||
-                      '/placeholder.svg?height=200&width=400'
-                    }
-                    alt={post.title}
-                    className='w-full h-full object-cover transition-transform duration-300 hover:scale-105'
-                  />
-                  <div className='absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-70'></div>
-                  <div className='absolute bottom-0 left-0 p-4'>
-                    <Badge className='bg-pink-600 hover:bg-pink-700 text-white'>
-                      {'Music'}
-                    </Badge>
-                  </div>
-                </Link>
-              </div>
-
-              <CardHeader className='p-4 pb-2'>
-                <Link href={`/blog/${post.slug}`}>
-                  <h2 className='text-xl font-bold text-gray-900 dark:text-white line-clamp-2 hover:text-pink-600 dark:hover:text-pink-400 transition-colors'>
-                    {post.title}
-                  </h2>
-                </Link>
-                <div className='flex items-center space-x-2 mt-2'>
-                  <Avatar className='h-6 w-6 ring-1 ring-pink-500'>
-                    <AvatarImage
-                      src={
-                        post.profiles?.profile_image_url || '/placeholder.svg'
-                      }
-                      alt={post.profiles?.username || 'User'}
-                    />
-                    <AvatarFallback className='bg-gradient-to-br from-pink-500 to-purple-600 text-white text-xs'>
-                      {(post.profiles?.username || 'U').charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className='text-xs text-gray-500 dark:text-gray-400'>
-                    {post.profiles?.full_name || post.profiles?.username} •{' '}
-                    {formatPostDate(post.created_at)}
-                  </span>
-                </div>
-              </CardHeader>
-
-              <CardContent className='p-4 pt-2 flex-grow'>
-                <p className='text-gray-600 dark:text-gray-300 text-sm line-clamp-3 mb-2'>
-                  {post.excerpt}
-                </p>
-              </CardContent>
-
-              <CardFooter className='p-4 pt-0 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center'>
-                <div className='flex space-x-2'>
-                  <Button
-                    variant='ghost'
-                    size='sm'
-                    className={`${
-                      hasUserLikedPost(post.id)
-                        ? 'text-pink-600 dark:text-pink-400'
-                        : 'text-gray-600 dark:text-gray-300'
-                    } hover:text-pink-600 dark:hover:text-pink-400 hover:bg-pink-50 dark:hover:bg-gray-700 p-1 rounded-full`}
-                    onClick={() => handleLike(post.id)}
-                  >
-                    <Heart
-                      className={`h-4 w-4 ${
-                        hasUserLikedPost(post.id)
-                          ? 'fill-pink-600 dark:fill-pink-400'
-                          : ''
-                      }`}
-                    />
-                    <span className='ml-1 text-xs'>
-                      {post.likes?.[0]?.count || 0}
-                    </span>
-                  </Button>
-                  <Button
-                    variant='ghost'
-                    size='sm'
-                    className='text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-gray-700 p-1 rounded-full'
-                  >
-                    <Share2 className='h-4 w-4' />
-                  </Button>
-                </div>
-                <Link
-                  href={`/blog/${post.slug}`}
-                  className='text-xs text-pink-600 dark:text-pink-400 hover:text-pink-800 dark:hover:text-pink-300 font-medium'
-                >
-                  Read more →
-                </Link>
-              </CardFooter>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-    );
-  };
-
-  if (loading && posts.length === 0) {
-    return (
-      <div className='min-h-screen bg-gradient-to-b from-indigo-900 to-purple-900 pt-24 flex items-center justify-center'>
+      <div className='min-h-screen bg-gradient-to-b from-black to-red-950 flex items-center justify-center'>
         <div className='flex flex-col items-center'>
-          <Loader2 className='h-10 w-10 text-pink-500 animate-spin' />
-          <p className='mt-4 text-white font-medium'>
-            Loading awesome posts...
-          </p>
+          <Loader2 className='h-12 w-12 text-red-500 animate-spin' />
+          <p className='mt-4 text-white font-medium'>Loading your vibe...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className='min-h-screen bg-gradient-to-b from-indigo-900 to-purple-900 pt-16 pb-16'>
-      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-        {/* Header */}
-        <div className='text-center mb-8'>
-          <h1 className='text-4xl md:text-6xl font-extrabold text-white mb-4 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500'>
-            Whats good fam?🔥
-          </h1>
-          <p className='text-pink-200 text-lg max-w-2xl mx-auto'>
-            Read all about it and stay updated with the latest posts from your
-            favourite artists and creators.
-          </p>
+    <div
+      className='min-h-screen bg-gradient-to-b from-black to-red-950'
+      onMouseEnter={() => {
+        togglePlay();
+        playFirstTrackFromQueue();
+        if (buttonRef.current) {
+          buttonRef.current.click();
+        }
+      }}
+    >
+      {/* Hero Section */}
+      <section className='relative h-[85vh] overflow-hidden'>
+        <div className='absolute inset-0 z-0'>
+          <Image
+            src='/kkeedcover.jpg'
+            alt='Music Visualizer'
+            fill
+            priority
+            className='object-cover opacity-70'
+          />
+          <div className='absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-red-950'></div>
         </div>
 
-        {/* Search Bar */}
-        <div className='max-w-2xl mx-auto mb-8'>
-          <div className='relative'>
-            <Input
-              type='text'
-              placeholder='Search posts...'
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className='pl-10 pr-10 py-6 bg-white/10 backdrop-blur-sm border-pink-300/30 text-white placeholder:text-pink-200 focus:border-pink-500 focus:ring-pink-500'
-            />
-            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-pink-300' />
-            {searchQuery && (
+        <div className='relative z-10 container mx-auto px-4 h-full flex flex-col justify-center'>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className='max-w-4xl'
+          >
+            <Badge className='bg-red-600 text-white mb-6 py-1.5'>
+              <Sparkles className='w-4 h-4 mr-1' /> Premium Music Experience
+            </Badge>
+            <h1 className='text-5xl md:text-7xl font-bold text-white mb-6 leading-tight'>
+              Discover Your Next
+              <span className='bg-clip-text text-transparent bg-gradient-to-r from-red-500 via-red-700 to-red-900 block'>
+                Musical Obsession
+              </span>
+            </h1>
+            <p className='text-xl text-gray-300 mb-8 max-w-2xl'>
+              Explore the latest releases from top artists and stay updated with
+              exclusive content from your favorite creators.
+            </p>
+            <div className='flex flex-wrap gap-4'>
               <Button
-                variant='ghost'
-                size='sm'
-                onClick={clearSearch}
-                className='absolute right-2 top-1/2 transform -translate-y-1/2 text-pink-300 hover:text-pink-100 p-1'
+                size='lg'
+                className='bg-red-600 hover:bg-red-700 text-white'
+                onClick={() => router.push('/releases')}
               >
-                <X className='h-5 w-5' />
+                <Headphones className='mr-2 h-5 w-5' /> Browse Music
               </Button>
-            )}
+              <Button
+                size='lg'
+                variant='outline'
+                className='border-red-500 text-red-500 hover:bg-red-500/10'
+                onClick={() => router.push('/blog')}
+              >
+                <BookOpen className='mr-2 h-5 w-5' /> Read Blog
+              </Button>
+            </div>
+          </motion.div>
+
+          {/* Floating Music Player Preview */}
+          {featuredReleases.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className='absolute bottom-12 right-12 max-w-md hidden lg:block'
+            >
+              <Card className='bg-black/40 backdrop-blur-md border border-white/10 overflow-hidden'>
+                <div className='flex p-4'>
+                  <div className='relative w-16 h-16 mr-4'>
+                    <Image
+                      src={
+                        featuredReleases[0].cover_image_url ||
+                        '/placeholder.svg' ||
+                        '/placeholder.svg'
+                      }
+                      alt={featuredReleases[0].title}
+                      fill
+                      className='object-cover rounded-md'
+                    />
+                    <Button
+                      size='icon'
+                      id='play-btn'
+                      ref={buttonRef}
+                      className='absolute inset-0 m-auto bg-red-600/80 hover:bg-red-600 h-8 w-8 rounded-full'
+                      onClick={() =>
+                        handlePlayPreview(
+                          featuredReleases[0].tracks[0],
+                          featuredReleases[0]
+                        )
+                      }
+                    >
+                      {currentlyPlaying ===
+                      featuredReleases[0].tracks[0]?.url ? (
+                        <Pause className='h-4 w-4' />
+                      ) : (
+                        <Play className='h-4 w-4' />
+                      )}
+                    </Button>
+                  </div>
+                  <div className='flex-1'>
+                    <h3 className='font-bold text-white truncate'>
+                      {featuredReleases[0].title}
+                    </h3>
+                    <p className='text-sm text-gray-300 truncate'>
+                      {featuredReleases[0].record_owner.artist_name ||
+                        featuredReleases[0].record_owner.username}
+                    </p>
+                    <div className='flex items-center mt-1'>
+                      <Badge className='bg-purple-600/50 text-white text-xs'>
+                        Featured
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          )}
+        </div>
+      </section>
+
+      {/* Featured Music Section */}
+      <section className='py-16 container mx-auto px-4'>
+        <div className='flex justify-between items-center mb-10'>
+          <div>
+            <Badge className='bg-indigo-600 text-white mb-2'>
+              <Flame className='w-3 h-3 mr-1' /> Hot Releases
+            </Badge>
+            <h2 className='text-3xl font-bold text-white'>Featured Music</h2>
           </div>
+          <Button
+            variant='ghost'
+            className='text-red-500 hover:text-red-400 hover:bg-red-500/10'
+            onClick={() => router.push('/releases')}
+          >
+            View All <ArrowRight className='ml-2 h-4 w-4' />
+          </Button>
         </div>
 
-        {/* Featured Post (only show if not searching) */}
-        {!searchQuery && posts.length > 0 && (
-          <div className='mb-12'>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+          {featuredReleases.map((release) => (
             <motion.div
+              key={release.id}
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+              className='group'
             >
-              <Card className='overflow-hidden border-0 shadow-xl bg-gradient-to-r from-pink-500/10 to-indigo-500/10 backdrop-blur-sm'>
-                <div className='grid md:grid-cols-2 gap-0'>
-                  <div className='relative h-64 md:h-auto'>
-                    <Link href={`/blog/${posts[0].slug}`}>
-                      <img
-                        src={
-                          posts[0].featured_image ||
-                          '/placeholder.svg?height=400&width=600'
-                        }
-                        alt={posts[0].title}
-                        className='w-full h-full object-cover'
-                      />
-                      <div className='absolute inset-0 bg-gradient-to-t from-black/70 to-transparent md:bg-gradient-to-r'></div>
-                    </Link>
+              <Card className='bg-gray-900/50 backdrop-blur-sm border-0 overflow-hidden hover:shadow-xl hover:shadow-pink-500/10 transition-all duration-300'>
+                <div className='relative aspect-square overflow-hidden'>
+                  <Image
+                    src={release.cover_image_url || '/placeholder.svg'}
+                    alt={release.title}
+                    fill
+                    className='object-cover transition-transform duration-500 group-hover:scale-110'
+                  />
+                  <div className='absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-between p-4'>
+                    <Button
+                      size='icon'
+                      className='bg-red-600 hover:bg-red-700 rounded-full h-12 w-12 shadow-lg transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300'
+                      onClick={() =>
+                        handlePlayPreview(release.tracks[0], release)
+                      }
+                    >
+                      {currentlyPlaying === release.tracks[0]?.url ? (
+                        <Pause className='h-5 w-5' />
+                      ) : (
+                        <Play className='h-5 w-5' />
+                      )}
+                    </Button>
+                    <div className='flex gap-2 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300'>
+                      <Button
+                        size='icon'
+                        variant='ghost'
+                        className='bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-full h-10 w-10'
+                      >
+                        <Heart className='h-5 w-5' />
+                      </Button>
+                      <Button
+                        size='icon'
+                        variant='ghost'
+                        className='bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-full h-10 w-10'
+                      >
+                        <Share2 className='h-5 w-5' />
+                      </Button>
+                    </div>
                   </div>
-                  <div className='p-6 md:p-8 flex flex-col justify-center'>
-                    <Badge className='w-fit mb-4 bg-pink-600 hover:bg-pink-700 text-white'>
-                      Featured
-                    </Badge>
-                    <Link href={`/blog/${posts[0].slug}`}>
-                      <h2 className='text-2xl md:text-3xl font-bold text-white mb-4 hover:text-pink-300 transition-colors'>
-                        {posts[0].title}
-                      </h2>
-                    </Link>
-                    <p className='text-pink-100 mb-6 line-clamp-3'>
-                      {posts[0].excerpt}
+                </div>
+                <CardContent className='p-4'>
+                  <Link href={`/r/${release.short_unique_id || release.id}`}>
+                    <h3 className='font-bold text-white text-lg mb-1 hover:text-red-500 transition-colors'>
+                      {release.title}
+                    </h3>
+                  </Link>
+                  <Link href={`/artists/${release.record_owner.username}`}>
+                    <p className='text-gray-400 hover:text-white transition-colors'>
+                      {release.record_owner.artist_name ||
+                        release.record_owner.username}
                     </p>
-                    <div className='flex items-center justify-between'>
-                      <div className='flex items-center space-x-3'>
-                        <Avatar className='h-8 w-8 ring-2 ring-pink-500'>
+                  </Link>
+                  <div className='flex items-center justify-between mt-3'>
+                    <Badge className='bg-purple-900/50 text-purple-200'>
+                      {release.genre?.name || 'Music'}
+                    </Badge>
+                    <span className='text-yellow-400 font-medium'>
+                      R{calculateReleasePrice(release.tracks).toFixed(2)}
+                    </span>
+                  </div>
+                </CardContent>
+                <CardFooter className='p-4 pt-0 flex justify-between items-center'>
+                  <span className='text-xs text-gray-400'>
+                    {release.tracks.length} tracks
+                  </span>
+                  <Button
+                    size='sm'
+                    className='bg-red-600 hover:bg-red-700 text-white'
+                    onClick={() =>
+                      router.push(`/r/${release.short_unique_id || release.id}`)
+                    }
+                  >
+                    Listen Now
+                  </Button>
+                </CardFooter>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Blog Posts Section */}
+      <section className='py-16 bg-gradient-to-r from-red-900/30 to-black/30 backdrop-blur-sm'>
+        <div className='container mx-auto px-4'>
+          <div className='flex justify-between items-center mb-10'>
+            <div>
+              <Badge className='bg-red-600 text-white mb-2'>
+                <BookOpen className='w-3 h-3 mr-1' /> Latest Stories
+              </Badge>
+              <h2 className='text-3xl font-bold text-white'>From The Blog</h2>
+            </div>
+            <Button
+              variant='ghost'
+              className='text-red-500 hover:text-red-400 hover:bg-red-500/10'
+              onClick={() => router.push('/blog')}
+            >
+              View All <ArrowRight className='ml-2 h-4 w-4' />
+            </Button>
+          </div>
+
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
+            {/* Featured Blog Post */}
+            {latestPosts.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+                className='lg:col-span-1'
+              >
+                <Card className='bg-black/40 backdrop-blur-md border border-white/10 overflow-hidden h-full'>
+                  <div className='relative w-full h-full aspect-[16/9]'>
+                    <Image
+                      src={
+                        latestPosts[0].featured_image ||
+                        '/placeholder.svg?height=400&width=600&query=music studio with neon lights' ||
+                        '/placeholder.svg' ||
+                        '/placeholder.svg'
+                      }
+                      alt={latestPosts[0].title}
+                      fill
+                      className='object-cover'
+                    />
+                    <div className='absolute inset-0 bg-gradient-to-t from-black/90 to-transparent'></div>
+                    <div className='absolute bottom-0 left-0 p-6'>
+                      <Badge className='bg-red-600 hover:bg-red-700 text-white mb-3'>
+                        Featured
+                      </Badge>
+                      <Link href={`/blog/${latestPosts[0].slug}`}>
+                        <h3 className='text-2xl font-bold text-white mb-2 hover:text-red-400 transition-colors'>
+                          {latestPosts[0].title}
+                        </h3>
+                      </Link>
+                      <p className='text-gray-300 line-clamp-2 mb-4'>
+                        {latestPosts[0].excerpt}
+                      </p>
+                      <div className='flex items-center'>
+                        <Avatar className='h-8 w-8 mr-3 ring-2 ring-red-500'>
                           <AvatarImage
                             src={
-                              posts[0].profiles?.profile_image_url ||
+                              latestPosts[0].profiles?.profile_image_url ||
+                              '/placeholder.svg' ||
                               '/placeholder.svg'
                             }
-                            alt={posts[0].profiles?.username || 'User'}
+                            alt={latestPosts[0].profiles?.username || 'User'}
                           />
-                          <AvatarFallback className='bg-gradient-to-br from-pink-500 to-purple-600 text-white'>
-                            {(posts[0].profiles?.username || 'U')
+                          <AvatarFallback className='bg-gradient-to-br from-red-500 to-red-900 text-white'>
+                            {(latestPosts[0].profiles?.username || 'U')
                               .charAt(0)
                               .toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         <div>
                           <p className='text-sm font-medium text-white'>
-                            {posts[0].profiles?.full_name ||
-                              posts[0].profiles?.username}
+                            {latestPosts[0].profiles?.full_name ||
+                              latestPosts[0].profiles?.username}
                           </p>
-                          <p className='text-xs text-pink-200'>
-                            {formatPostDate(posts[0].created_at)}
+                          <p className='text-xs text-gray-400'>
+                            {formatPostDate(latestPosts[0].created_at)}
                           </p>
                         </div>
                       </div>
-                      <Link
-                        href={`/blog/${posts[0].slug}`}
-                        className='text-sm text-pink-300 hover:text-pink-100 font-medium'
-                      >
-                        Read more →
-                      </Link>
                     </div>
                   </div>
-                </div>
-              </Card>
-            </motion.div>
-          </div>
-        )}
+                </Card>
+              </motion.div>
+            )}
 
-        {/* Content Tabs (only show if not searching) */}
-        {!searchQuery ? (
-          <Tabs defaultValue='latest' className='mb-8'>
-            <div className='flex justify-center'>
-              <TabsList className='bg-white/10 backdrop-blur-sm'>
-                <TabsTrigger
-                  value='latest'
-                  className='text-pink-200 data-[state=active]:text-white data-[state=active]:bg-pink-600'
-                >
-                  Latest
-                </TabsTrigger>
-                <TabsTrigger
-                  value='popular'
-                  className='text-pink-200 data-[state=active]:text-white data-[state=active]:bg-pink-600'
-                >
-                  Popular
-                </TabsTrigger>
-                <TabsTrigger
-                  value='trending'
-                  className='text-pink-200 data-[state=active]:text-white data-[state=active]:bg-pink-600'
-                >
-                  Trending
-                </TabsTrigger>
-              </TabsList>
+            {/* Other Blog Posts */}
+            <div className='lg:col-span-1'>
+              <div className='space-y-4'>
+                {latestPosts.slice(1, 4).map((post, index) => (
+                  <motion.div
+                    key={post.id}
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    viewport={{ once: true }}
+                  >
+                    <Card className='bg-black/40 backdrop-blur-md border border-white/10 overflow-hidden'>
+                      <div className='flex flex-col md:flex-row'>
+                        <div className='relative w-full md:w-1/3 h-40'>
+                          <Image
+                            src={
+                              post.featured_image ||
+                              '/placeholder.svg?height=200&width=300&query=music blog post' ||
+                              '/placeholder.svg'
+                            }
+                            alt={post.title}
+                            fill
+                            className='object-cover'
+                          />
+                        </div>
+                        <div className='p-4 md:w-2/3'>
+                          <Link href={`/blog/${post.slug}`}>
+                            <h3 className='font-bold text-white hover:text-red-400 transition-colors mb-2'>
+                              {post.title}
+                            </h3>
+                          </Link>
+                          <p className='text-gray-400 text-sm line-clamp-2 mb-3'>
+                            {post.excerpt}
+                          </p>
+                          <div className='flex items-center justify-between'>
+                            <div className='flex items-center'>
+                              <Avatar className='h-6 w-6 mr-2'>
+                                <AvatarImage
+                                  src={
+                                    post.profiles?.profile_image_url ||
+                                    '/placeholder.svg' ||
+                                    '/placeholder.svg'
+                                  }
+                                  alt={post.profiles?.username || 'User'}
+                                />
+                                <AvatarFallback className='bg-gradient-to-br from-red-500 to-red-900 text-white text-xs'>
+                                  {(post.profiles?.username || 'U')
+                                    .charAt(0)
+                                    .toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className='text-xs text-gray-400'>
+                                {formatPostDate(post.created_at)}
+                              </span>
+                            </div>
+                            <Link
+                              href={`/blog/${post.slug}`}
+                              className='text-xs text-red-500 hover:text-red-400 font-medium'
+                            >
+                              Read more
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
             </div>
+          </div>
+        </div>
+      </section>
 
-            <TabsContent value='latest' className='mt-6'>
-              {renderPostGrid(posts.slice(1))}{' '}
-              {/* Skip the first post as it's featured */}
+      {/* Trending Artists Section */}
+      <section className='py-16 container mx-auto px-4'>
+        <div className='flex justify-between items-center mb-10'>
+          <div>
+            <Badge className='bg-red-900 text-white mb-2'>
+              <TrendingUp className='w-3 h-3 mr-1' /> Trending Now
+            </Badge>
+            <h2 className='text-3xl font-bold text-white'>Popular Artists</h2>
+          </div>
+          <Button
+            variant='ghost'
+            className='text-red-500 hover:text-red-400 hover:bg-red-500/10'
+            onClick={() => router.push('/artists')}
+          >
+            Discover More <ArrowRight className='ml-2 h-4 w-4' />
+          </Button>
+        </div>
+
+        <ScrollArea className='w-full whitespace-nowrap pb-6'>
+          <div className='flex space-x-6'>
+            {trendingArtists.map((artist) => (
+              <motion.div
+                key={artist.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+                className='w-[220px] flex-shrink-0'
+              >
+                <Link href={`/artists/${artist.username}`}>
+                  <div className='group relative'>
+                    <div className='relative h-[220px] w-[220px] rounded-full overflow-hidden mb-4 ring-4 ring-red-500/20 group-hover:ring-red-500/50 transition-all duration-300'>
+                      <Image
+                        src={
+                          artist.profile_image_url ||
+                          '/placeholder.svg?height=400&width=400&query=music artist portrait' ||
+                          '/placeholder.svg' ||
+                          '/placeholder.svg'
+                        }
+                        alt={artist.artist_name || artist.username}
+                        fill
+                        className='object-cover'
+                      />
+                      <div className='absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center'>
+                        <Button
+                          size='icon'
+                          className='bg-red-600 hover:bg-red-700 rounded-full h-12 w-12 shadow-lg transform scale-0 group-hover:scale-100 transition-transform duration-300'
+                        >
+                          <Play className='h-5 w-5' />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className='text-center'>
+                      <h3 className='font-bold text-white text-lg group-hover:text-red-500 transition-colors'>
+                        {artist.artist_name || artist.username}
+                      </h3>
+                      <p className='text-gray-400 text-sm'>
+                        {artist.likes_count || 0} followers
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </ScrollArea>
+      </section>
+
+      {/* Explore Categories Section */}
+      {/* <section className='py-16 bg-gradient-to-r from-indigo-900/30 to-purple-900/30 backdrop-blur-sm'>
+        <div className='container mx-auto px-4'>
+          <div className='text-center mb-12'>
+            <Badge className='bg-pink-600 text-white mb-2 mx-auto'>
+              <Music className='w-3 h-3 mr-1' /> Explore
+            </Badge>
+            <h2 className='text-3xl font-bold text-white mb-4'>
+              Discover By Category
+            </h2>
+            <p className='text-gray-300 max-w-2xl mx-auto'>
+              Dive into our curated collections and find your next favorite
+              track, artist, or story.
+            </p>
+          </div>
+
+          <Tabs defaultValue='genres' className='w-full max-w-4xl mx-auto'>
+            <TabsList className='grid grid-cols-3 bg-black/40 backdrop-blur-md p-1 rounded-full w-fit mx-auto mb-8'>
+              <TabsTrigger
+                value='genres'
+                className='rounded-full data-[state=active]:bg-pink-600 data-[state=active]:text-white px-6'
+              >
+                Genres
+              </TabsTrigger>
+              <TabsTrigger
+                value='moods'
+                className='rounded-full data-[state=active]:bg-pink-600 data-[state=active]:text-white px-6'
+              >
+                Moods
+              </TabsTrigger>
+              <TabsTrigger
+                value='topics'
+                className='rounded-full data-[state=active]:bg-pink-600 data-[state=active]:text-white px-6'
+              >
+                Topics
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value='genres' className='mt-0'>
+              <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
+                {[
+                  'Hip Hop',
+                  'R&B',
+                  'Afrobeats',
+                  'Amapiano',
+                  'Pop',
+                  'House',
+                  'Jazz',
+                  'Rock',
+                ].map((genre) => (
+                  <motion.div
+                    key={genre}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    viewport={{ once: true }}
+                  >
+                    <Link
+                      href={`/genres/${genre.toLowerCase().replace(' ', '-')}`}
+                    >
+                      <div className='relative h-32 rounded-lg overflow-hidden group'>
+                        <Image
+                          src={`/abstract-geometric-shapes.png?height=200&width=300&query=${genre} music genre`}
+                          alt={genre}
+                          fill
+                          className='object-cover brightness-75 group-hover:brightness-100 transition-all duration-300 group-hover:scale-110'
+                        />
+                        <div className='absolute inset-0 flex items-center justify-center'>
+                          <div className='text-center'>
+                            <h3 className='font-bold text-white text-xl drop-shadow-md'>
+                              {genre}
+                            </h3>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
             </TabsContent>
 
-            <TabsContent value='popular' className='mt-6'>
-              {renderPostGrid(
-                [...posts].sort(
-                  (a, b) =>
-                    (b.likes?.[0]?.count || 0) - (a.likes?.[0]?.count || 0)
-                )
-              )}
+            <TabsContent value='moods' className='mt-0'>
+              <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
+                {[
+                  'Chill',
+                  'Party',
+                  'Workout',
+                  'Focus',
+                  'Relaxing',
+                  'Energetic',
+                  'Romantic',
+                  'Melancholic',
+                ].map((mood) => (
+                  <motion.div
+                    key={mood}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    viewport={{ once: true }}
+                  >
+                    <Link href={`/moods/${mood.toLowerCase()}`}>
+                      <div className='relative h-32 rounded-lg overflow-hidden group'>
+                        <Image
+                          src={`/abstract-geometric-shapes.png?height=200&width=300&query=${mood} music mood`}
+                          alt={mood}
+                          fill
+                          className='object-cover brightness-75 group-hover:brightness-100 transition-all duration-300 group-hover:scale-110'
+                        />
+                        <div className='absolute inset-0 flex items-center justify-center'>
+                          <div className='text-center'>
+                            <h3 className='font-bold text-white text-xl drop-shadow-md'>
+                              {mood}
+                            </h3>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
             </TabsContent>
 
-            <TabsContent value='trending' className='mt-6'>
-              {renderPostGrid(
-                [...posts].sort(
-                  (a, b) =>
-                    (b.comments?.[0]?.count || 0) -
-                    (a.comments?.[0]?.count || 0)
-                )
-              )}
+            <TabsContent value='topics' className='mt-0'>
+              <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
+                {[
+                  'Artist Interviews',
+                  'Music Reviews',
+                  'Industry News',
+                  'Behind the Scenes',
+                  'Music Tech',
+                  'Upcoming Events',
+                  'Album Releases',
+                  'Music History',
+                ].map((topic) => (
+                  <motion.div
+                    key={topic}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    viewport={{ once: true }}
+                  >
+                    <Link
+                      href={`/topics/${topic
+                        .toLowerCase()
+                        .replace(/\s+/g, '-')}`}
+                    >
+                      <div className='relative h-32 rounded-lg overflow-hidden group'>
+                        <Image
+                          src={`/abstract-geometric-shapes.png?height=200&width=300&query=${topic} music blog`}
+                          alt={topic}
+                          fill
+                          className='object-cover brightness-75 group-hover:brightness-100 transition-all duration-300 group-hover:scale-110'
+                        />
+                        <div className='absolute inset-0 flex items-center justify-center'>
+                          <div className='text-center'>
+                            <h3 className='font-bold text-white text-xl drop-shadow-md'>
+                              {topic}
+                            </h3>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
             </TabsContent>
           </Tabs>
-        ) : (
-          <div className='mb-6'>
-            <div className='flex justify-between items-center mb-4'>
-              <h2 className='text-xl font-bold text-white'>
-                {isSearching ? (
-                  <span className='flex items-center'>
-                    <Loader2 className='h-5 w-5 text-pink-400 animate-spin mr-2' />
-                    Searching...
-                  </span>
-                ) : (
-                  `Search Results (${searchResults.length})`
-                )}
-              </h2>
-            </div>
-            {renderPostGrid(searchResults)}
-          </div>
-        )}
+        </div>
+      </section> */}
 
-        {/* Loader element for infinite scroll (only show if not searching) */}
-        {!searchQuery && (
-          <div
-            ref={loaderRef}
-            className='flex justify-center items-center py-8 mt-8'
-          >
-            {hasMore ? (
-              <Loader2 className='h-8 w-8 text-pink-500 animate-spin' />
-            ) : posts.length > 0 ? (
-              <p className='text-pink-200 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full'>
-                You've reached the end ✨
-              </p>
-            ) : null}
+      {/* Call to Action */}
+      <section className='py-20 container mx-auto px-4'>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className='bg-gradient-to-r from-red-600 to-red-900 rounded-2xl p-8 md:p-12 text-center relative overflow-hidden'
+        >
+          <div className='absolute inset-0 opacity-20'>
+            <Image
+              src='/abstract-music-waveform.png'
+              alt='Background Pattern'
+              fill
+              className='object-cover'
+            />
           </div>
-        )}
-      </div>
+          <div className='relative z-10'>
+            <h2 className='text-3xl md:text-4xl font-bold text-white mb-4'>
+              Ready to Elevate Your Music Experience?
+            </h2>
+            <p className='text-white/80 max-w-2xl mx-auto mb-8'>
+              Join our community of music lovers and get exclusive access to
+              premium content, early releases, and special events.
+            </p>
+            <div className='flex flex-col sm:flex-row gap-4 justify-center'>
+              <Button
+                size='lg'
+                className='bg-white text-red-600 hover:bg-white/90'
+                onClick={() => router.push('/signup')}
+              >
+                Sign Up Now
+              </Button>
+              <Button
+                size='lg'
+                variant='outline'
+                className='border-white text-white hover:bg-white/10'
+                onClick={() => router.push('/releases')}
+              >
+                Browse Music <ChevronRight className='ml-1 h-4 w-4' />
+              </Button>
+            </div>
+          </div>
+        </motion.div>
+      </section>
     </div>
   );
 }
