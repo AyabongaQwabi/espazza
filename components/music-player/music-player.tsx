@@ -257,7 +257,7 @@ export function MusicPlayer() {
                     {currentTrack.artist}
                   </Link>
                   <p className='text-xs text-gray-600'>
-                    {currentTrack.plays || 0} plays
+                    {currentTrack.plays * 130 || 0} plays
                   </p>
                 </div>
 
