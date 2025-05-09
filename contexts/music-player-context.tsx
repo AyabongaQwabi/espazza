@@ -46,11 +46,14 @@ function musicPlayerReducer(
         isPlaying: true,
         currentTime: 0,
       };
-    case 'PLAY':
+    case 'PLAY': {
+      const currentTrack = state.currentTrack;
+      console.log('Playing track:', currentTrack);
       return {
         ...state,
         isPlaying: true,
       };
+    }
     case 'PAUSE':
       return {
         ...state,

@@ -232,16 +232,7 @@ export default function HomePage() {
   }
 
   return (
-    <div
-      className='min-h-screen bg-gradient-to-b from-black to-red-950'
-      onMouseEnter={() => {
-        togglePlay();
-        playFirstTrackFromQueue();
-        if (buttonRef.current) {
-          buttonRef.current.click();
-        }
-      }}
-    >
+    <div className='min-h-screen bg-gradient-to-b from-black to-red-950'>
       {/* Hero Section */}
       <section className='relative h-[85vh] overflow-hidden'>
         <div className='absolute inset-0 z-0'>
