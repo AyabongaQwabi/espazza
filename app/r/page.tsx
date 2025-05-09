@@ -428,6 +428,7 @@ export default function ReleasesPage() {
         cover_image_url: track.cover_image_url || release.cover_image_url,
         url: track.url,
         release_id: release.id,
+        plays: track.plays || 0,
       };
 
       // Play the track in the music player

@@ -374,6 +374,7 @@ export default function ReleasePage({ params }: { params: { id: string } }) {
         cover_image_url: t.cover_image_url || release.cover_image_url,
         url: t.url,
         release_id: release.id,
+        plays: t.plays || 0,
       }));
 
       // Find the current track
@@ -444,6 +445,7 @@ export default function ReleasePage({ params }: { params: { id: string } }) {
           selectedTrack.cover_image_url || release.cover_image_url,
         url: selectedTrack.url,
         release_id: release.id,
+        plays: selectedTrack.plays || 0,
       };
 
       await addToPlaylist(playlistId, formattedTrack);

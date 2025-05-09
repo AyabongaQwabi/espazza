@@ -33,19 +33,60 @@ const initialState: MusicPlayerState = {
   userPlaylists: [],
   loadingPlaylists: true,
 };
+async function updatePlays(action: MusicPlayerAction) {
+  const supabase = createClientComponentClient();
+  const currentTrack = action.payload;
+  console.log('Setting track:', currentTrack);
+  const { data: releaseData, error: fetchError } = await supabase
+    .from('releases')
+    .select('plays, tracks')
+    .eq('id', currentTrack.release_id)
+    .single();
 
+  if (fetchError) {
+    console.error('Error fetching release:', fetchError);
+  }
+
+  // Parse the tracks array if it's stored as a string
+  const tracks =
+    typeof releaseData.tracks === 'string'
+      ? JSON.parse(releaseData.tracks)
+      : releaseData.tracks;
+
+  // Find the track in the array and update its plays count
+  const updatedTracks = tracks.map((track) => {
+    if (track.id === currentTrack.id) {
+      return { ...track, plays: (track.plays || 0) + 1 };
+    }
+    return track;
+  });
+  // Update both the overall plays count and the tracks array
+  const { error: updateError } = await supabase
+    .from('releases')
+    .update({
+      plays: (releaseData.plays || 0) + 1,
+      tracks: updatedTracks,
+    })
+    .eq('id', currentTrack.release_id);
+
+  if (updateError) {
+    console.error('Error updating release:', updateError);
+  }
+}
 function musicPlayerReducer(
   state: MusicPlayerState,
   action: MusicPlayerAction
 ): MusicPlayerState {
   switch (action.type) {
-    case 'SET_TRACK':
+    case 'SET_TRACK': {
+      updatePlays(action);
       return {
         ...state,
         currentTrack: action.payload,
         isPlaying: true,
         currentTime: 0,
       };
+    }
     case 'PLAY': {
       const currentTrack = state.currentTrack;
       console.log('Playing track:', currentTrack);
@@ -59,11 +100,14 @@ function musicPlayerReducer(
         ...state,
         isPlaying: false,
       };
-    case 'TOGGLE_PLAY':
+    case 'TOGGLE_PLAY': {
+      const currentTrack = state.currentTrack;
+      console.log('Toggling play state', currentTrack);
       return {
         ...state,
         isPlaying: !state.isPlaying,
       };
+    }
     case 'SET_VOLUME':
       return {
         ...state,
@@ -666,6 +710,7 @@ export function MusicPlayerProvider({
                 title: track.track_title,
                 artist: track.artist_name || '',
                 artistId: track.artist_id,
+                plays: track.plays || 0,
                 cover_image_url: track.cover_image_url || '',
                 url: track.url,
               })),
@@ -732,6 +777,7 @@ export function MusicPlayerProvider({
                 title: track.track_title,
                 artist: track.artist_name || '',
                 artistId: track.artist_id,
+                plays: track.plays || 0,
                 cover_image_url: track.cover_image_url || '',
                 url: track.url,
               })),
@@ -1172,9 +1218,7 @@ export function MusicPlayerProvider({
   const addTracksToQueue = (tracks: Track[]) => {
     // Check if the tracks are already in the queue
     const existingTrackIds = new Set(state.queue.map((track) => track.id));
-    console.log('Existing track IDs in queue:', existingTrackIds);
     const newTracks = tracks.filter((track) => !existingTrackIds.has(track.id));
-    console.log('Adding tracks to queue:', newTracks);
     dispatch({ type: 'ADD_TRACKS_TO_QUEUE', payload: newTracks });
   };
 

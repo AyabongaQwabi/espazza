@@ -256,6 +256,9 @@ export function MusicPlayer() {
                   >
                     {currentTrack.artist}
                   </Link>
+                  <p className='text-xs text-gray-600'>
+                    {currentTrack.plays || 0} plays
+                  </p>
                 </div>
 
                 {/* Progress Bar */}

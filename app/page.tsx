@@ -93,6 +93,7 @@ export default function HomePage() {
           cover_image_url: track.cover_image_url || release.cover_image_url,
           url: track.url,
           release_id: release.id,
+          plays: track.plays || 0,
         }));
         return [...acc, ...tracks];
       }, []);
@@ -197,6 +198,7 @@ export default function HomePage() {
         cover_image_url: track.cover_image_url || release.cover_image_url,
         url: track.url,
         release_id: release.id,
+        plays: track.plays || 0,
       };
 
       playTrack(playerTrack);
