@@ -108,6 +108,11 @@ const navGroups = [
         icon: Paintbrush,
         label: 'Merchants',
       },
+      {
+        href: '/dashboard/podcasters',
+        icon: Paintbrush,
+        label: 'Podcasters',
+      },
     ],
   },
   {

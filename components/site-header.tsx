@@ -47,11 +47,11 @@ function Navigation({ className = '' }: { className?: string }) {
           <span>Posts</span>
         </Link>
         <Link
-          href='/artists'
+          href='/podcasts'
           className='hover:text-red-500 transition-colors flex items-center gap-2'
         >
           <HoverIcon Icon={UsersIcon} size={16} />
-          <span>Artists</span>
+          <span>Podcasts</span>
         </Link>
         <Link
           href='/merch'
