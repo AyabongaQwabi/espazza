@@ -28,7 +28,6 @@ import {
   Loader2,
 } from 'lucide-react';
 import { useMusicPlayer } from '@/hooks/use-music-player';
-import { add } from 'date-fns';
 
 export default function HomePage() {
   const [featuredReleases, setFeaturedReleases] = useState([]);
@@ -302,6 +301,7 @@ export default function HomePage() {
                       src={
                         featuredReleases[0].cover_image_url ||
                         '/placeholder.svg' ||
+                        '/placeholder.svg' ||
                         '/placeholder.svg'
                       }
                       alt={featuredReleases[0].title}
@@ -494,6 +494,7 @@ export default function HomePage() {
                         latestPosts[0].featured_image ||
                         '/placeholder.svg?height=400&width=600&query=music studio with neon lights' ||
                         '/placeholder.svg' ||
+                        '/placeholder.svg' ||
                         '/placeholder.svg'
                       }
                       alt={latestPosts[0].title}
@@ -518,6 +519,7 @@ export default function HomePage() {
                           <AvatarImage
                             src={
                               latestPosts[0].profiles?.profile_image_url ||
+                              '/placeholder.svg' ||
                               '/placeholder.svg' ||
                               '/placeholder.svg'
                             }
@@ -563,6 +565,7 @@ export default function HomePage() {
                             src={
                               post.featured_image ||
                               '/placeholder.svg?height=200&width=300&query=music blog post' ||
+                              '/placeholder.svg' ||
                               '/placeholder.svg'
                             }
                             alt={post.title}
@@ -585,6 +588,7 @@ export default function HomePage() {
                                 <AvatarImage
                                   src={
                                     post.profiles?.profile_image_url ||
+                                    '/placeholder.svg' ||
                                     '/placeholder.svg' ||
                                     '/placeholder.svg'
                                   }
@@ -654,6 +658,7 @@ export default function HomePage() {
                         src={
                           artist.profile_image_url ||
                           '/placeholder.svg?height=400&width=400&query=music artist portrait' ||
+                          '/placeholder.svg' ||
                           '/placeholder.svg' ||
                           '/placeholder.svg'
                         }
@@ -855,6 +860,56 @@ export default function HomePage() {
           </Tabs>
         </div>
       </section> */}
+
+      {/* App Download Section */}
+      <section className='py-16 bg-gradient-to-r from-black/80 to-red-950/80 backdrop-blur-sm'>
+        <div className='container mx-auto px-4'>
+          <div className='flex flex-col lg:flex-row items-center justify-between gap-8'>
+            <div className='lg:w-1/2'>
+              <Badge className='bg-green-600 text-white mb-2'>
+                <Sparkles className='w-3 h-3 mr-1' /> New Release
+              </Badge>
+              <h2 className='text-3xl md:text-4xl font-bold text-white mb-4'>
+                Get the eSpazza App
+              </h2>
+              <p className='text-gray-300 mb-6 max-w-lg'>
+                Take your music experience on the go with our Android app.
+                Download now to enjoy all your favorite tracks, artists, and
+                content offline.
+              </p>
+              <div className='flex flex-col sm:flex-row gap-4'>
+                <Button
+                  size='lg'
+                  className='bg-red-600 hover:bg-red-700 text-white'
+                  onClick={() => (window.location.href = '/espazza.apk')}
+                >
+                  <ArrowRight className='mr-2 h-5 w-5' /> Download for Android
+                </Button>
+                <Button
+                  size='lg'
+                  variant='outline'
+                  className='border-red-500 text-red-500 hover:bg-red-500/10'
+                >
+                  Learn More
+                </Button>
+              </div>
+            </div>
+            <div className='lg:w-1/2 relative'>
+              <div className='relative h-[400px] w-full'>
+                <Image
+                  src='/app.webp'
+                  alt='Espazza Mobile App'
+                  fill
+                  className='object-contain'
+                />
+                <div className='absolute -bottom-6 -right-6 bg-red-600 text-white p-4 rounded-full shadow-lg transform rotate-12'>
+                  <Headphones className='h-8 w-8' />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Call to Action */}
       <section className='py-20 container mx-auto px-4'>
