@@ -133,7 +133,7 @@ export default function HomePage() {
           )
         `
         )
-        .order('featured_at', { ascending: true })
+        .order('featured_at', { ascending: false })
         .limit(6);
 
       if (error) throw error;
@@ -368,12 +368,12 @@ export default function HomePage() {
                   <div className='relative w-16 h-16 mr-4'>
                     <Image
                       src={
-                        featuredReleasesFromTable[0].cover_image_url ||
+                        featuredReleases[0].cover_image_url ||
                         '/placeholder.svg' ||
                         '/placeholder.svg' ||
                         '/placeholder.svg'
                       }
-                      alt={featuredReleasesFromTable[0].title}
+                      alt={featuredReleases[0].title}
                       fill
                       className='object-cover rounded-md'
                     />
@@ -384,13 +384,13 @@ export default function HomePage() {
                       className='absolute inset-0 m-auto bg-red-600/80 hover:bg-red-600 h-8 w-8 rounded-full'
                       onClick={() =>
                         handlePlayPreview(
-                          featuredReleasesFromTable[0].tracks[0],
-                          featuredReleasesFromTable[0]
+                          featuredReleases[0].tracks[0],
+                          featuredReleases[0]
                         )
                       }
                     >
                       {currentlyPlaying ===
-                      featuredReleasesFromTable[0].tracks[0]?.url ? (
+                      featuredReleases[0].tracks[0]?.url ? (
                         <Pause className='h-4 w-4' />
                       ) : (
                         <Play className='h-4 w-4' />
@@ -399,11 +399,11 @@ export default function HomePage() {
                   </div>
                   <div className='flex-1'>
                     <h3 className='font-bold text-white truncate'>
-                      {featuredReleasesFromTable[0].title}
+                      {featuredReleases[0].title}
                     </h3>
                     <p className='text-sm text-gray-300 truncate'>
-                      {featuredReleasesFromTable[0].record_owner.artist_name ||
-                        featuredReleasesFromTable[0].record_owner.username}
+                      {featuredReleases[0].record_owner.artist_name ||
+                        featuredReleases[0].record_owner.username}
                     </p>
                     <div className='flex items-center mt-1'>
                       <Badge className='bg-purple-600/50 text-white text-xs'>
@@ -437,7 +437,7 @@ export default function HomePage() {
         </div>
 
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-          {featuredReleasesFromTable.map((release) => (
+          {featuredReleases.map((release) => (
             <motion.div
               key={release.id}
               initial={{ opacity: 0, y: 20 }}
