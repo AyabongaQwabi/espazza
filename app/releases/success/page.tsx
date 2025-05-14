@@ -23,6 +23,9 @@ import { Suspense } from 'react';
 import { SongPreview } from '@/components/SongPreview';
 import { Separator } from '@/components/ui/separator';
 
+// Define the system user ID that exists in the auth.users table
+const SYSTEM_USER_ID = 'c4dc7b72-8f2f-41d4-8a28-0538e06b2a9a';
+
 function SuccessPage() {
   const [purchaseDetails, setPurchaseDetails] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -61,6 +64,7 @@ function SuccessPage() {
           .select('*, release:releases (*, profiles:record_owner(*))')
           .eq('transaction_id', transactionId)
           .single();
+
         console.log('Purchase Data:', purchaseData);
         if (purchaseError || !purchaseData) {
           console.error('Error fetching purchase details:', purchaseError);
@@ -87,6 +91,97 @@ function SuccessPage() {
           if (releaseError) {
             console.error('Error updating release status:', releaseError);
           }
+        }
+
+        // Check if earnings records already exist for this transaction
+        const { data: existingEarnings, error: earningsCheckError } =
+          await supabase
+            .from('earnings')
+            .select('id')
+            .eq('transaction_id', transactionId);
+
+        if (earningsCheckError) {
+          console.error(
+            'Error checking existing earnings:',
+            earningsCheckError
+          );
+        }
+
+        // Only create earnings records if none exist for this transaction
+        if (!existingEarnings || existingEarnings.length === 0) {
+          if (purchaseData.amount && purchaseData.status === 'completed') {
+            const totalAmount = Number.parseFloat(purchaseData.amount);
+            const systemAmount = totalAmount * 0.1; // 10% for system
+            const artistAmount = totalAmount * 0.9; // 90% for artist
+
+            // Make sure we have a valid user ID for the artist earnings
+            // Use the purchase user_id which we know exists in the auth.users table
+            const artistUserId = purchaseData.user_id;
+
+            if (!artistUserId) {
+              console.error('No valid user ID found for artist earnings');
+              return;
+            }
+
+            console.log(
+              'Creating earnings with system user ID:',
+              SYSTEM_USER_ID
+            );
+            console.log('Creating earnings with artist user ID:', artistUserId);
+
+            try {
+              // Create system earnings record (10%)
+              const { error: systemEarningError } = await supabase
+                .from('earnings')
+                .insert({
+                  user_id: SYSTEM_USER_ID, // Use the specific system user ID
+                  purchase_id: purchaseData.id,
+                  transaction_id: transactionId,
+                  amount: systemAmount.toFixed(2),
+                  percentage: 10.0,
+                  type: 'system',
+                  status: 'pending',
+                });
+
+              if (systemEarningError) {
+                console.error(
+                  'Error creating system earnings record:',
+                  systemEarningError
+                );
+              } else {
+                console.log('Successfully created system earnings record');
+              }
+
+              // Create artist earnings record (90%)
+              const { error: artistEarningError } = await supabase
+                .from('earnings')
+                .insert({
+                  user_id: artistUserId,
+                  purchase_id: purchaseData.id,
+                  transaction_id: transactionId,
+                  amount: artistAmount.toFixed(2),
+                  percentage: 90.0,
+                  type: 'artist',
+                  status: 'pending',
+                });
+
+              if (artistEarningError) {
+                console.error(
+                  'Error creating artist earnings record:',
+                  artistEarningError
+                );
+              } else {
+                console.log('Successfully created artist earnings record');
+              }
+            } catch (err) {
+              console.error('Error creating earnings records:', err);
+            }
+          }
+        } else {
+          console.log(
+            'Earnings records already exist for transaction:',
+            transactionId
+          );
         }
 
         setPurchaseDetails(purchaseData);
