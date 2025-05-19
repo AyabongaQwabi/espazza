@@ -14,6 +14,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/next';
 import dynamic from 'next/dynamic';
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 // Dynamically import the AdBanner component with SSR disabled
 const AdBanner = dynamic(() => import('@/components/AdBanner'), { ssr: false });
@@ -224,6 +225,7 @@ export default function RootLayout({
           </SupabaseProvider>
         </ErrorBoundary>
       </body>
+      <GoogleAnalytics gaId='G-NC0MT9L44F' />
     </html>
   );
 }
