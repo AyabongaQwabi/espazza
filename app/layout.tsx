@@ -28,17 +28,24 @@ export const metadata: Metadata = {
     template: '%s | eSpazza',
   },
   description:
-    'Iplatform yabaRhepi baseKhaya - The home of South African music',
+    'eSpazza is a South African digital platform dedicated to promoting local music and culture, with a particular focus on Xhosa hip hop. It serves as a hub for artists, producers, and fans, offering a variety of content and merchandise',
   keywords: [
     'South African music',
-    'South African Music',
+    'afrikaans hip hop music',
+    'xhosa traditional music artists',
+    'south african hip hop',
+    'xhosa hip hop music',
+    'South African hip hop Music',
+    'xhosa hip hop artist',
+    'youngest rapper in south africa',
+    'young rappers in south africa',
     'Hip Hop',
     'Rap',
     'Music Platform',
   ],
-  authors: [{ name: 'eSpazza Team' }],
-  creator: 'eSpazza',
-  publisher: 'eSpazza',
+  authors: [{ name: 'Ayabonga Qwabi' }],
+  creator: 'Xhosa Hip Hop',
+  publisher: 'Ayabonga Qwabi',
   formatDetection: {
     email: false,
     address: false,
@@ -60,7 +67,7 @@ export const metadata: Metadata = {
     siteName: 'eSpazza',
     title: 'eSpazza - South African music Spaza Shop',
     description:
-      'Iplatform yabaRhepi baseKhaya - The home of South African music',
+      'eSpazza is a South African digital platform dedicated to promoting local music and culture, with a particular focus on Xhosa hip hop. It serves as a hub for artists, producers, and fans, offering a variety of content and merchandise',
     images: [
       {
         url: 'https://espazza.co.za/logo.png',
