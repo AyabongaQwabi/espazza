@@ -15,6 +15,7 @@ import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/next';
 import dynamic from 'next/dynamic';
 import { GoogleAnalytics } from '@next/third-parties/google';
+import Ezoic from '@/components/ezoic';
 
 // Dynamically import the AdBanner component with SSR disabled
 const AdBanner = dynamic(() => import('@/components/AdBanner'), { ssr: false });
@@ -123,6 +124,7 @@ export default function RootLayout({
   if (typeof window !== 'undefined') {
     restartQuake(window);
   }
+
   return (
     <html lang='xh' className='dark'>
       <head>
@@ -189,10 +191,12 @@ export default function RootLayout({
           data-cfasync='false'
         ></script>
         <script async src='//www.ezojs.com/ezoic/sa.min.js'></script>
-        <script>
-          window.ezstandalone = window.ezstandalone || {}; ezstandalone.cmd =
-          ezstandalone.cmd || [];
-        </script>
+        <Script
+          src='https://ezojs.com/ezoic/sa.min.js'
+          async={true}
+          strategy='beforeInteractive'
+          crossOrigin='anonymous'
+        />
       </head>
       <body className={inter.className}>
         <ErrorBoundary>
@@ -203,6 +207,7 @@ export default function RootLayout({
             <MusicPlayerProvider>
               <div className='flex flex-col min-h-screen bg-gradient-to-br from-zinc-900 to-zinc-800'>
                 <SiteHeader />
+                <Ezoic />
                 <main id='main-content' className='flex-1 pb-16'>
                   {/* Desktop Ad */}
                   <script
