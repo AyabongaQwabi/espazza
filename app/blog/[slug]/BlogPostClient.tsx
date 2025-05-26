@@ -556,18 +556,6 @@ export default function BlogPostClient({
                 {formatNumber(shareCount)}
               </p>
             </div>
-            <div className='bg-zinc-800 p-4 rounded-lg text-center'>
-              <p className='text-zinc-400 text-sm mb-1'>Likes</p>
-              <p className='text-white text-2xl font-bold'>
-                {formatNumber(likes.length)}
-              </p>
-            </div>
-            <div className='bg-zinc-800 p-4 rounded-lg text-center'>
-              <p className='text-zinc-400 text-sm mb-1'>Comments</p>
-              <p className='text-white text-2xl font-bold'>
-                {formatNumber(comments.length)}
-              </p>
-            </div>
           </div>
         </div>
 
@@ -583,6 +571,17 @@ export default function BlogPostClient({
             <Link href='/register'>Sign Up Now</Link>
           </Button>
         </div>
+
+        {typeof window !== 'undefined' && (
+          <DiscussionEmbed
+            shortname='espazza'
+            config={{
+              url: currentUrl,
+              identifier: post.id,
+              title: post.title,
+            }}
+          />
+        )}
 
         {/* Related Articles */}
         {relatedArticles && relatedArticles.length > 0 && (
@@ -632,16 +631,6 @@ export default function BlogPostClient({
           </div>
 
           {/* Disqus Comments - Only render on client side */}
-          {typeof window !== 'undefined' && (
-            <DiscussionEmbed
-              shortname='espazza'
-              config={{
-                url: currentUrl,
-                identifier: post.id,
-                title: post.title,
-              }}
-            />
-          )}
         </div>
       </article>
 
