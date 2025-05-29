@@ -84,7 +84,7 @@ export default function HomePage() {
           )
     `
         )
-        .order('created_at', { ascending: true }) // DESC order
+        .order('created_at', { ascending: false }) // DESC order
         .limit(6);
 
       if (error) throw error;
@@ -133,8 +133,8 @@ export default function HomePage() {
           )
         `
         )
-        .order('featured_at', { ascending: true })
-        .limit(6);
+        .order('featured_at', { ascending: false })
+        .limit(8);
 
       if (error) throw error;
 
@@ -436,7 +436,7 @@ export default function HomePage() {
           </Button>
         </div>
 
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
           {featuredReleasesFromTable.map((release) => (
             <motion.div
               key={release.id}
