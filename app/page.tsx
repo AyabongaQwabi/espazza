@@ -84,7 +84,7 @@ export default function HomePage() {
           )
     `
         )
-        .order('created_at', { ascending: false }) // DESC order
+        .order('created_at', { ascending: true }) // DESC order
         .limit(6);
 
       if (error) throw error;
