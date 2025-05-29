@@ -418,16 +418,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Discover New Music Section */}
+      {/* Featured Music Section */}
       <section className='py-16 container mx-auto px-4'>
         <div className='flex justify-between items-center mb-10'>
           <div>
-            <Badge className='bg-green-600 text-white mb-2'>
-              <Sparkles className='w-3 h-3 mr-1' /> Fresh Drops
+            <Badge className='bg-indigo-600 text-white mb-2'>
+              <Flame className='w-3 h-3 mr-1' /> Hot Releases
             </Badge>
-            <h2 className='text-3xl font-bold text-white'>
-              Discover New Music
-            </h2>
+            <h2 className='text-3xl font-bold text-white'>Featured Music</h2>
           </div>
           <Button
             variant='ghost'
@@ -439,7 +437,7 @@ export default function HomePage() {
         </div>
 
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-          {latestReleases.map((release) => (
+          {featuredReleasesFromTable.map((release) => (
             <motion.div
               key={release.id}
               initial={{ opacity: 0, y: 20 }}
@@ -448,7 +446,7 @@ export default function HomePage() {
               viewport={{ once: true }}
               className='group'
             >
-              <Card className='bg-gray-900/50 backdrop-blur-sm border-0 overflow-hidden hover:shadow-xl hover:shadow-green-500/10 transition-all duration-300'>
+              <Card className='bg-gray-900/50 backdrop-blur-sm border-0 overflow-hidden hover:shadow-xl hover:shadow-pink-500/10 transition-all duration-300'>
                 <div className='relative aspect-square overflow-hidden'>
                   <Image
                     src={release.cover_image_url || '/placeholder.svg'}
@@ -459,7 +457,7 @@ export default function HomePage() {
                   <div className='absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-between p-4'>
                     <Button
                       size='icon'
-                      className='bg-green-600 hover:bg-green-700 rounded-full h-12 w-12 shadow-lg transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300'
+                      className='bg-red-600 hover:bg-red-700 rounded-full h-12 w-12 shadow-lg transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300'
                       onClick={() =>
                         handlePlayPreview(release.tracks[0], release)
                       }
@@ -490,7 +488,7 @@ export default function HomePage() {
                 </div>
                 <CardContent className='p-4'>
                   <Link href={`/r/${release.short_unique_id || release.id}`}>
-                    <h3 className='font-bold text-white text-lg mb-1 hover:text-green-500 transition-colors'>
+                    <h3 className='font-bold text-white text-lg mb-1 hover:text-red-500 transition-colors'>
                       {release.title}
                     </h3>
                   </Link>
@@ -501,7 +499,7 @@ export default function HomePage() {
                     </p>
                   </Link>
                   <div className='flex items-center justify-between mt-3'>
-                    <Badge className='bg-green-900/50 text-green-200'>
+                    <Badge className='bg-purple-900/50 text-purple-200'>
                       {release.genre?.name || 'Music'}
                     </Badge>
                     <span className='text-yellow-400 font-medium'>
@@ -515,7 +513,7 @@ export default function HomePage() {
                   </span>
                   <Button
                     size='sm'
-                    className='bg-green-600 hover:bg-green-700 text-white'
+                    className='bg-red-600 hover:bg-red-700 text-white'
                     onClick={() =>
                       router.push(`/r/${release.short_unique_id || release.id}`)
                     }
@@ -701,14 +699,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Music Section */}
+      {/* Discover New Music Section */}
       <section className='py-16 container mx-auto px-4'>
         <div className='flex justify-between items-center mb-10'>
           <div>
-            <Badge className='bg-indigo-600 text-white mb-2'>
-              <Flame className='w-3 h-3 mr-1' /> Hot Releases
+            <Badge className='bg-green-600 text-white mb-2'>
+              <Sparkles className='w-3 h-3 mr-1' /> Fresh Drops
             </Badge>
-            <h2 className='text-3xl font-bold text-white'>Featured Music</h2>
+            <h2 className='text-3xl font-bold text-white'>
+              Discover New Music
+            </h2>
           </div>
           <Button
             variant='ghost'
@@ -720,7 +720,7 @@ export default function HomePage() {
         </div>
 
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-          {featuredReleasesFromTable.map((release) => (
+          {latestReleases.map((release) => (
             <motion.div
               key={release.id}
               initial={{ opacity: 0, y: 20 }}
@@ -729,7 +729,7 @@ export default function HomePage() {
               viewport={{ once: true }}
               className='group'
             >
-              <Card className='bg-gray-900/50 backdrop-blur-sm border-0 overflow-hidden hover:shadow-xl hover:shadow-pink-500/10 transition-all duration-300'>
+              <Card className='bg-gray-900/50 backdrop-blur-sm border-0 overflow-hidden hover:shadow-xl hover:shadow-green-500/10 transition-all duration-300'>
                 <div className='relative aspect-square overflow-hidden'>
                   <Image
                     src={release.cover_image_url || '/placeholder.svg'}
@@ -740,7 +740,7 @@ export default function HomePage() {
                   <div className='absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-between p-4'>
                     <Button
                       size='icon'
-                      className='bg-red-600 hover:bg-red-700 rounded-full h-12 w-12 shadow-lg transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300'
+                      className='bg-green-600 hover:bg-green-700 rounded-full h-12 w-12 shadow-lg transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300'
                       onClick={() =>
                         handlePlayPreview(release.tracks[0], release)
                       }
@@ -771,7 +771,7 @@ export default function HomePage() {
                 </div>
                 <CardContent className='p-4'>
                   <Link href={`/r/${release.short_unique_id || release.id}`}>
-                    <h3 className='font-bold text-white text-lg mb-1 hover:text-red-500 transition-colors'>
+                    <h3 className='font-bold text-white text-lg mb-1 hover:text-green-500 transition-colors'>
                       {release.title}
                     </h3>
                   </Link>
@@ -782,7 +782,7 @@ export default function HomePage() {
                     </p>
                   </Link>
                   <div className='flex items-center justify-between mt-3'>
-                    <Badge className='bg-purple-900/50 text-purple-200'>
+                    <Badge className='bg-green-900/50 text-green-200'>
                       {release.genre?.name || 'Music'}
                     </Badge>
                     <span className='text-yellow-400 font-medium'>
@@ -796,7 +796,7 @@ export default function HomePage() {
                   </span>
                   <Button
                     size='sm'
-                    className='bg-red-600 hover:bg-red-700 text-white'
+                    className='bg-green-600 hover:bg-green-700 text-white'
                     onClick={() =>
                       router.push(`/r/${release.short_unique_id || release.id}`)
                     }
