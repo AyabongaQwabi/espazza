@@ -35,7 +35,7 @@ async function generateSitemap() {
     .select('slug')
     .eq('published', true);
 
-  const { data: releases } = await supabase.from('releases').select('id');
+  const { data: releases } = await supabase.from('releases').select('*');
 
   const { data: artists } = await supabase
     .from('profiles')
