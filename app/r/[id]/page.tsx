@@ -27,8 +27,7 @@ export async function generateMetadata({
         *,
         genre:genres(id, name),
         record_label:record_labels(name),
-        record_owner:profiles(artist_name, username),
-        tracks(id, title, price)
+        record_owner:profiles(artist_name, username)
       `
       )
       .eq('short_unique_id', params.id)
