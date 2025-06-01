@@ -52,6 +52,7 @@ async function generateSitemap() {
     ...(artists?.map((artist) => `/artists/${artist.username}`) || []),
     ...(events?.map((event) => `/events/${event.id}`) || []),
     ...(releases?.map((release) => `/releases/${release.id}`) || []),
+    ...(releases?.map((release) => `/r/${release.short_unique_id}`) || []),
     ...(products?.map((product) => `/merch-store/${product.code}`) || []),
   ];
 
