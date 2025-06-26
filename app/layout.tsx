@@ -210,11 +210,11 @@ export default function RootLayout({
                 <Ezoic />
                 <main id='main-content' className='flex-1 pb-16'>
                   {/* Desktop Ad */}
-                  <script
+                  {/* <script
                     async
                     src='https://script.adquake.com/js/adquake.js'
                     adquake-key='jU4ct88nmUGU290dbTftwg=='
-                  ></script>
+                  ></script> */}
                   {/* <div className='hidden lg:block mt-20 -mb-12'>
                     <div className='mt-4'>
                       <script
