@@ -26,6 +26,7 @@ import {
   TrendingUp,
   Flame,
   Loader2,
+  Download,
 } from 'lucide-react';
 import { useMusicPlayer } from '@/hooks/use-music-player';
 
@@ -289,6 +290,39 @@ export default function HomePage() {
     return tracks.reduce((total, track) => total + (track.price || 0), 0);
   };
 
+  const downloadAllTracks = async (release) => {
+    try {
+      // Show loading state or notification
+      console.log(
+        `Downloading ${release.tracks.length} tracks from ${release.title}...`
+      );
+
+      for (const track of release.tracks) {
+        if (track.url) {
+          try {
+            // Create a temporary anchor element for each download
+            const link = document.createElement('a');
+            link.href = track.url;
+            link.download = `${track.title || 'track'}.mp3`; // You can adjust the file extension based on your needs
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Add a small delay between downloads to prevent browser blocking
+            await new Promise((resolve) => setTimeout(resolve, 500));
+          } catch (error) {
+            console.error(`Failed to download track: ${track.title}`, error);
+          }
+        }
+      }
+
+      console.log('All downloads initiated successfully!');
+    } catch (error) {
+      console.error('Error downloading tracks:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className='min-h-screen bg-gradient-to-b from-black to-red-950 flex items-center justify-center'>
@@ -304,117 +338,67 @@ export default function HomePage() {
     <div className='min-h-screen bg-gradient-to-b from-black to-red-950'>
       {/* Hero Section */}
 
-      <section className='relative h-[85vh] overflow-hidden'>
+      <section className='relative min-h-screen flex items-center overflow-hidden'>
         <div className='absolute inset-0 z-0'>
           <Image
             src='/kkeedcover.jpg'
-            alt='Music Visualizer'
+            alt='Music Experience'
             fill
             priority
-            className='object-cover opacity-70'
+            className='object-cover opacity-30'
           />
-          <div className='absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-red-950'></div>
+          <div className='absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/80 to-slate-950/90'></div>
+          <div className='absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent'></div>
         </div>
 
-        <div className='relative z-10 container mx-auto px-4 h-full flex flex-col justify-center'>
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className='max-w-4xl'
-          >
-            <Badge className='bg-red-600 text-white mb-6 py-1.5'>
-              <Sparkles className='w-4 h-4 mr-1' /> Premium Music Experience
-            </Badge>
-            <h1 className='text-5xl md:text-7xl font-bold text-white mb-6 leading-tight'>
-              Discover Your Next
-              <span className='bg-clip-text text-transparent bg-gradient-to-r from-red-500 via-red-700 to-red-900 block'>
-                Musical Obsession
-              </span>
-            </h1>
-            <p className='text-xl text-gray-300 mb-8 max-w-2xl'>
-              Explore the latest releases from top artists and stay updated with
-              exclusive content from your favorite creators.
-            </p>
-            <div className='flex flex-wrap gap-4'>
-              <Button
-                size='lg'
-                className='bg-red-600 hover:bg-red-700 text-white'
-                onClick={() => router.push('/releases')}
-              >
-                <Headphones className='mr-2 h-5 w-5' /> Browse Music
-              </Button>
-              <Button
-                size='lg'
-                variant='outline'
-                className='border-red-500 text-red-500 hover:bg-red-500/10'
-                onClick={() => router.push('/blog')}
-              >
-                <BookOpen className='mr-2 h-5 w-5' /> Read Blog
-              </Button>
-            </div>
-          </motion.div>
-
-          {/* Floating Music Player Preview */}
-          {featuredReleases.length > 0 && (
+        <div className='relative z-10 container mx-auto px-6 lg:px-8'>
+          <div className='max-w-6xl mx-auto'>
             <motion.div
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className='absolute bottom-12 right-12 max-w-md hidden lg:block'
+              transition={{ duration: 1, ease: 'easeOut' }}
+              className='text-center space-y-8'
             >
-              <Card className='bg-black/40 backdrop-blur-md border border-white/10 overflow-hidden'>
-                <div className='flex p-4'>
-                  <div className='relative w-16 h-16 mr-4'>
-                    <Image
-                      src={
-                        featuredReleasesFromTable[0].cover_image_url ||
-                        '/placeholder.svg' ||
-                        '/placeholder.svg' ||
-                        '/placeholder.svg'
-                      }
-                      alt={featuredReleasesFromTable[0].title}
-                      fill
-                      className='object-cover rounded-md'
-                    />
-                    <Button
-                      size='icon'
-                      id='play-btn'
-                      ref={buttonRef}
-                      className='absolute inset-0 m-auto bg-red-600/80 hover:bg-red-600 h-8 w-8 rounded-full'
-                      onClick={() =>
-                        handlePlayPreview(
-                          featuredReleasesFromTable[0].tracks[0],
-                          featuredReleasesFromTable[0]
-                        )
-                      }
-                    >
-                      {currentlyPlaying ===
-                      featuredReleasesFromTable[0].tracks[0]?.url ? (
-                        <Pause className='h-4 w-4' />
-                      ) : (
-                        <Play className='h-4 w-4' />
-                      )}
-                    </Button>
-                  </div>
-                  <div className='flex-1'>
-                    <h3 className='font-bold text-white truncate'>
-                      {featuredReleasesFromTable[0].title}
-                    </h3>
-                    <p className='text-sm text-gray-300 truncate'>
-                      {featuredReleasesFromTable[0].record_owner.artist_name ||
-                        featuredReleasesFromTable[0].record_owner.username}
-                    </p>
-                    <div className='flex items-center mt-1'>
-                      <Badge className='bg-purple-600/50 text-white text-xs'>
-                        Featured
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              </Card>
+              <div className='inline-flex items-center px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20'>
+                <Sparkles className='w-4 h-4 mr-2 text-white' />
+                <span className='text-white font-medium text-sm tracking-wide'>
+                  Premium Music Experience
+                </span>
+              </div>
+
+              <h1 className='text-6xl md:text-8xl lg:text-9xl font-bold text-white leading-none tracking-tight'>
+                Mzansi Sound,
+                <span className='block bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent'>
+                  Elevated
+                </span>
+              </h1>
+
+              <p className='text-xl md:text-2xl text-slate-300 max-w-3xl mx-auto font-light leading-relaxed'>
+                Discover extraordinary music from visionary artists. Stream,
+                download, and experience sound like never before.
+              </p>
+
+              <div className='flex flex-col sm:flex-row gap-4 justify-center pt-8'>
+                <Button
+                  size='lg'
+                  className='bg-white text-slate-900 hover:bg-slate-100 font-semibold px-8 py-4 rounded-full text-lg transition-all duration-300 hover:scale-105'
+                  onClick={() => router.push('/releases')}
+                >
+                  <Headphones className='mr-3 h-5 w-5' />
+                  Explore Music
+                </Button>
+                <Button
+                  size='lg'
+                  variant='outline'
+                  className='border-white/30 text-white hover:bg-white/10 font-medium px-8 py-4 rounded-full text-lg backdrop-blur-sm'
+                  onClick={() => router.push('/blog')}
+                >
+                  <BookOpen className='mr-3 h-5 w-5' />
+                  Read Stories
+                </Button>
+              </div>
             </motion.div>
-          )}
+          </div>
         </div>
       </section>
 
@@ -502,9 +486,6 @@ export default function HomePage() {
                     <Badge className='bg-purple-900/50 text-purple-200'>
                       {release.genre?.name || 'Music'}
                     </Badge>
-                    <span className='text-yellow-400 font-medium'>
-                      R{calculateReleasePrice(release.tracks).toFixed(2)}
-                    </span>
                   </div>
                 </CardContent>
                 <CardFooter className='p-4 pt-0 flex justify-between items-center'>
@@ -514,11 +495,10 @@ export default function HomePage() {
                   <Button
                     size='sm'
                     className='bg-red-600 hover:bg-red-700 text-white'
-                    onClick={() =>
-                      router.push(`/r/${release.short_unique_id || release.id}`)
-                    }
+                    onClick={() => downloadAllTracks(release)}
                   >
-                    Listen Now
+                    <Download className='mr-2 h-4 w-4' />
+                    Download
                   </Button>
                 </CardFooter>
               </Card>
@@ -566,6 +546,7 @@ export default function HomePage() {
                         '/placeholder.svg' ||
                         '/placeholder.svg' ||
                         '/placeholder.svg' ||
+                        '/placeholder.svg' ||
                         '/placeholder.svg'
                       }
                       alt={latestPosts[0].title}
@@ -590,6 +571,7 @@ export default function HomePage() {
                           <AvatarImage
                             src={
                               latestPosts[0].profiles?.profile_image_url ||
+                              '/placeholder.svg' ||
                               '/placeholder.svg' ||
                               '/placeholder.svg' ||
                               '/placeholder.svg' ||
@@ -641,6 +623,7 @@ export default function HomePage() {
                               '/placeholder.svg' ||
                               '/placeholder.svg' ||
                               '/placeholder.svg' ||
+                              '/placeholder.svg' ||
                               '/placeholder.svg'
                             }
                             alt={post.title}
@@ -663,6 +646,7 @@ export default function HomePage() {
                                 <AvatarImage
                                   src={
                                     post.profiles?.profile_image_url ||
+                                    '/placeholder.svg' ||
                                     '/placeholder.svg' ||
                                     '/placeholder.svg' ||
                                     '/placeholder.svg' ||
@@ -785,9 +769,9 @@ export default function HomePage() {
                     <Badge className='bg-green-900/50 text-green-200'>
                       {release.genre?.name || 'Music'}
                     </Badge>
-                    <span className='text-yellow-400 font-medium'>
+                    {/* <span className='text-yellow-400 font-medium'>
                       R{calculateReleasePrice(release.tracks).toFixed(2)}
-                    </span>
+                    </span> */}
                   </div>
                 </CardContent>
                 <CardFooter className='p-4 pt-0 flex justify-between items-center'>
@@ -797,11 +781,10 @@ export default function HomePage() {
                   <Button
                     size='sm'
                     className='bg-green-600 hover:bg-green-700 text-white'
-                    onClick={() =>
-                      router.push(`/r/${release.short_unique_id || release.id}`)
-                    }
+                    onClick={() => downloadAllTracks(release)}
                   >
-                    Listen Now
+                    <Download className='mr-2 h-4 w-4' />
+                    Download
                   </Button>
                 </CardFooter>
               </Card>
@@ -846,6 +829,7 @@ export default function HomePage() {
                         src={
                           artist.profile_image_url ||
                           '/placeholder.svg?height=400&width=400&query=music artist portrait' ||
+                          '/placeholder.svg' ||
                           '/placeholder.svg' ||
                           '/placeholder.svg' ||
                           '/placeholder.svg' ||

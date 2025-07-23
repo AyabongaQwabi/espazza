@@ -61,6 +61,8 @@ import {
   ListMusic,
   Plus,
   ChevronDown,
+  Download,
+  Loader2,
 } from 'lucide-react';
 import { postToURL } from '@/lib/payfast';
 import { useMusicPlayer } from '@/hooks/use-music-player';
@@ -133,6 +135,7 @@ export default function ReleasesPage() {
   const [addToPlaylistDialogOpen, setAddToPlaylistDialogOpen] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   const [expandedReleases, setExpandedReleases] = useState<string[]>([]);
+  const [downloadingReleases, setDownloadingReleases] = useState<string[]>([]);
 
   const router = useRouter();
   const supabase = createClientComponentClient();
@@ -597,6 +600,48 @@ export default function ReleasesPage() {
     }
   }
 
+  const downloadAllTracks = async (release: Release) => {
+    try {
+      setDownloadingReleases((prev) => [...prev, release.id]);
+      console.log(
+        `Starting download of ${release.tracks.length} tracks from "${release.title}"...`
+      );
+
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const track of release.tracks) {
+        if (track.url) {
+          try {
+            const link = document.createElement('a');
+            link.href = track.url;
+            const artistName =
+              release.record_owner.artist_name || release.record_owner.username;
+            const fileName = `${artistName} - ${track.title || 'track'}.mp3`;
+            link.download = fileName.replace(/[^a-z0-9\s\-_.]/gi, '');
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            successCount++;
+            await new Promise((resolve) => setTimeout(resolve, 800));
+          } catch (error) {
+            console.error(`Failed to download track: ${track.title}`, error);
+            failCount++;
+          }
+        }
+      }
+
+      console.log(
+        `Download completed! ${successCount} successful, ${failCount} failed`
+      );
+    } catch (error) {
+      console.error('Error downloading tracks:', error);
+    } finally {
+      setDownloadingReleases((prev) => prev.filter((id) => id !== release.id));
+    }
+  };
+
   return (
     <div className='flex flex-col min-h-screen bg-gray-900 text-white'>
       <Dialog open={paymentModalOpen} onOpenChange={setPaymentModalOpen}>
@@ -915,13 +960,25 @@ export default function ReleasesPage() {
                                   <Music className='mr-2 h-4 w-4' />
                                   View Details
                                 </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className='cursor-pointer hover:bg-gray-700 text-green-400'
+                                  onClick={() => downloadAllTracks(release)}
+                                  disabled={downloadingReleases.includes(
+                                    release.id
+                                  )}
+                                >
+                                  <Download className='mr-2 h-4 w-4' />
+                                  {downloadingReleases.includes(release.id)
+                                    ? 'Downloading...'
+                                    : 'Download All'}
+                                </DropdownMenuItem>
                                 <DropdownMenuSeparator className='bg-gray-700' />
                                 <DropdownMenuItem
                                   className='cursor-pointer hover:bg-gray-700 text-red-400'
                                   onClick={() => handlePurchase(release)}
                                 >
                                   <DollarSign className='mr-2 h-4 w-4' />
-                                  Buy Now
+                                  Support
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   className='cursor-pointer hover:bg-gray-700'
@@ -1039,17 +1096,33 @@ export default function ReleasesPage() {
                             </div>
                           )}
 
-                          <div className='mt-2 pt-2 border-t border-gray-700 flex justify-between items-center'>
-                            <span className='font-bold text-yellow-400 text-xs'>
-                              R
-                              {calculateReleasePrice(release.tracks).toFixed(2)}
-                            </span>
+                          <div className='mt-2 pt-2 border-t border-gray-700 flex justify-between items-center gap-2'>
                             <Button
                               size='sm'
-                              className='bg-red-500 hover:bg-red-600 text-white h-7 text-xs px-2'
+                              className='bg-green-600 hover:bg-green-700 text-white h-7 text-xs px-2 flex-1'
+                              onClick={() => downloadAllTracks(release)}
+                              disabled={downloadingReleases.includes(
+                                release.id
+                              )}
+                            >
+                              {downloadingReleases.includes(release.id) ? (
+                                <>
+                                  <Loader2 className='mr-1 h-3 w-3 animate-spin' />
+                                  Downloading...
+                                </>
+                              ) : (
+                                <>
+                                  <Download className='mr-1 h-3 w-3' />
+                                  Download
+                                </>
+                              )}
+                            </Button>
+                            <Button
+                              size='sm'
+                              className='bg-red-500 hover:bg-red-600 text-white h-7 text-xs px-2 flex-1'
                               onClick={() => handlePurchase(release)}
                             >
-                              Buy Now
+                              Support
                             </Button>
                           </div>
                         </div>
@@ -1089,6 +1162,7 @@ export default function ReleasesPage() {
                                   <Image
                                     src={
                                       release.cover_image_url ||
+                                      '/placeholder.svg' ||
                                       '/placeholder.svg' ||
                                       '/placeholder.svg'
                                     }
@@ -1174,13 +1248,25 @@ export default function ReleasesPage() {
                                       <Share2 className='mr-2 h-4 w-4' />
                                       Share
                                     </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      className='cursor-pointer hover:bg-gray-700 text-green-400'
+                                      onClick={() => downloadAllTracks(release)}
+                                      disabled={downloadingReleases.includes(
+                                        release.id
+                                      )}
+                                    >
+                                      <Download className='mr-2 h-4 w-4' />
+                                      {downloadingReleases.includes(release.id)
+                                        ? 'Downloading...'
+                                        : 'Download All'}
+                                    </DropdownMenuItem>
                                     <DropdownMenuSeparator className='bg-gray-700' />
                                     <DropdownMenuItem
                                       className='cursor-pointer hover:bg-gray-700 text-red-400'
                                       onClick={() => handlePurchase(release)}
                                     >
                                       <DollarSign className='mr-2 h-4 w-4' />
-                                      Buy Now
+                                      Support
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
