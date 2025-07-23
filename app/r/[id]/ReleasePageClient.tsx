@@ -36,6 +36,7 @@ import {
   Disc3,
   Sparkles,
   ListMusic,
+  Download,
   Plus,
 } from 'lucide-react';
 
@@ -145,6 +146,7 @@ export default function ReleasePageClient({
   const [shareTracked, setShareTracked] = useState<Record<string, boolean>>({});
   const [viewCount, setViewCount] = useState(initialRelease?.views || 0);
   const [shareCount, setShareCount] = useState(initialRelease?.shares || 0);
+  const [downloadingReleases, setDownloadingReleases] = useState<string[]>([]);
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const router = useRouter();
@@ -528,6 +530,48 @@ export default function ReleasePageClient({
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 
+  const downloadAllTracks = async (release: Release) => {
+    try {
+      setDownloadingReleases((prev) => [...prev, release.id]);
+      console.log(
+        `Starting download of ${release.tracks.length} tracks from "${release.title}"...`
+      );
+
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const track of release.tracks) {
+        if (track.url) {
+          try {
+            const link = document.createElement('a');
+            link.href = track.url;
+            const artistName =
+              release.record_owner.artist_name || release.record_owner.username;
+            const fileName = `${artistName} - ${track.title || 'track'}.mp3`;
+            link.download = fileName.replace(/[^a-z0-9\s\-_.]/gi, '');
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            successCount++;
+            await new Promise((resolve) => setTimeout(resolve, 800));
+          } catch (error) {
+            console.error(`Failed to download track: ${track.title}`, error);
+            failCount++;
+          }
+        }
+      }
+
+      console.log(
+        `Download completed! ${successCount} successful, ${failCount} failed`
+      );
+    } catch (error) {
+      console.error('Error downloading tracks:', error);
+    } finally {
+      setDownloadingReleases((prev) => prev.filter((id) => id !== release.id));
+    }
+  };
+
   return (
     <div className='min-h-screen bg-gray-900 text-white pb-16'>
       {/* Header with blurred background */}
@@ -638,6 +682,16 @@ export default function ReleasePageClient({
                     : `Buy for R${calculateReleasePrice(release.tracks).toFixed(
                         2
                       )}`}
+                </Button>
+                <Button
+                  className='cursor-pointer hover:bg-gray-700 text-white-400'
+                  onClick={() => downloadAllTracks(release)}
+                  disabled={downloadingReleases.includes(release.id)}
+                >
+                  <Download className='mr-2 h-4 w-4' />
+                  {downloadingReleases.includes(release.id)
+                    ? 'Downloading...'
+                    : 'Download All'}
                 </Button>
                 <Button
                   variant='outline'
