@@ -54,11 +54,11 @@ function Navigation({ className = '' }: { className?: string }) {
           <span>Podcasts</span>
         </Link>
         <Link
-          href='/merch'
+          href='/videos'
           className='hover:text-red-500 transition-colors flex items-center gap-2'
         >
           <HoverIcon Icon={ShoppingBagIcon} size={16} />
-          <span>Merch Sellers</span>
+          <span>Hot Videos</span>
         </Link>
         <Link
           href='/producers'
