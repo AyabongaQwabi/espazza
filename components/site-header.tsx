@@ -75,13 +75,13 @@ function Navigation({ className = '' }: { className?: string }) {
           <HoverIcon Icon={ShoppingBagIcon} size={16} />
           <span>Buy Merch</span>
         </Link>
-        <Link
+        {/* <Link
           href='/events'
           className='hover:text-red-500 transition-colors flex items-center gap-2'
         >
           <HoverIcon Icon={CalendarIcon} size={16} />
           <span>Events</span>
-        </Link>
+        </Link> */}
       </div>
     </nav>
   );
