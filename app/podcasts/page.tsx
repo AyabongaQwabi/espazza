@@ -793,7 +793,7 @@ export default function PodcastsPage() {
         <div className='absolute inset-0 flex items-center justify-center z-20'>
           <div className='text-center'>
             <h1 className='text-5xl font-bold mb-4 text-white drop-shadow-lg'>
-              Discover Amazing Episodes
+              Discover SA Music Related Podcast Episodes
             </h1>
             <p className='text-xl mb-8 text-white drop-shadow-lg max-w-2xl mx-auto'>
               Watch thought-provoking conversations and stories from your

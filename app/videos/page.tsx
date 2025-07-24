@@ -607,7 +607,7 @@ export default function VideosPage() {
       <div className='relative h-[40vh] overflow-hidden'>
         <div className='absolute inset-0 bg-gradient-to-b from-transparent to-gray-900 z-10'></div>
         <Image
-          src='/video-hero.jpg'
+          src='/kkeed.jpg'
           alt='Videos Hero'
           layout='fill'
           objectFit='cover'
@@ -616,7 +616,7 @@ export default function VideosPage() {
         <div className='absolute inset-0 flex items-center justify-center z-20'>
           <div className='text-center'>
             <h1 className='text-5xl font-bold mb-4 text-white drop-shadow-lg'>
-              Discover Amazing Videos
+              Discover New Mzansi Music Videos
             </h1>
             <p className='text-xl mb-8 text-white drop-shadow-lg max-w-2xl mx-auto'>
               Watch promotional videos and creative content from talented

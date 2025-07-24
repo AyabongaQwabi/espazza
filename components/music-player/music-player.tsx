@@ -26,6 +26,7 @@ import {
   Plus,
   MoreHorizontal,
   Music,
+  Download,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -259,6 +260,14 @@ export function MusicPlayer() {
                   <p className='text-xs text-gray-600'>
                     {currentTrack.plays || 0} plays
                   </p>
+                  <a
+                    href={currentTrack.url}
+                    className='text-xs text-gray-400 hover:text-white flex items-center justify-center mt-2 gap-2'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                  >
+                    <Download /> Download
+                  </a>
                 </div>
 
                 {/* Progress Bar */}
