@@ -80,7 +80,8 @@ export default function UserTypeSelection() {
         .eq('id', user.id);
       console.log(data);
       if (!data || data.length === 0) {
-        await supabase
+        console.log('Creating new profile for user:', user.id);
+        const { data, error: profileError } = await supabase
           .from('profiles')
           .insert([
             {
@@ -91,22 +92,37 @@ export default function UserTypeSelection() {
               distributor_id: 'e8aa2a31-a488-46a7-994f-0c328de92fa3',
               record_label_id: '1421499d-042a-4085-9e08-543d65070cbc',
             },
-          ])
-          .select()
-          .single();
-      }
+          ]);
 
-      const { error } = await supabase
-        .from('profiles')
-        .update({ user_type: selectedType })
-        .eq('id', user.id);
+        console.log('Profile data:', data);
+        console.log('Profile error:', profileError);
 
-      if (error) throw error;
+        const { error } = await supabase
+          .from('profiles')
+          .update({ user_type: selectedType })
+          .eq('id', user.id);
 
-      if (selectedType === 'artist') {
-        router.push('/onboarding/basic-info');
+        if (error) throw error;
+
+        if (selectedType === 'artist') {
+          router.push('/onboarding/basic-info');
+        } else {
+          router.push(`/onboarding/${selectedType}`);
+        }
       } else {
-        router.push(`/onboarding/${selectedType}`);
+        console.log('Updating existing profile for user:', user.id);
+        const { error } = await supabase
+          .from('profiles')
+          .update({ user_type: selectedType })
+          .eq('id', user.id);
+
+        if (error) throw error;
+
+        if (selectedType === 'artist') {
+          router.push('/onboarding/basic-info');
+        } else {
+          router.push(`/onboarding/${selectedType}`);
+        }
       }
     } catch (error) {
       console.error('Error updating user type:', error);
