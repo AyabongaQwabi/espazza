@@ -78,7 +78,7 @@ export default function UserTypeSelection() {
         .from('profiles')
         .select('id')
         .eq('id', user.id);
-
+      console.log(data);
       if (!data || data.length === 0) {
         await supabase
           .from('profiles')
@@ -104,9 +104,9 @@ export default function UserTypeSelection() {
       if (error) throw error;
 
       if (selectedType === 'artist') {
-        router.push('/onboarding/basic-info');
+        //router.push('/onboarding/basic-info');
       } else {
-        router.push(`/onboarding/${selectedType}`);
+        ///router.push(`/onboarding/${selectedType}`);
       }
     } catch (error) {
       console.error('Error updating user type:', error);
