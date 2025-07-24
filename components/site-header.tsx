@@ -68,13 +68,13 @@ function Navigation({ className = '' }: { className?: string }) {
           <span>Producers</span>
         </Link>
 
-        <Link
+        {/* <Link
           href='/merch-store'
           className='hover:text-red-500 transition-colors flex items-center gap-2'
         >
           <HoverIcon Icon={ShoppingBagIcon} size={16} />
           <span>Buy Merch</span>
-        </Link>
+        </Link> */}
         {/* <Link
           href='/events'
           className='hover:text-red-500 transition-colors flex items-center gap-2'
