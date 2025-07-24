@@ -73,7 +73,7 @@ export default function UserTypeSelection() {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) throw new Error('No user found');
-
+      console.log('Current user:', user);
       const { data } = await supabase
         .from('profiles')
         .select('id')
