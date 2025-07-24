@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { toast } from '@/hooks/use-toast';
 import { Eye, EyeOff } from 'lucide-react';
-import { FaMagic } from 'react-icons/fa';
+import { FaGoogle, FaMagic } from 'react-icons/fa';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -153,9 +153,20 @@ export default function Login() {
             <div className='mt-4 text-center 0'>
               <Button
                 variant='info'
+                onClick={handleGoogleLogin}
+                disabled={loading}
+                className='hover:text-red-500 bg-white text-black'
+              >
+                <FaGoogle className='h-4 w-4 mr-2 ' />
+                Login with Google
+              </Button>
+            </div>
+            <div className='mt-4 text-center 0'>
+              <Button
+                variant='info'
                 onClick={handleMagicLinkLogin}
                 disabled={loading}
-                className='hover:text-red-500'
+                className='hover:text-red-500 '
               >
                 <FaMagic className='h-4 w-4 mr-2' />
                 Login with Magic Link
