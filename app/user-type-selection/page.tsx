@@ -74,6 +74,28 @@ export default function UserTypeSelection() {
       } = await supabase.auth.getUser();
       if (!user) throw new Error('No user found');
 
+      const { data } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id);
+
+      if (!data || data.length === 0) {
+        await supabase
+          .from('profiles')
+          .insert([
+            {
+              id: user.id,
+              username: user.user_metadata?.username || user.email,
+              email: user.email,
+              town_id: 'ab4ac681-5596-438a-82bc-52e06e934f15',
+              distributor_id: 'e8aa2a31-a488-46a7-994f-0c328de92fa3',
+              record_label_id: '1421499d-042a-4085-9e08-543d65070cbc',
+            },
+          ])
+          .select()
+          .single();
+      }
+
       const { error } = await supabase
         .from('profiles')
         .update({ user_type: selectedType })
