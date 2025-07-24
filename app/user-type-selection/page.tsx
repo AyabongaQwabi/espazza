@@ -86,7 +86,7 @@ export default function UserTypeSelection() {
           .insert([
             {
               id: user.id,
-              username: user.user_metadata?.username || user.email,
+              username: user.user_metadata?.username,
               email: user.email,
               town_id: 'ab4ac681-5596-438a-82bc-52e06e934f15',
               distributor_id: 'e8aa2a31-a488-46a7-994f-0c328de92fa3',
