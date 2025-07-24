@@ -19,6 +19,7 @@ import ProgressBar from '@/components/ProgressBar';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { AlertCircle, Loader2, Search, X, User } from 'lucide-react';
 import ShortUniqueId from 'short-unique-id';
+import { create } from 'domain';
 
 const uid = new ShortUniqueId({ length: 10 });
 
@@ -606,6 +607,67 @@ export default function CreateReleasePage() {
     );
   }
 
+  const removeSpaces = (str: string) => {
+    return str.replace(/\s+/g, '');
+  };
+
+  const createNewProfile = async (name: string) => {
+    try {
+      const { data: signUpData, error: signUpError } =
+        await supabase.auth.signUp({
+          email: `${name.toLowerCase().replace(/\s+/g, '')}@espazza.co.za`,
+          password: '@defaultPassword123',
+          options: {
+            data: {
+              username: removeSpaces(name),
+            },
+          },
+        });
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .insert({
+          id: signUpData?.user?.id,
+          username: removeSpaces(name),
+          email: signUpData?.user?.email,
+          artist_name: name,
+          government_name: name,
+          profile_image_url: '/placeholder.svg',
+          created_at: new Date().toISOString(),
+          town_id: 'ab4ac681-5596-438a-82bc-52e06e934f15',
+          distributor_id: 'e8aa2a31-a488-46a7-994f-0c328de92fa3',
+          record_label_id: '1421499d-042a-4085-9e08-543d65070cbc',
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating new profile:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to create new profile. Please try again.',
+          variant: 'destructive',
+        });
+        return null;
+      }
+
+      setProfiles((prev) => [...prev, data]);
+      toast({
+        title: 'Profile created',
+        description: `New profile "${name}" created successfully.`,
+      });
+      return data.id;
+    } catch (error) {
+      console.error('Error creating new profile:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to create new profile. Please try again.',
+        variant: 'destructive',
+      });
+      return null;
+    }
+  };
+
   // Update the button text based on whether the release has been created
   return (
     <div className='p-4 my-4 text-white'>
@@ -693,7 +755,8 @@ export default function CreateReleasePage() {
                 </Button>
               </div>
               <p className='text-xs text-gray-500 dark:text-gray-400 mb-2'>
-                Select who will own this release. Defaults to your account.
+                Select who will own this release. Defaults to your account. If
+                its not you click the Not me button before searching
               </p>
 
               {/* Simplified user selection with direct rendering */}
@@ -749,11 +812,11 @@ export default function CreateReleasePage() {
                       </div>
                     </div>
                     <Button
-                      variant='ghost'
+                      variant='primary'
                       size='sm'
                       onClick={() => setRecordOwner(null)}
                     >
-                      <X className='h-4 w-4' />
+                      <X className='h-4 w-4' /> Not me
                     </Button>
                   </div>
                 )}
@@ -820,6 +883,14 @@ export default function CreateReleasePage() {
                         Try a different search term or click "Load Users" to see
                         available users
                       </p>
+                      <Button
+                        variant='secondary'
+                        size='sm'
+                        className='mt-2'
+                        onClick={() => createNewProfile(searchQuery)}
+                      >
+                        Create "{searchQuery}"
+                      </Button>
                     </div>
                   )}
               </div>
