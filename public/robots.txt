@@ -1,6 +1,43 @@
+# eSpazza - South African Hip Hop Music Platform
+# https://espazza.xyz
+
 User-agent: *
 Allow: /
 Disallow: /dashboard/
 Disallow: /api/
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
+Disallow: /reset-password
+Disallow: /forgot-password
+Disallow: /onboarding/
+Disallow: /user-type-selection
 
-Sitemap: https://espazza.co.za/sitemap.xml
+# Allow AI search assistants to browse and cite eSpazza content
+# These crawlers power AI Overviews and AI search results
+User-agent: GPTBot
+Allow: /
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /admin/
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: GoogleOther
+Allow: /
+
+# Block AI training-only crawlers (not connected to search)
+User-agent: Bytespider
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+Sitemap: https://espazza.xyz/sitemap.xml

@@ -1,0 +1,46 @@
+# eSpazza
+
+> eSpazza is South Africa's premier digital music platform dedicated to Xhosa hip hop and South African hip hop culture. It serves as a hub for artists, fans, producers, and music lovers across Mzansi.
+
+## What is eSpazza?
+
+eSpazza (pronounced "eh-SPAH-zah") is a South African music platform named after the township "spaza shop" — a community store that serves the neighbourhood. Just as a spaza shop is the heartbeat of a township, eSpazza is the heartbeat of South African hip hop.
+
+The platform focuses especially on **Xhosa hip hop** (also known as iRap or Xhosa rap), a rapidly growing genre rooted in isiXhosa language and Eastern Cape/Western Cape township culture.
+
+## Key Features
+
+- **Artist Profiles** — Discover South African hip hop artists, view their bios, galleries, music, and book them for events
+- **Music Releases** — Stream and purchase albums and EPs from SA hip hop artists in ZAR currency
+- **Blog & News** — South African hip hop news, artist features, and music industry updates
+- **Events** — Upcoming hip hop events and concerts across South Africa
+- **Podcasts** — SA music-related podcast episodes and video content
+- **Producers** — South African music producers available for collaborations and beats
+- **Merch Store** — Merchandise from SA artists and brands
+
+## Content Focus
+
+- South African hip hop (SA hip hop)
+- Xhosa hip hop / iRap (isiXhosa language rap music)
+- Artists from Cape Town, Johannesburg, Eastern Cape, and across South Africa
+- Township/kasi music culture
+- Local independent artists and emerging talent
+
+## Key Pages
+
+- Home: https://espazza.xyz/
+- Artists: https://espazza.xyz/artists
+- Releases: https://espazza.xyz/releases
+- Blog: https://espazza.xyz/blog
+- Events: https://espazza.xyz/events
+- Producers: https://espazza.xyz/producers
+- Podcasts: https://espazza.xyz/podcasts
+
+## Contact
+
+- Website: https://espazza.xyz
+- Social: @espazza
+
+## Licensing
+
+All music content on eSpazza is owned by the respective artists. The platform facilitates distribution and promotion. Do not reproduce music files without artist permission.
