@@ -283,16 +283,16 @@ export default function ReleasesPage() {
         externalEntityID: release.id,
         amount: totalPrice * 100, // Convert to cents
         currency: 'ZAR',
-        requesterUrl: 'https://espazza.co.za/releases',
+        requesterUrl: 'https://espazza.xyz/releases',
         description: `Purchase of ${release.title} (includes R${SURCHARGE} service fee)`,
         paymentReference: `${currentUser.id}-${release.id}`,
         mode: 'sandbox',
         externalTransactionID: transactionId,
         urls: {
-          callbackUrl: 'https://espazza.co.za/releases/callback',
-          successPageUrl: `https://espazza.co.za/releases/success?transaction_id=${transactionId}`,
-          failurePageUrl: 'https://espazza.co.za/failure',
-          cancelUrl: 'https://espazza.co.za/cancel',
+          callbackUrl: 'https://espazza.xyz/releases/callback',
+          successPageUrl: `https://espazza.xyz/releases/success?transaction_id=${transactionId}`,
+          failurePageUrl: 'https://espazza.xyz/failure',
+          cancelUrl: 'https://espazza.xyz/cancel',
         },
       };
 
@@ -376,9 +376,9 @@ export default function ReleasesPage() {
       const paymentData = {
         merchant_id: merchant_id,
         merchant_key: merchant_key,
-        return_url: `https://espazza.co.za/releases/success?transaction_id=${transactionId}`,
-        cancel_url: 'https://espazza.co.za/cancel',
-        notify_url: 'https://espazza.co.za/releases/callback',
+        return_url: `https://espazza.xyz/releases/success?transaction_id=${transactionId}`,
+        cancel_url: 'https://espazza.xyz/cancel',
+        notify_url: 'https://espazza.xyz/releases/callback',
         name_first: currentUser.user_metadata.full_name || 'Customer',
         email_address: currentUser.email,
         m_payment_id: transactionId,

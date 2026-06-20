@@ -149,10 +149,10 @@ export default function PrivacyPolicy() {
               <p>
                 You can view Ezoic's privacy policy at{' '}
                 <a
-                  href='https://g.ezoic.net/privacy/espazza.co.za'
+                  href='https://g.ezoic.net/privacy/espazza.xyz'
                   className='text-primary hover:underline'
                 >
-                  https://g.ezoic.net/privacy/espazza.co.za
+                  https://g.ezoic.net/privacy/espazza.xyz
                 </a>
                 , or for additional information about Ezoic's advertising and
                 other partners, you can view Ezoic's advertising partners{' '}

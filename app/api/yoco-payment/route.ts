@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     }
 
     // Get the base URL for success/failure/cancel redirects
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://espazza.co.za';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://espazza.xyz';
 
     // Create the checkout session payload
     const payload = {

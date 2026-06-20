@@ -256,7 +256,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
   }, [audioRef]);
 
   const handleShare = (platform: string) => {
-    const url = `https://espazza.co.za/artist/${username}`;
+    const url = `https://espazza.xyz/artist/${username}`;
     let shareUrl = '';
 
     switch (platform) {

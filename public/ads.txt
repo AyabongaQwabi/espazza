@@ -1,6 +1,6 @@
-#Ads.txt espazza.co.za
+#Ads.txt espazza.xyz
 #Ads.txt managed by AdsTxtManager.com - the free ads.txt management tool for publishers
-ownerdomain=espazza.co.za
+ownerdomain=espazza.xyz
 contact=directsales@ezoic.com
 managerdomain=ezoic.ai
 

@@ -138,10 +138,10 @@ export default function ContactPage() {
                 <Button
                   className='w-full bg-blue-600 hover:bg-blue-700 h-12 text-base'
                   onClick={() =>
-                    (window.location.href = 'mailto:info@espazza.co.za')
+                    (window.location.href = 'mailto:info@espazza.xyz')
                   }
                 >
-                  Email info@espazza.co.za
+                  Email info@espazza.xyz
                 </Button>
               </div>
             </div>

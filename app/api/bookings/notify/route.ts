@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   // Send email notification
   try {
     await resend.emails.send({
-      from: 'noreply@espazza.co.za',
+      from: 'noreply@espazza.xyz',
       to: booking.profiles.email,
       subject: 'New Booking Request',
       html: `
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
         <p>Venue: ${booking.events.venue}</p>
         <p>Fee: $${booking.fee}</p>
         <p>Payment Terms: ${booking.payment_terms}</p>
-        <a href="https://espazza.co.za/dashboard/bookings">View Booking</a>
+        <a href="https://espazza.xyz/dashboard/bookings">View Booking</a>
       `,
     });
 

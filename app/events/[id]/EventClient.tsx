@@ -277,16 +277,16 @@ export default function EventClient({ eventId }: { eventId: string }) {
         externalEntityID: event.id,
         amount: totalPrice * 100, // Convert to cents
         currency: 'ZAR',
-        requesterUrl: 'https://espazza.co.za/events',
+        requesterUrl: 'https://espazza.xyz/events',
         description: `Ticket for ${event.name} (includes R${SURCHARGE} service fee)`,
         paymentReference: event.id,
         mode: 'live',
         externalTransactionID: transactionId,
         urls: {
-          callbackUrl: 'https://espazza.co.za/api/payment/callback',
-          successPageUrl: `https://espazza.co.za/events/ticket/success?transaction_id=${transactionId}`,
-          failurePageUrl: 'https://espazza.co.za/failure',
-          cancelUrl: 'https://espazza.co.za/cancel',
+          callbackUrl: 'https://espazza.xyz/api/payment/callback',
+          successPageUrl: `https://espazza.xyz/events/ticket/success?transaction_id=${transactionId}`,
+          failurePageUrl: 'https://espazza.xyz/failure',
+          cancelUrl: 'https://espazza.xyz/cancel',
         },
       };
 

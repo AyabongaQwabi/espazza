@@ -45,7 +45,7 @@ export default function BloggerOnboarding() {
   const [newLabel, setNewLabel] = useState('');
   const [formData, setFormData] = useState({
     blog_name: 'I dont have a blog',
-    blog_url: 'https://espazza.co.za',
+    blog_url: 'https://espazza.xyz',
     artist_bio: '',
     artist_name: '',
     date_of_birth: '',

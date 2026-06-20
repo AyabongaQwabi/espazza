@@ -240,16 +240,16 @@ export default function ReleasePage({ params }: { params: { id: string } }) {
         externalEntityID: release.id,
         amount: totalPrice, // Convert to cents
         currency: 'ZAR',
-        requesterUrl: 'https://espazza.co.za/releases',
+        requesterUrl: 'https://espazza.xyz/releases',
         description: `Purchase of ${release.title} (includes R${SURCHARGE} service fee)`,
         paymentReference: `${currentUser.id}-${release.id}`,
         mode: 'sandbox',
         externalTransactionID: transactionId,
         urls: {
-          callbackUrl: 'https://espazza.co.za/releases/callback',
-          successPageUrl: `https://espazza.co.za/releases/success?transaction_id=${transactionId}`,
-          failurePageUrl: 'https://espazza.co.za/failure',
-          cancelUrl: 'https://espazza.co.za/cancel',
+          callbackUrl: 'https://espazza.xyz/releases/callback',
+          successPageUrl: `https://espazza.xyz/releases/success?transaction_id=${transactionId}`,
+          failurePageUrl: 'https://espazza.xyz/failure',
+          cancelUrl: 'https://espazza.xyz/cancel',
         },
       };
 

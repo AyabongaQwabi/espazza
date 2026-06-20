@@ -615,7 +615,7 @@ export default function CreateReleasePage() {
     try {
       const { data: signUpData, error: signUpError } =
         await supabase.auth.signUp({
-          email: `${name.toLowerCase().replace(/\s+/g, '')}@espazza.co.za`,
+          email: `${name.toLowerCase().replace(/\s+/g, '')}@espazza.xyz`,
           password: '@defaultPassword123',
           options: {
             data: {

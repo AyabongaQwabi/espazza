@@ -99,16 +99,16 @@ export default function TicketsPage() {
         externalEntityID: ticket.id,
         amount: totalPrice,
         currency: 'ZAR',
-        requesterUrl: 'https://espazza.co.za/tickets',
+        requesterUrl: 'https://espazza.xyz/tickets',
         description: `Payment for ticket to ${ticket.events.name}`,
         paymentReference: `${ticket.buyer_id}-${ticket.id}`,
         mode: 'live',
         externalTransactionID: transactionId,
         urls: {
-          callbackUrl: 'https://espazza.co.za/api/payment/callback',
-          successPageUrl: `https://espazza.co.za/tickets/success?transaction_id=${transactionId}`,
-          failurePageUrl: 'https://espazza.co.za/tickets/failure',
-          cancelUrl: 'https://espazza.co.za/tickets',
+          callbackUrl: 'https://espazza.xyz/api/payment/callback',
+          successPageUrl: `https://espazza.xyz/tickets/success?transaction_id=${transactionId}`,
+          failurePageUrl: 'https://espazza.xyz/tickets/failure',
+          cancelUrl: 'https://espazza.xyz/tickets',
         },
       };
 

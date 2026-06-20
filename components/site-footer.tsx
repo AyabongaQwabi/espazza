@@ -61,7 +61,7 @@ export function SiteFooter() {
             <ul className='space-y-2 text-zinc-400'>
               <li className='flex items-center gap-2'>
                 <Mail className='w-4 h-4' />
-                info@espazza.co.za
+                info@espazza.xyz
               </li>
               <li className='flex items-center gap-2'>
                 <Phone className='w-4 h-4' />

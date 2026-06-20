@@ -232,16 +232,16 @@ export default function MerchPage() {
         externalEntityID: selectedProduct.id,
         amount: totalPrice,
         currency: 'ZAR',
-        requesterUrl: 'https://espazza.co.za/merch-store',
+        requesterUrl: 'https://espazza.xyz/merch-store',
         description: `Purchase of ${orderDetails.quantity}x ${selectedProduct.name}`,
         paymentReference: `${currentUser.id}-${selectedProduct.id}`,
         mode: 'live',
         externalTransactionID: transactionId,
         urls: {
-          callbackUrl: 'https://espazza.co.za/api/payment/callback',
-          successPageUrl: `https://espazza.co.za/merch-store/success?transaction_id=${transactionId}`,
-          failurePageUrl: 'https://espazza.co.za/failure',
-          cancelUrl: 'https://espazza.co.za/cancel',
+          callbackUrl: 'https://espazza.xyz/api/payment/callback',
+          successPageUrl: `https://espazza.xyz/merch-store/success?transaction_id=${transactionId}`,
+          failurePageUrl: 'https://espazza.xyz/failure',
+          cancelUrl: 'https://espazza.xyz/cancel',
         },
       };
 

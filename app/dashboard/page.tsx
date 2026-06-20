@@ -182,16 +182,16 @@ export default function DashboardPage() {
       //   externalEntityID: youtubeLink,
       //   amount: totalPrice,
       //   currency: 'ZAR',
-      //   requesterUrl: 'https://espazza.co.za/dashboard',
+      //   requesterUrl: 'https://espazza.xyz/dashboard',
       //   description: `Purchase of YT Link Promotion: ${youtubeLink}}`,
       //   paymentReference: `${user.id}-yt-promo-${transactionId}`,
       //   mode: 'live',
       //   externalTransactionID: transactionId,
       //   urls: {
-      //     callbackUrl: 'https://espazza.co.za/api/payment/callback',
-      //     successPageUrl: `https://espazza.co.za/dashboard/success?transaction_id=${transactionId}`,
-      //     failurePageUrl: 'https://espazza.co.za/failure',
-      //     cancelUrl: 'https://espazza.co.za/cancel',
+      //     callbackUrl: 'https://espazza.xyz/api/payment/callback',
+      //     successPageUrl: `https://espazza.xyz/dashboard/success?transaction_id=${transactionId}`,
+      //     failurePageUrl: 'https://espazza.xyz/failure',
+      //     cancelUrl: 'https://espazza.xyz/cancel',
       //   },
       // };
 

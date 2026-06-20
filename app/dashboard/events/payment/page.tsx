@@ -88,17 +88,17 @@ export default function EventPaymentPage() {
         externalEntityID: event.id,
         amount: totalPrice,
         currency: 'ZAR',
-        requesterUrl: 'https://espazza.co.za/dashboard/events',
+        requesterUrl: 'https://espazza.xyz/dashboard/events',
         description: `Event creation fee for ${event.name}`,
         paymentReference: `${event.organizer_id}-${event.id}`,
         mode: 'live',
         externalTransactionID: newTransactionId,
         urls: {
-          callbackUrl: 'https://espazza.co.za/api/payment/callback',
-          successPageUrl: `https://espazza.co.za/dashboard/events/payment/success?transaction_id=${newTransactionId}`,
+          callbackUrl: 'https://espazza.xyz/api/payment/callback',
+          successPageUrl: `https://espazza.xyz/dashboard/events/payment/success?transaction_id=${newTransactionId}`,
           failurePageUrl:
-            'https://espazza.co.za/dashboard/events/payment/failure',
-          cancelUrl: 'https://espazza.co.za/dashboard/events',
+            'https://espazza.xyz/dashboard/events/payment/failure',
+          cancelUrl: 'https://espazza.xyz/dashboard/events',
         },
       };
 

@@ -45,8 +45,8 @@ export async function POST(request: Request) {
           },
         ],
         application_context: {
-          return_url: `https://espazza.co.za/releases/success?transaction_id=${transactionId}`,
-          cancel_url: 'https://espazza.co.za/cancel',
+          return_url: `https://espazza.xyz/releases/success?transaction_id=${transactionId}`,
+          cancel_url: 'https://espazza.xyz/cancel',
         },
       },
       {
