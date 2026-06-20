@@ -55,8 +55,6 @@ import {
 import { useMusicPlayer } from '@/hooks/use-music-player';
 
 const API_ENDPOINT = 'https://api.ikhokha.com/public-api/v1/api/payment';
-const APPLICATION_ID = process.env.NEXT_IKHOKA_APP_ID;
-const APPLICATION_KEY = process.env.NEXT_PUBLIC_IKHOKA_APP_KEY;
 const SURCHARGE = 2;
 
 interface Release {
@@ -192,29 +190,7 @@ export default function ReleasePage({ params }: { params: { id: string } }) {
     setLoading(false);
   }
 
-  function createPayloadToSign(urlPath: string, body = '') {
-    try {
-      const parsedUrl = url.parse(urlPath);
-      const basePath = parsedUrl.path;
-      if (!basePath) throw new Error('No basePath in url');
-      const payload = basePath + body;
-      return jsStringEscape(payload);
-    } catch (error) {
-      console.error('Error on createPayloadToSign:', error);
-      return '';
-    }
-  }
-
-  function jsStringEscape(str: string) {
-    try {
-      return str.replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
-    } catch (error) {
-      console.error('Error on jsStringEscape:', error);
-      return '';
-    }
-  }
-
-  async function handlePurchase() {
+    async function handlePurchase() {
     if (!currentUser) {
       toast({
         title: 'Authentication Required',
@@ -252,12 +228,6 @@ export default function ReleasePage({ params }: { params: { id: string } }) {
           cancelUrl: 'https://espazza.xyz/cancel',
         },
       };
-
-      const requestBody = JSON.stringify(request);
-      const payloadToSign = createPayloadToSign(API_ENDPOINT, requestBody);
-      const signature = crypto
-        .HmacSHA256(payloadToSign, APPLICATION_KEY.trim())
-        .toString(crypto.enc.Hex);
 
       const response = await axios.post('/api/payment', request);
 

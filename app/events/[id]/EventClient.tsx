@@ -28,14 +28,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import axios from 'axios';
-import crypto from 'crypto-js';
-import url from 'url';
 import short from 'short-uuid';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const API_ENDPOINT = 'https://api.ikhokha.com/public-api/v1/api/payment';
-const APPLICATION_ID = process.env.NEXT_IKHOKA_APP_ID;
-const APPLICATION_KEY = process.env.NEXT_PUBLIC_IKHOKA_APP_KEY;
 const SURCHARGE = 2;
 
 export default function EventClient({ eventId }: { eventId: string }) {
@@ -214,30 +210,7 @@ export default function EventClient({ eventId }: { eventId: string }) {
     }
   }
 
-  function createPayloadToSign(urlPath: string, body = '') {
-    try {
-      const parsedUrl = url.parse(urlPath);
-      const basePath = parsedUrl.path;
-
-      if (!basePath) throw new Error('No basePath in url');
-      const payload = basePath + body;
-      return jsStringEscape(payload);
-    } catch (error) {
-      console.error('Error on createPayloadToSign:', error);
-      return '';
-    }
-  }
-
-  function jsStringEscape(str: string) {
-    try {
-      return str.replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
-    } catch (error) {
-      console.error('Error on jsStringEscape:', error);
-      return '';
-    }
-  }
-
-  async function handlePurchaseTicket() {
+    async function handlePurchaseTicket() {
     if (!user) {
       toast({
         title: 'Authentication Required',
@@ -289,12 +262,6 @@ export default function EventClient({ eventId }: { eventId: string }) {
           cancelUrl: 'https://espazza.xyz/cancel',
         },
       };
-
-      const requestBody = JSON.stringify(request);
-      const payloadToSign = createPayloadToSign(API_ENDPOINT, requestBody);
-      const signature = crypto
-        .HmacSHA256(payloadToSign, APPLICATION_KEY.trim())
-        .toString(crypto.enc.Hex);
 
       const response = await axios.post('/api/payment', request);
       console.log('Payment API response:', response.data);

@@ -28,19 +28,9 @@ import { toast } from '@/hooks/use-toast';
 import sign from 'jwt-encode';
 import { EncryptJWT } from 'jose';
 import axios from 'axios';
-import crypto from 'crypto-js';
-import url from 'url';
 import short from 'short-uuid';
 import ShortUniqueId from 'short-unique-id';
 
-const SECRET_KEY = new Uint8Array(32);
-const keyMaterial = new TextEncoder().encode(
-  process.env.NEXT_PUBLIC_SECRET_KEY
-);
-SECRET_KEY.set(keyMaterial.slice(0, 32));
-const API_ENDPOINT = 'https://api.ikhokha.com/public-api/v1/api/payment';
-const APPLICATION_ID = process.env.NEXT_IKHOKA_APP_ID;
-const APPLICATION_KEY = process.env.NEXT_PUBLIC_IKHOKA_APP_KEY;
 const ITEMS_PER_PAGE = 12;
 
 async function encryptData(data: any) {
@@ -127,23 +117,6 @@ export default function DashboardPage() {
 
     loadData();
   }, []);
-
-  function createPayloadToSign(urlPath: string, body = '') {
-    try {
-      const parsedUrl = url.parse(urlPath);
-      const basePath = parsedUrl.path;
-      if (!basePath) throw new Error('No basePath in url');
-      const payload = basePath + body;
-      return jsStringEscape(payload);
-    } catch (error) {
-      console.error('Error on createPayloadToSign:', error);
-      return '';
-    }
-  }
-
-  function jsStringEscape(str: string) {
-    return str.replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
-  }
 
   const handlePromoteVideo = async () => {
     try {

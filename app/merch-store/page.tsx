@@ -35,8 +35,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Image from 'next/image';
 import { toast } from '@/hooks/use-toast';
 import axios from 'axios';
-import crypto from 'crypto-js';
-import url from 'url';
 import short from 'short-uuid';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
 import {
@@ -58,8 +56,6 @@ import {
 } from 'lucide-react';
 
 const API_ENDPOINT = 'https://api.ikhokha.com/public-api/v1/api/payment';
-const APPLICATION_ID = process.env.NEXT_IKHOKA_APP_ID;
-const APPLICATION_KEY = process.env.NEXT_PUBLIC_IKHOKA_APP_KEY;
 const ITEMS_PER_PAGE = 12;
 
 export default function MerchPage() {
@@ -180,24 +176,7 @@ export default function MerchPage() {
     fetchProducts();
   };
 
-  function createPayloadToSign(urlPath: string, body = '') {
-    try {
-      const parsedUrl = url.parse(urlPath);
-      const basePath = parsedUrl.path;
-      if (!basePath) throw new Error('No basePath in url');
-      const payload = basePath + body;
-      return jsStringEscape(payload);
-    } catch (error) {
-      console.error('Error on createPayloadToSign:', error);
-      return '';
-    }
-  }
-
-  function jsStringEscape(str: string) {
-    return str.replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
-  }
-
-  async function handlePurchase(product) {
+    async function handlePurchase(product) {
     if (!currentUser) {
       toast({
         title: 'Authentication Required',
@@ -244,12 +223,6 @@ export default function MerchPage() {
           cancelUrl: 'https://espazza.xyz/cancel',
         },
       };
-
-      const requestBody = JSON.stringify(request);
-      const payloadToSign = createPayloadToSign(API_ENDPOINT, requestBody);
-      const signature = crypto
-        .HmacSHA256(payloadToSign, APPLICATION_KEY.trim())
-        .toString(crypto.enc.Hex);
 
       const response = await axios.post('/api/payment', request);
 

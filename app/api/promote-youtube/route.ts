@@ -4,9 +4,7 @@ import { FacebookAdsApi, Page } from 'facebook-nodejs-business-sdk';
 import play from 'play-dl';
 
 const SECRET_KEY = new Uint8Array(32);
-const keyMaterial = new TextEncoder().encode(
-  process.env.NEXT_PUBLIC_SECRET_KEY
-);
+const keyMaterial = new TextEncoder().encode(process.env.SECRET_KEY);
 SECRET_KEY.set(keyMaterial.slice(0, 32));
 
 export async function POST(req: Request) {

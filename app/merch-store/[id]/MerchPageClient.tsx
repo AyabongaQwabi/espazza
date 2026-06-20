@@ -11,8 +11,6 @@ import { toast } from '@/hooks/use-toast';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { Share2 } from 'lucide-react';
 import axios from 'axios';
-import crypto from 'crypto-js';
-import url from 'url';
 import short from 'short-uuid';
 import ShortUniqueId from 'short-unique-id';
 import {
@@ -21,8 +19,6 @@ import {
 } from '@/components/OrderDetailsModal';
 
 const API_ENDPOINT = 'https://api.ikhokha.com/public-api/v1/api/payment';
-const APPLICATION_ID = process.env.NEXT_IKHOKA_APP_ID;
-const APPLICATION_KEY = process.env.NEXT_PUBLIC_IKHOKA_APP_KEY;
 
 export default function MerchItemClient({ initialProduct }) {
   const [product, setProduct] = useState(initialProduct);
@@ -46,24 +42,7 @@ export default function MerchItemClient({ initialProduct }) {
     setCurrentUser(user);
   }
 
-  function createPayloadToSign(urlPath: string, body = '') {
-    try {
-      const parsedUrl = url.parse(urlPath);
-      const basePath = parsedUrl.path;
-      if (!basePath) throw new Error('No basePath in url');
-      const payload = basePath + body;
-      return jsStringEscape(payload);
-    } catch (error) {
-      console.error('Error on createPayloadToSign:', error);
-      return '';
-    }
-  }
-
-  function jsStringEscape(str: string) {
-    return str.replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
-  }
-
-  async function processOrder(orderDetails: OrderDetails) {
+    async function processOrder(orderDetails: OrderDetails) {
     setPurchaseLoading(true);
     setIsOrderModalOpen(false);
     if (!currentUser) {
@@ -96,12 +75,6 @@ export default function MerchItemClient({ initialProduct }) {
           cancelUrl: 'https://espazza.xyz/cancel',
         },
       };
-
-      const requestBody = JSON.stringify(request);
-      const payloadToSign = createPayloadToSign(API_ENDPOINT, requestBody);
-      const signature = crypto
-        .HmacSHA256(payloadToSign, APPLICATION_KEY.trim())
-        .toString(crypto.enc.Hex);
 
       const response = await axios.post('/api/payment', request);
 

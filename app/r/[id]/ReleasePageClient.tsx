@@ -59,8 +59,6 @@ import {
 import { FacebookIcon, TwitterIcon, LinkedinIcon } from 'react-share';
 
 const API_ENDPOINT = 'https://api.ikhokha.com/public-api/v1/api/payment';
-const APPLICATION_ID = process.env.NEXT_IKHOKA_APP_ID;
-const APPLICATION_KEY = process.env.NEXT_PUBLIC_IKHOKA_APP_KEY;
 const SURCHARGE = 2;
 
 interface Release {

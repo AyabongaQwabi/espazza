@@ -4,8 +4,8 @@ import crypto from 'crypto-js';
 import url from 'url';
 
 const API_ENDPOINT = 'https://api.ikhokha.com/public-api/v1/api/payment';
-const APPLICATION_ID = process.env.NEXT_PUBLIC_IKHOKA_APP_ID?.trim();
-const APPLICATION_KEY = process.env.NEXT_PUBLIC_IKHOKA_APP_KEY?.trim();
+const APPLICATION_ID = process.env.IKHOKA_APP_ID?.trim();
+const APPLICATION_KEY = process.env.IKHOKA_APP_KEY?.trim();
 
 function createPayloadToSign(urlPath: string, body = '') {
   try {
@@ -29,8 +29,6 @@ export async function POST(request: Request) {
     if (!APPLICATION_ID || !APPLICATION_KEY) {
       throw new Error('Missing iKhokha API credentials');
     }
-    console.log('iKhokha API credentials:', APPLICATION_ID, APPLICATION_KEY);
-
     const body = await request.json();
     console.log('Payment API request body:', body);
 
