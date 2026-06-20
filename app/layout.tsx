@@ -23,26 +23,28 @@ const AdBanner = dynamic(() => import('@/components/AdBanner'), { ssr: false });
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://espazza.co.za'),
+  metadataBase: new URL('https://espazza.xyz'),
   title: {
     default: 'eSpazza - South African music Spaza Shop',
     template: '%s | eSpazza',
   },
   description:
-    'eSpazza is a South African digital platform dedicated to promoting local music and culture, with a particular focus on Xhosa hip hop. It serves as a hub for artists, producers, and fans, offering a variety of content and merchandise',
+    "eSpazza is South Africa's premier digital platform for Xhosa hip hop and South African hip hop. Discover artists, stream and buy music releases, read SA music news, and explore events. The home of Mzansi hip hop culture.",
   keywords: [
-    'South African music',
-    'afrikaans hip hop music',
-    'xhosa traditional music artists',
-    'south african hip hop',
-    'xhosa hip hop music',
-    'South African hip hop Music',
-    'xhosa hip hop artist',
-    'youngest rapper in south africa',
-    'young rappers in south africa',
-    'Hip Hop',
-    'Rap',
-    'Music Platform',
+    'South African hip hop',
+    'Xhosa hip hop',
+    'SA hip hop',
+    'South African music platform',
+    'Xhosa rap',
+    'Mzansi music',
+    'iRap',
+    'South African rappers',
+    'Xhosa hip hop artists',
+    'SA music streaming',
+    'South African music news',
+    'kasi music',
+    'township hip hop',
+    'eSpazza',
   ],
   authors: [{ name: 'Ayabonga Qwabi' }],
   creator: 'Xhosa Hip Hop',
@@ -64,14 +66,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_ZA',
-    url: 'https://espazza.co.za',
+    url: 'https://espazza.xyz',
     siteName: 'eSpazza',
     title: 'eSpazza - South African music Spaza Shop',
     description:
       'eSpazza is a South African digital platform dedicated to promoting local music and culture, with a particular focus on Xhosa hip hop. It serves as a hub for artists, producers, and fans, offering a variety of content and merchandise',
     images: [
       {
-        url: 'https://espazza.co.za/logo.png',
+        url: 'https://espazza.xyz/logo.png',
         width: 1200,
         height: 630,
         alt: 'eSpazza - South African music Platform',
@@ -82,7 +84,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'eSpazza - South African music Spaza Shop',
     description: 'The home of South African music',
-    images: ['https://espazza.co.za/logo.jpg'],
+    images: ['https://espazza.xyz/logo.jpg'],
     creator: '@xhap',
     site: '@espazza',
   },
@@ -106,7 +108,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: 'https://espazza.co.za',
+    canonical: 'https://espazza.xyz',
   },
 };
 
@@ -153,32 +155,70 @@ export default function RootLayout({
         <meta name='apple-mobile-web-app-title' content='MyWebSite' />
         <link rel='manifest' href='/site.webmanifest' />
         <Script
-          id='structured-data'
+          id='structured-data-website'
           type='application/ld+json'
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'WebSite',
               name: 'eSpazza',
-              url: 'https://espazza.co.za',
-              description: 'The home of South African music',
+              alternateName: 'eSpazza Music',
+              url: 'https://espazza.xyz',
+              description:
+                "South Africa's premier Xhosa hip hop and South African hip hop digital music platform.",
+              inLanguage: 'en-ZA',
               potentialAction: {
                 '@type': 'SearchAction',
                 target: {
                   '@type': 'EntryPoint',
                   urlTemplate:
-                    'https://espazza.co.za/search?q={search_term_string}',
+                    'https://espazza.xyz/releases?q={search_term_string}',
                 },
                 'query-input': 'required name=search_term_string',
               },
-              publisher: {
-                '@type': 'Organization',
-                name: 'eSpazza',
-                logo: {
-                  '@type': 'ImageObject',
-                  url: 'https://espazza.co.za/logo.png',
+            }),
+          }}
+        />
+        <Script
+          id='structured-data-org'
+          type='application/ld+json'
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: 'eSpazza',
+              url: 'https://espazza.xyz',
+              logo: {
+                '@type': 'ImageObject',
+                url: 'https://espazza.xyz/logo.png',
+                width: 512,
+                height: 512,
+              },
+              description:
+                "South Africa's premier digital platform for Xhosa hip hop and South African hip hop music. Discover artists, stream releases, and stay updated with SA music news.",
+              foundingLocation: {
+                '@type': 'Place',
+                name: 'South Africa',
+                address: {
+                  '@type': 'PostalAddress',
+                  addressCountry: 'ZA',
                 },
               },
+              areaServed: {
+                '@type': 'Country',
+                name: 'South Africa',
+              },
+              knowsAbout: [
+                'South African Hip Hop',
+                'Xhosa Hip Hop',
+                'SA Music',
+                'Mzansi Music',
+                'Township Music',
+              ],
+              sameAs: [
+                'https://twitter.com/espazza',
+                'https://www.instagram.com/espazza',
+              ],
             }),
           }}
         />

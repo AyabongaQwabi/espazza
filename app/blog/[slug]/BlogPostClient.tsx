@@ -63,7 +63,7 @@ export default function BlogPostClient({
     // Only set the URL in the browser environment
     if (typeof window !== 'undefined') {
       setCurrentUrl(
-        window.location.href || `https://espazza.co.za/blog/${post.slug}`
+        window.location.href || `https://espazza.xyz/blog/${post.slug}`
       );
       window.addEventListener('scroll', handleScroll);
       return () => window.removeEventListener('scroll', handleScroll);

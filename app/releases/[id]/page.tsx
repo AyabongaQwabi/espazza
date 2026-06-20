@@ -3,107 +3,64 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { SITE_NAME, SITE_URL, PUBLISHER_LD, releaseKeywords } from '@/lib/seo';
 
-// This makes the page dynamic
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-// Define the generateMetadata function for SEO
 export async function generateMetadata({
   params,
 }: {
   params: { id: string };
 }): Promise<Metadata> {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerComponentClient({
-      cookies: () => cookieStore,
-    });
+    const cookieStore = await cookies();
+    const supabase = createServerComponentClient({ cookies: () => cookieStore });
 
-    const { data: release, error } = await supabase
+    const { data: release } = await supabase
       .from('releases')
-      .select(
-        `
-        *,
-        genre:genres(id, name),
-        record_label:record_labels(name),
+      .select(`
+        title, description, cover_image_url, release_date, tracks,
+        genre:genres(name),
         record_owner:profiles(artist_name, username)
-      `
-      )
+      `)
       .eq('short_unique_id', params.id)
       .single();
 
-    if (error) {
-      console.error('Metadata fetch error:', error);
-      return {
-        title: 'Espazza',
-        description: 'Discover and stream the latest hip-hop releases',
-      };
-    }
-
     if (!release) {
-      return {
-        title: 'Release Not Found | Espazza',
-        description: 'The requested release could not be found.',
-      };
+      return { title: `Release Not Found | ${SITE_NAME}` };
     }
 
-    const artistName =
-      release.record_owner.artist_name || release.record_owner.username;
-    const releaseYear = new Date(release.release_date).getFullYear();
+    const artistName = release.record_owner?.artist_name || release.record_owner?.username || 'Unknown Artist';
     const trackCount = release.tracks?.length || 0;
-    const totalPrice =
-      release.tracks?.reduce(
-        (sum: number, track: any) => sum + (track.price || 0),
-        0
-      ) || 0;
-
     const description =
       release.description ||
-      `Listen to ${release.title} by ${artistName}. ${trackCount} tracks of pure hip-hop music. Available now on Espazza.`;
-
-    const ogImage = release.cover_image_url || '/default-release-og.jpg';
+      `Listen to ${release.title} by ${artistName}. ${trackCount} track${trackCount !== 1 ? 's' : ''} of South African hip hop music. Stream and download on ${SITE_NAME}.`;
+    const ogImage = release.cover_image_url || `${SITE_URL}/logo.png`;
+    const url = `${SITE_URL}/r/${params.id}`;
 
     return {
-      title: `${release.title} by ${artistName} | Espazza`,
-      description: description,
-      keywords: [
-        release.title,
-        artistName,
-        'hip-hop',
-        'music',
-        'album',
-        'south african music',
-        release.genre?.name || 'hip-hop',
-        'stream music',
-        'buy music',
-      ].join(', '),
+      title: `${release.title} by ${artistName} | ${SITE_NAME}`,
+      description,
+      keywords: releaseKeywords(release.title, artistName, release.genre?.name),
       openGraph: {
         title: `${release.title} by ${artistName}`,
-        description: description,
+        description,
         type: 'music.album',
-        url: `/releases/${params.id}`,
-        images: [
-          {
-            url: ogImage,
-            width: 1200,
-            height: 1200,
-            alt: `${release.title} album cover`,
-          },
-        ],
-        siteName: 'Espazza',
+        url,
+        images: [{ url: ogImage, width: 1200, height: 1200, alt: `${release.title} album cover` }],
+        siteName: SITE_NAME,
         locale: 'en_ZA',
       },
       twitter: {
         card: 'summary_large_image',
         title: `${release.title} by ${artistName}`,
-        description: description,
+        description,
         images: [ogImage],
-        creator: '@espazzamusic',
+        creator: '@espazza',
+        site: '@espazza',
       },
-      alternates: {
-        canonical: `/releases/${params.id}`,
-      },
+      alternates: { canonical: url },
       robots: {
         index: true,
         follow: true,
@@ -111,49 +68,9 @@ export async function generateMetadata({
         'max-snippet': -1,
         'max-video-preview': -1,
       },
-      other: {
-        // Music-specific meta tags
-        'music:duration': release.tracks?.length
-          ? `${release.tracks.length} tracks`
-          : undefined,
-        'music:album': release.title,
-        'music:musician': artistName,
-        'music:release_date': release.release_date,
-        'music:genre': release.genre?.name,
-        // Schema.org structured data
-        'application/ld+json': JSON.stringify({
-          '@context': 'https://schema.org',
-          '@type': 'MusicAlbum',
-          name: release.title,
-          byArtist: {
-            '@type': 'MusicGroup',
-            name: artistName,
-          },
-          datePublished: release.release_date,
-          genre: release.genre?.name || 'Hip Hop',
-          image: ogImage,
-          description: description,
-          numTracks: trackCount,
-          offers: {
-            '@type': 'Offer',
-            price: totalPrice.toFixed(2),
-            priceCurrency: 'ZAR',
-            availability: 'https://schema.org/InStock',
-          },
-          publisher: {
-            '@type': 'Organization',
-            name: 'Espazza',
-            url: 'https://espazza.co.za',
-          },
-        }),
-      },
     };
-  } catch (error) {
-    console.error('Metadata generation error:', error);
-    return {
-      title: 'Espazza',
-      description: 'Discover and stream the latest hip-hop releases',
-    };
+  } catch {
+    return { title: SITE_NAME };
   }
 }
 
@@ -162,59 +79,78 @@ export default async function ReleasePage({
 }: {
   params: { id: string };
 }) {
-  try {
-    const cookieStore = cookies();
-    const supabase = createServerComponentClient({
-      cookies: () => cookieStore,
-    });
+  const cookieStore = await cookies();
+  const supabase = createServerComponentClient({ cookies: () => cookieStore });
 
-    const { data: release, error: releaseError } = await supabase
-      .from('releases')
-      .select(
-        `
-        *,
-        genre:genres(id, name),
-        record_label:record_labels(name),
-        record_owner:profiles(artist_name, username)
-      `
-      )
-      .eq('short_unique_id', params.id)
-      .single();
+  const { data: release, error: releaseError } = await supabase
+    .from('releases')
+    .select(`
+      *,
+      genre:genres(id, name),
+      record_label:record_labels(name),
+      record_owner:profiles(artist_name, username)
+    `)
+    .eq('short_unique_id', params.id)
+    .single();
 
-    if (releaseError) {
-      console.error('Release fetch error:', releaseError);
-      throw new Error('Failed to fetch release');
-    }
+  if (releaseError || !release) notFound();
 
-    if (!release) {
-      notFound();
-    }
+  const { data: relatedReleases } = await supabase
+    .from('releases')
+    .select('id, title, short_unique_id, cover_image_url, record_owner:profiles(artist_name, username)')
+    .neq('id', release.id)
+    .or(`record_owner.eq.${release.record_owner},genre_id.eq.${release.genre_id}`)
+    .limit(4);
 
-    // Fetch related releases by the same artist or genre
-    const { data: relatedReleases, error: relatedError } = await supabase
-      .from('releases')
-      .select(
-        'id, title, short_unique_id, cover_image_url, record_owner:profiles(artist_name, username)'
-      )
-      .neq('id', release.id)
-      .or(
-        `record_owner.eq.${release.record_owner},genre_id.eq.${release.genre_id}`
-      )
-      .limit(4);
+  const artistName = release.record_owner?.artist_name || release.record_owner?.username || 'Unknown Artist';
+  const artistUrl = `${SITE_URL}/artists/${release.record_owner?.username}`;
+  const trackCount = release.tracks?.length || 0;
+  const totalPrice = release.tracks?.reduce((sum: number, t: any) => sum + (t.price || 0), 0) || 0;
+  const ogImage = release.cover_image_url || `${SITE_URL}/logo.png`;
+  const url = `${SITE_URL}/r/${params.id}`;
+  const description =
+    release.description ||
+    `Listen to ${release.title} by ${artistName}. ${trackCount} tracks of South African hip hop. Stream and download on ${SITE_NAME}.`;
 
-    if (relatedError) {
-      console.error('Related releases fetch error:', relatedError);
-    }
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'MusicAlbum',
+    name: release.title,
+    url,
+    image: ogImage,
+    description,
+    datePublished: release.release_date,
+    genre: release.genre?.name || 'Hip Hop',
+    numTracks: trackCount,
+    byArtist: {
+      '@type': 'MusicGroup',
+      name: artistName,
+      url: artistUrl,
+    },
+    offers: totalPrice > 0
+      ? {
+          '@type': 'Offer',
+          price: totalPrice.toFixed(2),
+          priceCurrency: 'ZAR',
+          availability: 'https://schema.org/InStock',
+          url,
+        }
+      : undefined,
+    publisher: PUBLISHER_LD,
+    inLanguage: 'en-ZA',
+  };
 
-    return (
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <ReleasePageClient
         params={params}
         initialRelease={release}
         relatedReleases={relatedReleases || []}
       />
-    );
-  } catch (error) {
-    console.error('Page render error:', error);
-    throw error; // Let Next.js handle the error
-  }
+    </>
+  );
 }

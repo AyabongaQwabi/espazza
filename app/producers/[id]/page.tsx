@@ -1,32 +1,65 @@
 import { cookies } from "next/headers"
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
 import { notFound } from "next/navigation"
+import type { Metadata } from "next"
 import { Button } from "@/components/ui/button"
 import { Mail, Phone, Facebook, Youtube, ArrowLeft, Music } from "lucide-react"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { SITE_NAME, SITE_URL, PUBLISHER_LD } from "@/lib/seo"
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
-  const cookieStore = cookies()
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const cookieStore = await cookies()
   const supabase = createServerComponentClient({ cookies: () => cookieStore })
 
-  const { data: producer } = await supabase.from("music_producers").select("*").eq("id", params.id).single()
+  const { data: producer } = await supabase
+    .from("music_producers")
+    .select("name, bio, genres, email")
+    .eq("id", params.id)
+    .single()
 
-  if (!producer) {
-    return {
-      title: "Producer Not Found | eSpazza",
-    }
-  }
+  if (!producer) return { title: `Producer Not Found | ${SITE_NAME}` }
+
+  const description =
+    producer.bio?.substring(0, 160) ||
+    `${producer.name} is a South African music producer available for beats and collaborations on ${SITE_NAME}.`
+  const url = `${SITE_URL}/producers/${params.id}`
 
   return {
-    title: `${producer.name} | eSpazza Music Producers`,
-    description: producer.bio?.substring(0, 160),
+    title: `${producer.name} | South African Music Producer | ${SITE_NAME}`,
+    description,
+    keywords: [
+      producer.name,
+      `${producer.name} beats`,
+      `${producer.name} producer`,
+      "South African music producer",
+      "SA hip hop producer",
+      "Xhosa hip hop producer",
+      "SA beat maker",
+      ...(producer.genres || []),
+    ],
+    openGraph: {
+      title: `${producer.name} | ${SITE_NAME}`,
+      description,
+      type: "profile",
+      url,
+      siteName: SITE_NAME,
+      locale: "en_ZA",
+    },
+    twitter: {
+      card: "summary",
+      title: `${producer.name} | ${SITE_NAME}`,
+      description,
+      site: "@espazza",
+    },
+    alternates: { canonical: url },
+    robots: { index: true, follow: true, "max-snippet": -1 },
   }
 }
 
 export default async function ProducerPage({ params }: { params: { id: string } }) {
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const supabase = createServerComponentClient({ cookies: () => cookieStore })
 
   const { data: producer } = await supabase.from("music_producers").select("*").eq("id", params.id).single()
@@ -55,8 +88,37 @@ export default async function ProducerPage({ params }: { params: { id: string } 
   }
 
   const youtubeVideoId = producer.youtube_link ? getYoutubeVideoId(producer.youtube_link) : null
+  const url = `${SITE_URL}/producers/${params.id}`
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: producer.name,
+    url,
+    image: imageUrl || `${SITE_URL}/logo.png`,
+    description:
+      producer.bio ||
+      `${producer.name} is a South African music producer available for beats and collaborations on ${SITE_NAME}.`,
+    jobTitle: "Music Producer",
+    knowsAbout: ["Music Production", "South African Hip Hop", "Xhosa Hip Hop", ...(producer.genres || [])],
+    email: producer.email || undefined,
+    sameAs: [
+      producer.facebook_link,
+      producer.youtube_link,
+    ].filter(Boolean),
+    worksFor: PUBLISHER_LD,
+    address: {
+      "@type": "PostalAddress",
+      addressCountry: "ZA",
+    },
+  }
 
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-5xl mx-auto">
         <Button variant="ghost" asChild className="mb-8">
@@ -192,6 +254,7 @@ export default async function ProducerPage({ params }: { params: { id: string } 
         </div>
       </div>
     </div>
+    </>
   )
 }
 

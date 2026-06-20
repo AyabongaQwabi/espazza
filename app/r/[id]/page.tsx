@@ -143,7 +143,7 @@ export async function generateMetadata({
           publisher: {
             '@type': 'Organization',
             name: 'Espazza',
-            url: 'https://espazza.co.za',
+            url: 'https://espazza.xyz',
           },
         }),
       },
