@@ -78,7 +78,7 @@ interface PodcastEpisode {
   };
 }
 
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 6;
 
 export default function PodcastsPage() {
   const [podcasters, setPodcasters] = useState<Podcaster[]>([]);
@@ -215,8 +215,8 @@ export default function PodcastsPage() {
           .from('podcast_episodes')
           .select(
             `
-            *,
-            featured_artist:featured_artist_id(id, username, artist_name, profile_image_url)
+            id, title, podcaster_id, featured_artist_id, youtube_link, created_at, updated_at,
+            featured_artist:featured_artist_id(id, username, artist_name)
           `
           )
           .eq('podcaster_id', podcaster.id);
@@ -225,8 +225,8 @@ export default function PodcastsPage() {
           episodesQuery = episodesQuery.ilike('title', `%${searchTerm}%`);
         }
 
-        // Sort episodes by created_at date (newest first)
-        episodesQuery = episodesQuery.order('created_at', { ascending: false });
+        // Sort episodes by created_at date (newest first), limit per podcaster
+        episodesQuery = episodesQuery.order('created_at', { ascending: false }).limit(4);
 
         const { data: episodesData, error: episodesError } =
           await episodesQuery;

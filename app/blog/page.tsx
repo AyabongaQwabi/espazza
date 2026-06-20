@@ -49,8 +49,8 @@ export default function BlogPage() {
           .from('blog_posts')
           .select(
             `
-            *,
-            profiles:author_id (username, full_name, profile_image_url),
+            id, title, slug, excerpt, created_at, published, author_id,
+            profiles:author_id (username, full_name),
             likes:blog_likes(count),
             comments:blog_comments(count)
           `,
@@ -109,16 +109,14 @@ export default function BlogPage() {
           .from('blog_posts')
           .select(
             `
-            *,
-            profiles:author_id (username, full_name, profile_image_url),
+            id, title, slug, excerpt, created_at, published, author_id,
+            profiles:author_id (username, full_name),
             likes:blog_likes(count),
             comments:blog_comments(count)
           `
           )
           .eq('published', true)
-          .or(
-            `title.ilike.%${query}%,excerpt.ilike.%${query}%,content.ilike.%${query}%`
-          )
+          .or(`title.ilike.%${query}%,excerpt.ilike.%${query}%`)
           .order('created_at', { ascending: false })
           .limit(20);
 
@@ -362,27 +360,10 @@ export default function BlogPage() {
             transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.5) }}
           >
             <Card className='h-full flex flex-col overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white dark:bg-gray-800'>
-              {/* Featured Image */}
-              <div className='relative overflow-hidden h-48'>
-                <Link href={`/blog/${post.slug}`}>
-                  <img
-                    src={
-                      post.featured_image ||
-                      '/placeholder.svg?height=200&width=400'
-                    }
-                    alt={post.title}
-                    className='w-full h-full object-cover transition-transform duration-300 hover:scale-105'
-                  />
-                  <div className='absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-70'></div>
-                  <div className='absolute bottom-0 left-0 p-4'>
-                    <Badge className='bg-pink-600 hover:bg-pink-700 text-white'>
-                      {'Music'}
-                    </Badge>
-                  </div>
-                </Link>
-              </div>
-
               <CardHeader className='p-4 pb-2'>
+                <Badge className='bg-pink-600 hover:bg-pink-700 text-white w-fit mb-2'>
+                  Music
+                </Badge>
                 <Link href={`/blog/${post.slug}`}>
                   <h2 className='text-xl font-bold text-gray-900 dark:text-white line-clamp-2 hover:text-pink-600 dark:hover:text-pink-400 transition-colors'>
                     {post.title}
@@ -390,12 +371,6 @@ export default function BlogPage() {
                 </Link>
                 <div className='flex items-center space-x-2 mt-2'>
                   <Avatar className='h-6 w-6 ring-1 ring-pink-500'>
-                    <AvatarImage
-                      src={
-                        post.profiles?.profile_image_url || '/placeholder.svg'
-                      }
-                      alt={post.profiles?.username || 'User'}
-                    />
                     <AvatarFallback className='bg-gradient-to-br from-pink-500 to-purple-600 text-white text-xs'>
                       {(post.profiles?.username || 'U').charAt(0).toUpperCase()}
                     </AvatarFallback>

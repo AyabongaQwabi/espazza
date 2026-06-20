@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 import {
   Play,
@@ -23,12 +22,12 @@ import {
   ChevronRight,
   Sparkles,
   BookOpen,
-  TrendingUp,
   Flame,
   Loader2,
   Download,
 } from 'lucide-react';
 import { useMusicPlayer } from '@/hooks/use-music-player';
+import { thumbUrl } from '@/lib/image';
 
 export default function HomePage() {
   const [featuredReleases, setFeaturedReleases] = useState([]);
@@ -37,7 +36,6 @@ export default function HomePage() {
   );
   const [latestReleases, setLatestReleases] = useState([]);
   const [latestPosts, setLatestPosts] = useState([]);
-  const [trendingArtists, setTrendingArtists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const [allTracks, setAllTracks] = useState([]);
@@ -61,7 +59,6 @@ export default function HomePage() {
         fetchFeaturedReleases(),
         fetchLatestReleases(),
         fetchLatestPosts(),
-        fetchTrendingArtists(),
       ]);
       setLoading(false);
     }
@@ -85,8 +82,8 @@ export default function HomePage() {
           )
     `
         )
-        .order('created_at', { ascending: false }) // DESC order
-        .limit(6);
+        .order('created_at', { ascending: false })
+        .limit(4);
 
       if (error) throw error;
       const allTracks = data.reduce((acc, release) => {
@@ -135,7 +132,7 @@ export default function HomePage() {
         `
         )
         .order('featured_at', { ascending: false })
-        .limit(8);
+        .limit(4);
 
       if (error) throw error;
 
@@ -164,7 +161,7 @@ export default function HomePage() {
         `
         )
         .order('created_at', { ascending: false })
-        .limit(6);
+        .limit(3);
 
       if (error) throw error;
       setLatestReleases(data || []);
@@ -192,62 +189,6 @@ export default function HomePage() {
       setLatestPosts(data || []);
     } catch (error) {
       console.error('Error fetching posts:', error);
-    }
-  }
-
-  async function fetchTrendingArtists() {
-    try {
-      // Fetch all likes (or a large enough number for trending purposes)
-      const { data: likesData, error: likesError } = await supabase
-        .from('artist_likes')
-        .select('artist_id');
-
-      if (likesError) throw likesError;
-
-      if (!likesData || likesData.length === 0) {
-        console.warn('No likes found');
-        setTrendingArtists([]);
-        return;
-      }
-
-      // Count likes per artist in JS
-      const likeCounts = likesData.reduce((acc, { artist_id }) => {
-        acc[artist_id] = (acc[artist_id] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-
-      // Sort artist IDs by like count
-      const sortedArtistIds = Object.entries(likeCounts)
-        .sort(([, a], [, b]) => b - a)
-        .map(([artist_id]) => artist_id)
-        .slice(0, 10); // limit to top 10
-
-      // Fetch artist profiles for the top artist IDs
-      const { data: artistProfiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*, south_african_towns(*)')
-        .eq('user_type', 'artist')
-        .not('artist_name', 'is', null)
-        .not('artist_name', 'eq', '')
-        .in('username', sortedArtistIds); // NOTE: match against `id`, not `username`
-
-      if (profilesError) throw profilesError;
-
-      // Merge like count into profiles
-      const artistsWithLikes = artistProfiles.map((profile) => ({
-        ...profile,
-        likes_count: likeCounts[profile.id] || 0,
-      }));
-
-      // Sort final results again and limit to top 5
-      const sortedArtists = artistsWithLikes
-        .sort((a, b) => b.likes_count - a.likes_count)
-        .slice(0, 5);
-
-      setTrendingArtists(sortedArtists);
-    } catch (error) {
-      console.error('Error fetching trending artists:', error);
-      setTrendingArtists([]);
     }
   }
 
@@ -433,7 +374,7 @@ export default function HomePage() {
               <Card className='bg-gray-900/50 backdrop-blur-sm border-0 overflow-hidden hover:shadow-xl hover:shadow-pink-500/10 transition-all duration-300'>
                 <div className='relative aspect-square overflow-hidden'>
                   <Image
-                    src={release.cover_image_url || '/placeholder.svg'}
+                    src={thumbUrl(release.cover_image_url, 400)}
                     alt={release.title}
                     fill
                     className='object-cover transition-transform duration-500 group-hover:scale-110'
@@ -703,7 +644,7 @@ export default function HomePage() {
           </Button>
         </div>
 
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
           {latestReleases.map((release) => (
             <motion.div
               key={release.id}
@@ -716,7 +657,7 @@ export default function HomePage() {
               <Card className='bg-gray-900/50 backdrop-blur-sm border-0 overflow-hidden hover:shadow-xl hover:shadow-green-500/10 transition-all duration-300'>
                 <div className='relative aspect-square overflow-hidden'>
                   <Image
-                    src={release.cover_image_url || '/placeholder.svg'}
+                    src={thumbUrl(release.cover_image_url, 400)}
                     alt={release.title}
                     fill
                     className='object-cover transition-transform duration-500 group-hover:scale-110'
@@ -791,78 +732,6 @@ export default function HomePage() {
             </motion.div>
           ))}
         </div>
-      </section>
-
-      {/* Trending Artists Section */}
-      <section className='py-16 container mx-auto px-4'>
-        <div className='flex justify-between items-center mb-10'>
-          <div>
-            <Badge className='bg-red-900 text-white mb-2'>
-              <TrendingUp className='w-3 h-3 mr-1' /> Trending Now
-            </Badge>
-            <h2 className='text-3xl font-bold text-white'>Popular Artists</h2>
-          </div>
-          <Button
-            variant='ghost'
-            className='text-red-500 hover:text-red-400 hover:bg-red-500/10'
-            onClick={() => router.push('/artists')}
-          >
-            Discover More <ArrowRight className='ml-2 h-4 w-4' />
-          </Button>
-        </div>
-
-        <ScrollArea className='w-full whitespace-nowrap pb-6'>
-          <div className='flex space-x-6'>
-            {trendingArtists.map((artist) => (
-              <motion.div
-                key={artist.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-                viewport={{ once: true }}
-                className='w-[220px] flex-shrink-0'
-              >
-                <Link href={`/artists/${artist.username}`}>
-                  <div className='group relative'>
-                    <div className='relative h-[220px] w-[220px] rounded-full overflow-hidden mb-4 ring-4 ring-red-500/20 group-hover:ring-red-500/50 transition-all duration-300'>
-                      <Image
-                        src={
-                          artist.profile_image_url ||
-                          '/placeholder.svg?height=400&width=400&query=music artist portrait' ||
-                          '/placeholder.svg' ||
-                          '/placeholder.svg' ||
-                          '/placeholder.svg' ||
-                          '/placeholder.svg' ||
-                          '/placeholder.svg' ||
-                          '/placeholder.svg'
-                        }
-                        alt={artist.artist_name || artist.username}
-                        fill
-                        className='object-cover'
-                      />
-                      <div className='absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center'>
-                        <Button
-                          size='icon'
-                          className='bg-red-600 hover:bg-red-700 rounded-full h-12 w-12 shadow-lg transform scale-0 group-hover:scale-100 transition-transform duration-300'
-                        >
-                          <Play className='h-5 w-5' />
-                        </Button>
-                      </div>
-                    </div>
-                    <div className='text-center'>
-                      <h3 className='font-bold text-white text-lg group-hover:text-red-500 transition-colors'>
-                        {artist.artist_name || artist.username}
-                      </h3>
-                      <p className='text-gray-400 text-sm'>
-                        {artist.likes_count || 0} followers
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        </ScrollArea>
       </section>
 
       <section className='py-16 bg-gradient-to-r from-black/80 to-red-950/80 backdrop-blur-sm'>

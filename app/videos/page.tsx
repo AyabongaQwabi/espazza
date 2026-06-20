@@ -58,7 +58,7 @@ interface VideoPromotion {
   transaction_id: string | null;
 }
 
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 6;
 
 export default function VideosPage() {
   const [videos, setVideos] = useState<VideoPromotion[]>([]);
